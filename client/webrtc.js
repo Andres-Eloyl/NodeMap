@@ -69,6 +69,7 @@ function setupDataChannel(peerId, nombre, dc) {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre });
+    if (!pingInterval) startPingCycle();
   };
 
   dc.onclose = () => {
@@ -279,8 +280,26 @@ function getLatency(peerId) {
   return latencies.has(peerId) ? latencies.get(peerId) : null;
 }
 
+function desconectar() {
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+  if (socket) {
+    socket.emit(PROTOCOL.PEER_EXIT);
+    socket.disconnect();
+    socket = null;
+  }
+  for (const [peerId] of peers) {
+    cleanupPeer(peerId);
+  }
+  myId = null;
+  myNombre = null;
+}
+
 const WebRTCEngine = {
   conectar,
+  desconectar,
   sendMessage,
   broadcast,
   onMessage,
