@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Señalización P2P</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2e3d;
+      --text: #e4e6ed;
+      --text-dim: #8b8fa3;
+      --accent: #6c63ff;
+      --green: #34d399;
+      --red: #f87171;
+      --orange: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 24px; }
+
+    .info-bar {
+      display: flex;
+      gap: 20px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .info-item { font-size: 0.85rem; }
+    .info-item strong { color: var(--accent); }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .status-dot.online { background: var(--green); box-shadow: 0 0 6px rgba(52,211,153,0.5); }
+    .status-dot.offline { background: var(--red); }
+
+    .peer-count {
+      display: inline-block;
+      background: rgba(108,99,255,0.15);
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    #log {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+    }
+
+    #log .entry {
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.4;
+    }
+    #log .entry:last-child { border-bottom: none; }
+    #log .entry.join { color: var(--green); }
+    #log .entry.leave { color: var(--red); }
+    #log .entry.signal { color: var(--orange); }
+    #log .entry.info { color: var(--text-dim); }
+
+    .time { color: var(--text-dim); margin-right: 8px; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #5b53e0; }
+    .btn-danger { background: var(--red); color: #0f1117; }
+    .btn-danger:hover { background: #ef4444; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+  </style>
+</head>
+<body>
+  <h1>Test de Señalización</h1>
+  <p class="subtitle">Prueba de conexión con el servidor de señalización (sin WebRTC)</p>
+
+  <div class="info-bar">
+    <div class="info-item">
+      <span class="status-dot offline" id="statusDot"></span>
+      <span id="statusText">Conectando...</span>
+    </div>
+    <div class="info-item"><strong>Nombre:</strong> <span id="miNombre">—</span></div>
+    <div class="info-item"><strong>Mi ID:</strong> <span id="miId">—</span></div>
+    <div class="info-item">Peers: <span class="peer-count" id="peerCount">0</span></div>
+  </div>
+
+  <div id="log"></div>
+
+  <div class="actions">
+    <button class="btn-primary" onclick="simularOffer()">📨 Simular OFFER</button>
+    <button class="btn-secondary" onclick="fetchMetrics()">📊 Ver Métricas</button>
+    <button class="btn-danger" onclick="salir()">🚪 Salir</button>
+  </div>
+
+  <!-- Scripts del Servidor -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/config.js"></script>
+  <script src="/shared/protocol.js"></script>
+  
+  <script>
+    let peerCountNum = 0;
+
+    const miNombre = prompt("¿Cuál es tu nombre?") || "Anónimo";
+    document.getElementById("miNombre").innerText = miNombre;
+
+    // Conexión a Socket.io pasando el nombre como query
+    const socket = io({ query: { nombre: miNombre } });
+    const logDiv = document.getElementById("log");
+
+    function addLog(text, type = "info") {
+      const div = document.createElement("div");
+      div.className = `entry ${type}`;
+      div.innerHTML = `<span class="time">[${new Date().toLocaleTimeString()}]</span>${text}`;
+      logDiv.appendChild(div);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStatus(connected) {
+      const dot = document.getElementById("statusDot");
+      const txt = document.getElementById("statusText");
+      dot.className = `status-dot ${connected ? "online" : "offline"}`;
+      txt.textContent = connected ? "Conectado" : "Desconectado";
+    }
+
+    function updatePeerCount(delta) {
+      peerCountNum += delta;
+      if (peerCountNum < 0) peerCountNum = 0;
+      document.getElementById("peerCount").textContent = peerCountNum;
+    }
+
+    socket.on("connect", () => {
+      updateStatus(true);
+      addLog("Conectado al servidor de señalización", "join");
+    });
+
+    socket.on("disconnect", () => {
+      updateStatus(false);
+      addLog("Desconectado del servidor", "leave");
+    });
+
+    // Escuchar eventos según el protocolo
+    socket.on(PROTOCOL.PEER_LIST, (data) => {
+      if (data.miId) {
+        document.getElementById("miId").innerText = data.miId;
+      }
+      
+      peerCountNum = data.peers.length;
+      document.getElementById("peerCount").textContent = peerCountNum;
+
+      if (data.peers.length === 0) {
+        addLog("No hay otros peers conectados — eres el primero", "info");
+      } else {
+        const nombres = data.peers.map(p => `${p.nombre} (${p.id.substr(0,6)}…)`).join(", ");
+        addLog(`Peers existentes: ${nombres}`, "info");
+      }
+    });
+
+    socket.on(PROTOCOL.PEER_JOIN, (data) => {
+      updatePeerCount(1);
+      addLog(`🟢 <strong>${data.nombre}</strong> acaba de entrar (${data.id.substr(0,6)}…)`, "join");
+    });
+
+    socket.on(PROTOCOL.PEER_LEAVE, (data) => {
+      updatePeerCount(-1);
+      addLog(`🔴 Peer desconectado: ${data.id.substr(0,6)}…`, "leave");
+    });
+
+    socket.on(PROTOCOL.PEER_EXIT, (data) => {
+      updatePeerCount(-1);
+      addLog(`🟡 <strong>${data.nombre}</strong> salió voluntariamente`, "leave");
+    });
+
+    socket.on(PROTOCOL.OFFER, (data) => {
+      addLog(`📨 Recibí OFFER de ${data.origen.substr(0,6)}…`, "signal");
+    });
+
+    socket.on(PROTOCOL.ANSWER, (data) => {
+      addLog(`📩 Recibí ANSWER de ${data.origen.substr(0,6)}…`, "signal");
+    });
+
+    socket.on(PROTOCOL.ICE_CANDIDATE, (data) => {
+      addLog(`🧊 Recibí ICE candidate de ${data.origen.substr(0,6)}…`, "signal");
+    });
+
+    function simularOffer() {
+      const destino = prompt("Ingresa el ID del destinatario:");
+      if (destino) {
+        socket.emit(PROTOCOL.OFFER, { destino: destino, sdp: { tipo: "test-simulado" } });
+        addLog(`📨 Enviando OFFER simulada a ${destino.substr(0,6)}…`, "signal");
+      }
+    }
+
+    async function fetchMetrics() {
+      try {
+        const res = await fetch("/metrics");
+        const data = await res.json();
+        addLog(`📊 Peers: ${data.peers_activos} | Mensajes: ${data.mensajes_totales} | Uptime: ${data.uptime_segundos}s`, "info");
+      } catch (err) {
+        addLog(`❌ Error leyendo métricas: ${err.message}`, "leave");
+      }
+    }
+
+    function salir() {
+      socket.emit(PROTOCOL.PEER_EXIT);
+      addLog("Saliendo voluntariamente...", "leave");
+      updateStatus(false);
+      socket.disconnect();
+    }
+  </script>
+</body>
+</html>
