@@ -1,8 +1,3 @@
-/**
- * NodeMap - D3.js Graph Implementation
- * Maneja la renderización y simulación física de la red P2P.
- */
-
 const PALETTE = [
     "hsl(174, 72%, 56%)",  // cyan tropical
     "hsl(262, 83%, 68%)",  // violeta eléctrico
@@ -33,9 +28,7 @@ const ZONAS = {
     "Pasillo":    { x: 0.50, y: 0.60, width: 0.60, height: 0.10, color: "hsl(45,93%,58%)"  },
     "Escenario":  { x: 0.50, y: 0.85, width: 0.40, height: 0.15, color: "hsl(142,69%,52%)" },
     "Entrada":    { x: 0.50, y: 0.05, width: 0.15, height: 0.08, color: "hsl(199,89%,58%)" },
-};
-
-// Variables Globales
+};
 let width, height;
 let svg, defs;
 let simulation;
@@ -49,18 +42,14 @@ let currentTy = 0;
 let nodes = [];
 let links = [];
 
-/**
- * Estado y Métricas Locales
- */
+
 const metrics = {
     peersActivos: 0,
     mensajesTotales: 0,
     startTime: Date.now()
 };
 
-/**
- * Animación Visual de Actividad de Red
- */
+
 function bumpNetworkBars() {
     const rings = document.getElementById('health-rings');
     if (rings) {
@@ -79,9 +68,7 @@ function randomizeNetworkBars() {
 }
 setInterval(randomizeNetworkBars, 500);
 
-/**
- * Genera un color consistente basado en el hash del ID del peer
- */
+
 function getPeerColorIndex(id) {
     let hash = 0;
     for (let i = 0; i < id.length; i++) {
@@ -90,9 +77,7 @@ function getPeerColorIndex(id) {
     return Math.abs(hash) % PALETTE.length;
 }
 
-/**
- * 1. Inicialización del Grafo
- */
+
 async function initGraph() {
     const container = document.getElementById("graph-container");
     width = container.clientWidth;
@@ -102,9 +87,7 @@ async function initGraph() {
         .attr("width", width)
         .attr("height", height);
 
-    defs = svg.append("defs");
-
-    // Filtro de brillo (glow) para nodos
+    defs = svg.append("defs");
     const filter = defs.append("filter").attr("id", "node-glow")
         .attr("x", "-50%").attr("y", "-50%")
         .attr("width", "200%").attr("height", "200%");
@@ -115,24 +98,18 @@ async function initGraph() {
     
     const feMerge = filter.append("feMerge");
     feMerge.append("feMergeNode").attr("in", "coloredBlur");
-    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
-    // Capas SVG
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
     svg.append("g").attr("id", "recinto-layer");
     svg.append("g").attr("id", "zone-counters");
     svg.append("g").attr("id", "trails-layer");
     svg.append("g").attr("id", "hull-layer");
     svg.append("g").attr("id", "links-layer");
     svg.append("g").attr("id", "messages-layer");
-    svg.append("g").attr("id", "nodes-layer");
-
-    // Cargar SVG del recinto
+    svg.append("g").attr("id", "nodes-layer");
     try {
         const xml = await d3.xml("recinto.svg");
         const importedSVG = xml.documentElement;
-        const recintoLayer = svg.select("#recinto-layer");
-        
-        // Transferir contenido
+        const recintoLayer = svg.select("#recinto-layer");
         while (importedSVG.firstChild) {
             recintoLayer.node().appendChild(importedSVG.firstChild);
         }
@@ -141,17 +118,13 @@ async function initGraph() {
         
         const RECINTO_W = 1200;
         const RECINTO_H = 800;
-        const recintoLayer = svg.select("#recinto-layer");
-        
-        // Crear un fondo oscuro para simular el mapa
+        const recintoLayer = svg.select("#recinto-layer");
         recintoLayer.append("rect")
             .attr("width", RECINTO_W)
             .attr("height", RECINTO_H)
             .style("fill", "#0c0e17")
             .style("stroke", "rgba(255,255,255,0.05)")
-            .style("stroke-width", "2px");
-            
-        // Dibujar las zonas artificialmente
+            .style("stroke-width", "2px");
         for (let name in ZONAS) {
             const z = ZONAS[name];
             const rw = z.width * RECINTO_W;
@@ -173,9 +146,7 @@ async function initGraph() {
                 .style("stroke-opacity", 0.25)
                 .style("stroke-width", "1.5px");
         }
-    }
-
-    // Tooltips HTML
+    }
     let tooltip = d3.select("#zone-tooltip");
     if (tooltip.empty()) {
         tooltip = d3.select("body").append("div")
@@ -209,9 +180,7 @@ async function initGraph() {
             .style("box-shadow", "0 4px 20px rgba(0,0,0,0.6)")
             .style("transform", "scale(0.95)")
             .style("transition", "opacity 0.2s ease, transform 0.2s ease");
-    }
-
-    // Mapear coordenadas de las zonas y agregar Hover Events
+    }
     d3.selectAll("#recinto-layer g[data-nombre]").each(function() {
         const group = d3.select(this);
         const rect = group.select("rect");
@@ -224,9 +193,7 @@ async function initGraph() {
             y: +rect.attr("y"),
             width: +rect.attr("width"),
             height: +rect.attr("height")
-        };
-        
-        // Hover interactivo
+        };
         group.style("cursor", "pointer")
             .on("mouseenter", function(event) {
                 rect.transition().duration(200).style("fill-opacity", 0.12);
@@ -258,18 +225,14 @@ async function initGraph() {
     initZoneCounters();
 
     nodeSelection = svg.select("#nodes-layer").selectAll(".node");
-    linkSelection = svg.select("#links-layer").selectAll(".link");
-
-    // D3 Force Simulation
+    linkSelection = svg.select("#links-layer").selectAll(".link");
     simulation = d3.forceSimulation(nodes)
         .force("charge", d3.forceManyBody().strength(-180))
         .force("link", d3.forceLink(links).id(d => d.id).distance(120).strength(0.4))
         .force("collide", d3.forceCollide().radius(d => d.radius + 12))
         .force("x", d3.forceX(d => getZoneCenter(d.zona).x).strength(0.05))
         .force("y", d3.forceY(d => getZoneCenter(d.zona).y).strength(0.05))
-        .on("tick", ticked);
-
-    // Escuchar redimensionamiento
+        .on("tick", ticked);
     window.addEventListener('resize', onResize);
 }
 
@@ -330,9 +293,7 @@ function updateZoneCountersPos() {
     }
 }
 
-/**
- * Actualiza el tamaño del lienzo en responsive
- */
+
 function onResize() {
     const container = document.getElementById("graph-container");
     width = container.clientWidth;
@@ -356,9 +317,7 @@ function getZoneCenter(zoneName) {
     };
 }
 
-/**
- * 2. Funciones de Renderizado (Enter / Update / Exit)
- */
+
 function renderLinks() {
     linkSelection = svg.select("#links-layer").selectAll(".link")
         .data(links, d => {
@@ -387,16 +346,12 @@ function renderLinks() {
 
 function renderNodes() {
     nodeSelection = svg.select("#nodes-layer").selectAll(".node")
-        .data(nodes, d => d.id);
-
-    // Salida (Exit)
+        .data(nodes, d => d.id);
     const nodeExit = nodeSelection.exit();
     nodeExit.select(".node-scale")
         .transition().duration(400).ease(d3.easeCubicIn)
         .attr("transform", "scale(0)");
-    nodeExit.transition().duration(400).remove();
-
-    // Entrada (Enter)
+    nodeExit.transition().duration(400).remove();
     const nodeEnter = nodeSelection.enter().append("g")
         .attr("class", "node")
         .call(d3.drag()
@@ -435,23 +390,17 @@ function renderNodes() {
     })
     .on("mouseleave", function() {
         nodeTooltip.style("opacity", 0).style("transform", "scale(0.95)");
-    });
-
-    // Nodo base visual (escalable individualmente)
+    });
     const nodeScale = nodeEnter.append("g")
         .attr("class", "node-scale")
-        .attr("transform", "scale(0)");
-
-    // Círculo de pulso
+        .attr("transform", "scale(0)");
     nodeScale.append("circle")
         .attr("class", "pulse-circle")
         .attr("r", d => d.radius + 4)
         .style("fill", "none")
         .style("stroke", d => d.color)
         .style("stroke-opacity", 0.15)
-        .style("animation", "node-pulse-intense 3s forwards, node-pulse 2s infinite 3s");
-
-    // Círculo principal
+        .style("animation", "node-pulse-intense 3s forwards, node-pulse 2s infinite 3s");
     nodeScale.append("circle")
         .attr("class", "main-circle")
         .attr("r", d => d.radius)
@@ -459,9 +408,7 @@ function renderNodes() {
         .style("stroke", d => d.color)
         .style("stroke-opacity", 0.6)
         .style("stroke-width", "2px")
-        .style("filter", "url(#node-glow)");
-
-    // Texto descriptivo
+        .style("filter", "url(#node-glow)");
     nodeScale.append("text")
         .attr("dy", d => d.radius + 16)
         .style("font-family", "Inter, sans-serif")
@@ -470,18 +417,14 @@ function renderNodes() {
         .style("fill", "rgba(255, 255, 255, 0.85)")
         .style("text-anchor", "middle")
         .style("text-shadow", "0px 2px 4px rgba(0,0,0,0.8)")
-        .text(d => d.nombre);
-
-    // Animación de entrada
+        .text(d => d.nombre);
     nodeScale.transition().duration(600).ease(d3.easeBounceOut)
         .attr("transform", "scale(1)");
 
     nodeSelection = nodeEnter.merge(nodeSelection);
 }
 
-/**
- * 3. Física de Simulación
- */
+
 function drawHulls() {
     const hullsData = [];
     for (let zoneName in zonaRects) {
@@ -537,9 +480,7 @@ function ticked() {
     drawHulls();
 }
 
-/**
- * Eventos de Arrastre (Drag)
- */
+
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     d.fx = d.x;
@@ -557,9 +498,7 @@ function dragended(event, d) {
     d.fy = null;
 }
 
-/**
- * Historial de Eventos
- */
+
 function addLogEntry(textHTML, typeClass) {
     const container = document.getElementById("log-entries-container");
     if (!container) return;
@@ -581,9 +520,7 @@ function addLogEntry(textHTML, typeClass) {
     }
 }
 
-/**
- * 4. Actualización del Panel Técnico
- */
+
 function updateMetricsDisplay() {
     metrics.peersActivos = nodes.length;
 }
@@ -598,9 +535,7 @@ function checkEmptyState() {
     }
 }
 
-/**
- * 4. Modificación de los arrays de datos
- */
+
 function addNode(peer, isOriginal = false) {
     if (nodes.find(n => n.id === peer.id)) return;
 
@@ -622,9 +557,7 @@ function addNode(peer, isOriginal = false) {
     
     const targetPos = getZoneTarget(newNode);
     newNode.x = targetPos.x;
-    newNode.y = targetPos.y;
-
-    // Crear links (mesh completo)
+    newNode.y = targetPos.y;
     nodes.forEach(existing => {
         if (existing.id !== newNode.id) {
             links.push({ source: newNode.id, target: existing.id });
@@ -638,9 +571,7 @@ function addNode(peer, isOriginal = false) {
     simulation.force("link").links(links);
     simulation.alpha(0.3).restart();
     
-    updateZoneCounters();
-    
-    // Animar reubicación de los demás peers en la misma zona
+    updateZoneCounters();
     nodes.filter(n => n.zona === newNode.zona && n.id !== newNode.id).forEach(n => {
         if (typeof animateNodeToZoneTarget === "function") animateNodeToZoneTarget(n);
     });
@@ -657,9 +588,7 @@ function removeNode(id) {
         const sId = typeof l.source === "object" ? l.source.id : l.source;
         const tId = typeof l.target === "object" ? l.target.id : l.target;
         return sId !== id && tId !== id;
-    });
-
-    // Actualizar visuales (esto dispara el .exit() y sus animaciones)
+    });
     renderLinks();
     renderNodes();
 
@@ -670,9 +599,7 @@ function removeNode(id) {
     updateZoneCounters();
 }
 
-/**
- * Lógica de Zonas y Movimiento
- */
+
 function updateZoneCounters() {
     for (let zoneName in zonaRects) {
         const count = nodes.filter(n => n.zona === zoneName).length;
@@ -701,9 +628,7 @@ function getZoneTarget(node) {
     const total = nodesInZone.length;
     
     const cx = (z.x + z.width / 2) * currentScale + currentTx;
-    const cy = (z.y + z.height / 2) * currentScale + currentTy;
-    
-    // Padding de 30px (escala)
+    const cy = (z.y + z.height / 2) * currentScale + currentTy;
     const rw = (z.width * currentScale) - (60 * currentScale); 
     const rh = (z.height * currentScale) - (60 * currentScale);
     
@@ -715,9 +640,7 @@ function getZoneTarget(node) {
         if (index === 0) return { x: cx, y: cy - rh/4 };
         if (index === 1) return { x: cx - rw/4, y: cy + rh/4 };
         if (index === 2) return { x: cx + rw/4, y: cy + rh/4 };
-    }
-    
-    // Grid para 4+
+    }
     const cols = Math.ceil(Math.sqrt(total));
     const rows = Math.ceil(total / cols);
     const col = index % cols;
@@ -744,13 +667,9 @@ function changeNodeZone(node, newZone) {
     updateZoneCounters();
     
     const oldCenter = getZoneCenter(oldZone);
-    const targetPos = getZoneTarget(node);
-    
-    // Rastro visual
+    const targetPos = getZoneTarget(node);
     const animGroup = svg.select("#trails-layer").append("g");
-    let pathData = "";
-    
-    // Si cruza zonas lejanas, pasa por el pasillo
+    let pathData = "";
     if (oldZone !== "Pasillo" && newZone !== "Pasillo" && Math.abs(oldCenter.x - targetPos.x) > 300 * currentScale) {
         const pasilloCenter = getZoneCenter("Pasillo");
         pathData = `M${oldCenter.x},${oldCenter.y} Q${oldCenter.x},${pasilloCenter.y} ${pasilloCenter.x},${pasilloCenter.y} T${targetPos.x},${targetPos.y}`;
@@ -786,13 +705,9 @@ function changeNodeZone(node, newZone) {
           .attr("stroke-dashoffset", 0)
           .transition().delay(4000).duration(1000).ease(d3.easeLinear)
           .style("stroke-opacity", 0)
-          .remove();
-
-    // Reubicar nodos en la zona origen y destino
+          .remove();
     nodes.filter(n => n.zona === oldZone).forEach(n => animateNodeToZoneTarget(n));
-    nodes.filter(n => n.zona === newZone).forEach(n => animateNodeToZoneTarget(n, n.id === node.id));
-        
-    // Revive para que forces actualicen colisiones dinámicas
+    nodes.filter(n => n.zona === newZone).forEach(n => animateNodeToZoneTarget(n, n.id === node.id));
     simulation.alphaTarget(0.1).restart();
     setTimeout(() => simulation.alphaTarget(0), 1000);
 }
@@ -831,13 +746,10 @@ function animateNodeToZoneTarget(n, isMainNode = false) {
         });
 }
 
-/**
- * Animación de Mensajes de Chat
- */
+
 let activeAnimations = [];
 
-function animateChat(sourceNode, targetNode) {
-    // Activar "respiración" en el emisor
+function animateChat(sourceNode, targetNode) {
     const sEl = svg.select("#nodes-layer").selectAll(".node").filter(d => d.id === sourceNode.id);
     sEl.classed("active-breathing", true);
     clearTimeout(sourceNode.breatheTimer);
@@ -851,9 +763,7 @@ function animateChat(sourceNode, targetNode) {
     if (activeAnimations.length > 5) {
         const old = activeAnimations.shift();
         old.remove();
-    }
-
-    // Calcular curva Bezier
+    }
     const sx = sourceNode.x, sy = sourceNode.y;
     const tx = targetNode.x, ty = targetNode.y;
     
@@ -862,9 +772,7 @@ function animateChat(sourceNode, targetNode) {
     
     let dx = tx - sx;
     let dy = ty - sy;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    
-    // Perpendicular
+    const dist = Math.sqrt(dx * dx + dy * dy);
     let px = -dy;
     let py = dx;
     const plen = Math.sqrt(px * px + py * py);
@@ -881,41 +789,29 @@ function animateChat(sourceNode, targetNode) {
 
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", `M${sx},${sy} Q${cx},${cy} ${tx},${ty}`);
-    const pathLength = path.getTotalLength();
-    
-    // Duración proporcional a la distancia (800-1200ms)
-    const duration = Math.max(800, Math.min(1200, dist * 2));
-
-    // Estela (trail)
+    const pathLength = path.getTotalLength();
+    const duration = Math.max(800, Math.min(1200, dist * 2));
     const trail = animGroup.append("circle")
         .attr("r", 10)
         .style("fill", sourceNode.color)
         .style("opacity", 0.2)
-        .style("filter", "blur(4px)");
-
-    // Bolita principal
+        .style("filter", "blur(4px)");
     const bullet = animGroup.append("circle")
         .attr("r", 6)
         .style("fill", sourceNode.color)
-        .style("filter", "url(#node-glow)");
-
-    // Función de interpolación
+        .style("filter", "url(#node-glow)");
     const tweenPath = function() {
         return function(t) {
             const p = path.getPointAtLength(t * pathLength);
             d3.select(this).attr("cx", p.x).attr("cy", p.y);
         };
-    };
-
-    // Animar principal
+    };
     bullet.transition().duration(duration).ease(d3.easeCubicInOut)
         .tween("pathTween", tweenPath)
         .on("end", function() {
             d3.select(this).remove();
             createImpactEffect(sourceNode, targetNode);
-        });
-
-    // Animar estela con delay
+        });
     trail.transition().delay(100).duration(duration).ease(d3.easeCubicInOut)
         .tween("pathTween", tweenPath)
         .on("end", function() {
@@ -924,8 +820,7 @@ function animateChat(sourceNode, targetNode) {
         });
 }
 
-function createImpactEffect(sourceNode, targetNode) {
-    // Onda expansiva
+function createImpactEffect(sourceNode, targetNode) {
     const wave = svg.select("#messages-layer").append("circle")
         .attr("cx", targetNode.x)
         .attr("cy", targetNode.y)
@@ -938,18 +833,14 @@ function createImpactEffect(sourceNode, targetNode) {
     wave.transition().duration(500).ease(d3.easeQuadOut)
         .attr("r", targetNode.radius + 30)
         .style("opacity", 0)
-        .remove();
-
-    // Bump del nodo destino
+        .remove();
     const targetEl = svg.select("#nodes-layer").selectAll(".node").filter(d => d.id === targetNode.id).select(".node-scale");
     if (!targetEl.empty()) {
         targetEl.transition().duration(150)
             .attr("transform", "scale(1.15)")
             .transition().duration(150)
             .attr("transform", "scale(1)");
-    }
-
-    // Destello del link
+    }
     const linkEl = svg.select("#links-layer").selectAll(".link").filter(d => 
         (d.source.id === sourceNode.id && d.target.id === targetNode.id) ||
         (d.source.id === targetNode.id && d.target.id === sourceNode.id)
@@ -965,9 +856,7 @@ function createImpactEffect(sourceNode, targetNode) {
     }
 }
 
-/**
- * 5. Control y Eventos del Motor
- */
+
 function setupEventListeners() {
     const IS_MOCK = !window.WebRTCEngine;
     const engine = window.WebRTCEngine || window.MockWebRTC;
@@ -1015,9 +904,7 @@ function setupEventListeners() {
     });
 }
 
-/**
- * Actualización Periódica de Métricas
- */
+
 function formatUptime(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
@@ -1032,9 +919,7 @@ let lastServerLogTimestamp = 0;
 function updateMetricsDisplay() {
     if (!serverConnected) {
         metrics.peersActivos = nodes.length;
-        const uptimeStr = formatUptime(Date.now() - metrics.startTime);
-        
-        // Header
+        const uptimeStr = formatUptime(Date.now() - metrics.startTime);
         const hp = document.getElementById('header-peer-count');
         if (hp && hp.innerText != metrics.peersActivos) {
             hp.innerText = metrics.peersActivos;
@@ -1047,9 +932,7 @@ function updateMetricsDisplay() {
         }
         
         const hu = document.getElementById('header-uptime');
-        if (hu) hu.innerText = uptimeStr;
-        
-        // Tech Panel
+        if (hu) hu.innerText = uptimeStr;
         const tp = document.getElementById('peer-count');
         if (tp) tp.innerText = metrics.peersActivos;
         
@@ -1058,9 +941,7 @@ function updateMetricsDisplay() {
         
         const tu = document.getElementById('uptime-display');
         if (tu) tu.innerText = uptimeStr;
-    }
-    
-    // Latency
+    }
     const engine = window.MockWebRTC || window.WebRTCEngine;
     const tl = document.getElementById('latency-display');
     if (engine && tl) {
@@ -1073,9 +954,7 @@ function updateMetricsDisplay() {
         });
         const avg = count > 0 ? Math.round(sum / count) : 0;
         tl.innerText = avg;
-    }
-    
-    // Zonas Activas
+    }
     const tz = document.getElementById('zones-display');
     if (tz) {
         const activeZones = new Set(nodes.map(n => n.zona)).size;
@@ -1089,9 +968,7 @@ async function fetchServerMetrics() {
         const response = await fetch("/metrics");
         if (response.ok) {
             const data = await response.json();
-            serverConnected = true;
-            
-            // UI de servidor
+            serverConnected = true;
             const sd = document.getElementById('server-dot');
             const st = document.getElementById('server-text');
             if (sd && st) {
@@ -1101,33 +978,25 @@ async function fetchServerMetrics() {
             }
             
             metrics.peersActivos = data.peers_activos;
-            metrics.mensajesTotales = data.mensajes_totales;
-            
-            // Actualizar peers
+            metrics.mensajesTotales = data.mensajes_totales;
             const hp = document.getElementById('header-peer-count');
             if (hp && hp.innerText != metrics.peersActivos) {
                 hp.innerText = metrics.peersActivos;
                 d3.select(hp).transition().duration(150).style("transform", "scale(1.3)").transition().duration(150).style("transform", "scale(1)");
             }
             const tp = document.getElementById('peer-count');
-            if (tp) tp.innerText = metrics.peersActivos;
-            
-            // Actualizar mensajes
+            if (tp) tp.innerText = metrics.peersActivos;
             const hm = document.getElementById('header-message-count');
             if (hm && hm.innerText != metrics.mensajesTotales) {
                 hm.innerText = metrics.mensajesTotales;
             }
             const tm = document.getElementById('message-count');
-            if (tm) tm.innerText = metrics.mensajesTotales;
-            
-            // Actualizar uptime
+            if (tm) tm.innerText = metrics.mensajesTotales;
             const uptimeStr = formatUptime(data.uptime_segundos * 1000);
             const hu = document.getElementById('header-uptime');
             if (hu) hu.innerText = uptimeStr;
             const tu = document.getElementById('uptime-display');
-            if (tu) tu.innerText = uptimeStr;
-            
-            // Sincronizar historial
+            if (tu) tu.innerText = uptimeStr;
             if (data.log && Array.isArray(data.log)) {
                 data.log.forEach(entry => {
                     if (entry.timestamp > lastServerLogTimestamp) {
@@ -1213,22 +1082,14 @@ function initParticles() {
     animate();
 }
 
-/**
- * Punto de entrada principal
- */
-async function init() {
-    initParticles();
-    
-    // 1. Inicializar grafo base SVG
-    await initGraph();
 
-    // 2. Detección automática del motor (Real vs Mock)
+async function init() {
+    initParticles();
+    await initGraph();
     const canUseReal = window.WebRTCEngine && typeof io !== "undefined";
     const IS_MOCK = !canUseReal;
     const engine = canUseReal ? window.WebRTCEngine : window.MockWebRTC;
-    if (!engine) return;
-    
-    // Indicador visual de modo
+    if (!engine) return;
     const badgeContainer = document.getElementById("mode-badge");
     if (badgeContainer) {
         if (IS_MOCK) {
@@ -1236,21 +1097,15 @@ async function init() {
         } else {
             badgeContainer.innerHTML = `<span style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px;"><div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>EN VIVO</span>`;
         }
-    }
-
-    // Iniciar Motor
+    }
     if (IS_MOCK) {
         engine.start();
     } else {
         engine.conectar("Display");
-    }
-    
-    // Cargar peers iniciales
+    }
     const initialPeers = engine.getPeers();
     initialPeers.forEach(p => addNode(p, true));
 
     setupEventListeners();
-}
-
-// Inicializar cuando el DOM esté listo
+}
 document.addEventListener("DOMContentLoaded", init);
