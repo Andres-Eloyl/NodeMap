@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>NodeMap Bot</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 12px; background: #1a1d27; color: #fff; margin: 10px; }
+    #log { height: 180px; overflow-y: auto; border: 1px solid #2a2e3d; padding: 8px; border-radius: 6px; background: #0f1117; }
+    .log-time { color: #8b8fa3; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h3 id="bot-title" style="margin:0 0 10px 0; color:#6c63ff;">Bot P2P</h3>
+  <div id="log"></div>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/config.js"></script>
+  <script src="/shared/protocol.js"></script>
+  <script src="webrtc.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const botId = urlParams.get('id') || Math.floor(Math.random() * 1000);
+    const nombre = "Bot " + botId;
+    document.getElementById("bot-title").innerText = nombre;
+    
+    function log(msg) {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML += `<div><span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}</div>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    log(`Iniciando conexión...`);
+    WebRTCEngine.conectar(nombre);
+    
+    WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (p) => log(`🟢 Detectado: ${p.nombre}`));
+    WebRTCEngine.onMessage(PROTOCOL.PEER_LEAVE, (p) => log(`🔴 Cayó: ${p.id.substr(0,6)}`));
+    WebRTCEngine.onMessage(PROTOCOL.PEER_EXIT, (p) => log(`🟡 Salió: ${p.nombre}`));
+    WebRTCEngine.onMessage(PROTOCOL.CHAT, (m) => log(`💬 ${m.nombre}: ${m.texto}`));
+    
+    const zonas = ["Zona A", "Zona B", "Zona C", "Pasillo", "Escenario", "Entrada"];
+    let miZona = zonas[Math.floor(Math.random() * zonas.length)];
+    
+    // Posición inicial
+    setTimeout(() => {
+        // En webrtc.js "myId" no está expuesto directamente en la API pública actual,
+        // pero podemos pasar null ya que el display usa el peerId del socket si hace falta,
+        // o mejor: en webrtc.js el "id" es para display, pero el display usa id del PEER_JOIN.
+        WebRTCEngine.broadcast(PROTOCOL.POSITION, { id: null, nombre: nombre, zona: miZona });
+        log(`📍 Posición inicial: ${miZona}`);
+    }, 3000);
+    
+    // Ciclo de comportamiento autónomo
+    setInterval(() => {
+      const isChat = Math.random() > 0.5;
+      
+      if (isChat) {
+         const frases = ["¡Hola a todos!", "¿Alguien en la zona?", "Probando red P2P...", "¡Qué buen evento!", "Nos vemos en el pasillo."];
+         const txt = frases[Math.floor(Math.random() * frases.length)];
+         
+         const peers = WebRTCEngine.getPeers();
+         if (peers.length > 0) {
+            const dest = peers[Math.floor(Math.random() * peers.length)];
+            WebRTCEngine.sendMessage(dest.id, PROTOCOL.CHAT, { id: null, nombre: nombre, texto: txt, destino: dest.id });
+            log(`✉️ Envié a ${dest.nombre}: ${txt}`);
+         }
+      } else {
+         miZona = zonas[Math.floor(Math.random() * zonas.length)];
+         WebRTCEngine.broadcast(PROTOCOL.POSITION, { id: null, nombre: nombre, zona: miZona });
+         log(`🏃 Me moví a ${miZona}`);
+      }
+    }, 4000 + Math.random() * 4000); // Cada 4 a 8 segundos hace algo
+  </script>
+</body>
+</html>

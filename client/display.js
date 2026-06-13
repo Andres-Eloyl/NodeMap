@@ -13,14 +13,6 @@ const PALETTE = [
     "hsl(350, 80%, 55%)",  // rojo rubí
 ];
 
-const PROTOCOL = window.PROTOCOL || {
-    PEER_JOIN: "peer-join",
-    PEER_LEAVE: "peer-leave",
-    PEER_EXIT: "peer-exit",
-    CHAT: "chat",
-    POSITION: "position"
-};
-
 const ZONAS = {
     "Zona A":     { x: 0.20, y: 0.30, width: 0.20, height: 0.25, color: "hsl(174,72%,56%)" },
     "Zona B":     { x: 0.50, y: 0.30, width: 0.20, height: 0.25, color: "hsl(262,83%,68%)" },
