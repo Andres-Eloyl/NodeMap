@@ -1,1 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%" style="font-family: 'Inter', sans-serif;">
+    <defs>
+        <!-- Las variables de CSS no son necesarias ya que se especifican en HSL directo -->
+    </defs>
+    
+    <!-- Borde Exterior Enmarcando el Recinto -->
+    <!-- Se interrumpe en la entrada (top: x500 a x700) para simular la puerta -->
+    <path d="M 500,20 L 40,20 Q 20,20 20,40 L 20,760 Q 20,780 40,780 L 1160,780 Q 1180,780 1180,760 L 1180,40 Q 1180,20 1160,20 L 700,20" 
+          fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="12 6" />
+          
+    <!-- Pasillos Secundarios (Líneas punteadas de conexión sutiles) -->
+    <line x1="400" y1="130" x2="400" y2="440" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="790" y1="130" x2="790" y2="440" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="600" y1="80" x2="600" y2="130" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" stroke-dasharray="4 4" />
+    <line x1="600" y1="520" x2="600" y2="570" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" stroke-dasharray="4 4" />
 
+    <!-- Zona: Entrada -->
+    <g id="entrada" data-nombre="Entrada">
+        <rect x="500" y="20" width="200" height="60" rx="8" fill="hsla(199, 89%, 58%, 0.08)" stroke="hsla(199, 89%, 58%, 0.2)" stroke-width="1.5" />
+        <text x="520" y="45" font-size="14" fill="hsla(199, 89%, 58%, 0.4)">Acceso Principal</text>
+        <path d="M660,35 h10 v15 h-10 z" fill="none" stroke="hsla(199, 89%, 58%, 0.15)" stroke-width="2"/>
+    </g>
+
+    <!-- Zona A (Tecnología) -->
+    <g id="zona-a" data-nombre="Zona A">
+        <rect x="50" y="130" width="320" height="280" rx="8" fill="hsla(174, 72%, 56%, 0.08)" stroke="hsla(174, 72%, 56%, 0.2)" stroke-width="1.5" />
+        <text x="70" y="160" font-size="14" fill="hsla(174, 72%, 56%, 0.4)">Zona A (Tecnología)</text>
+        
+        <!-- Icono: Laptop -->
+        <g transform="translate(180, 240) scale(2.5)" fill="none" stroke="hsla(174, 72%, 56%, 0.15)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="12" rx="2" ry="2"/>
+            <path d="M2 16h20"/>
+        </g>
+    </g>
+
+    <!-- Zona B (Ciencia) -->
+    <g id="zona-b" data-nombre="Zona B">
+        <rect x="430" y="130" width="340" height="280" rx="8" fill="hsla(262, 83%, 68%, 0.08)" stroke="hsla(262, 83%, 68%, 0.2)" stroke-width="1.5" />
+        <text x="450" y="160" font-size="14" fill="hsla(262, 83%, 68%, 0.4)">Zona B (Ciencia)</text>
+        
+        <!-- Icono: Matraz (Flask) -->
+        <g transform="translate(570, 240) scale(2.5)" fill="none" stroke="hsla(262, 83%, 68%, 0.15)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 2v6L3 20h18l-7-12V2"/>
+            <path d="M7 2h10"/>
+        </g>
+    </g>
+
+    <!-- Zona C (Innovación) -->
+    <g id="zona-c" data-nombre="Zona C">
+        <rect x="810" y="130" width="320" height="280" rx="8" fill="hsla(338, 78%, 62%, 0.08)" stroke="hsla(338, 78%, 62%, 0.2)" stroke-width="1.5" />
+        <text x="830" y="160" font-size="14" fill="hsla(338, 78%, 62%, 0.4)">Zona C (Innovación)</text>
+        
+        <!-- Icono: Bombilla (Lightbulb) -->
+        <g transform="translate(940, 240) scale(2.5)" fill="none" stroke="hsla(338, 78%, 62%, 0.15)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18h6"/>
+            <path d="M10 22h4"/>
+            <path d="M12 2a7 7 0 0 0-7 7c0 2.2 1.3 4.2 3 5.4V18h8v-3.6c1.7-1.2 3-3.2 3-5.4a7 7 0 0 0-7-7z"/>
+        </g>
+    </g>
+
+    <!-- Pasillo Principal -->
+    <g id="pasillo" data-nombre="Pasillo">
+        <rect x="50" y="440" width="1100" height="80" rx="8" fill="hsla(45, 93%, 58%, 0.08)" stroke="hsla(45, 93%, 58%, 0.2)" stroke-width="1.5" />
+        <text x="70" y="470" font-size="14" fill="hsla(45, 93%, 58%, 0.4)">Pasillo Principal</text>
+    </g>
+
+    <!-- Escenario Principal -->
+    <g id="escenario" data-nombre="Escenario">
+        <rect x="300" y="570" width="600" height="180" rx="8" fill="hsla(142, 69%, 52%, 0.08)" stroke="hsla(142, 69%, 52%, 0.2)" stroke-width="1.5" />
+        <text x="320" y="600" font-size="14" fill="hsla(142, 69%, 52%, 0.4)">Escenario de Presentaciones</text>
+        
+        <!-- Icono: Micrófono (Microphone) -->
+        <g transform="translate(570, 620) scale(2.5)" fill="none" stroke="hsla(142, 69%, 52%, 0.15)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3" ry="3"/>
+            <path d="M5 10v1a7 7 0 0 0 14 0v-1"/>
+            <path d="M12 18v4"/>
+            <path d="M8 22h8"/>
+        </g>
+    </g>
+</svg>

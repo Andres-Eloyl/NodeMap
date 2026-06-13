@@ -1,1 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NodeMap — Visualización P2P en Tiempo Real</title>
+    <meta name="description"
+        content="Dashboard interactivo y mapa en tiempo real de nodos P2P conectados mediante WebRTC en la feria universitaria.">
+    <!-- Favicon inline SVG rocket -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+
+    <!-- 1. Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- 2. D3.js v7 CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+    <!-- 3. CSS Propio -->
+    <link rel="stylesheet" href="display.css">
+</head>
+
+<body>
+    <div id="layout-root">
+        <!-- HEADER -->
+        <header id="app-header">
+            <div class="logo-area">
+                <h1>NodeMap</h1>
+                <p>Red P2P en Tiempo Real</p>
+            </div>
+            <div class="live-indicators">
+                <div id="mode-badge" style="display: flex; align-items: center;"></div>
+                <div class="indicator-badge">
+                    <div class="status-dot"></div>
+                    <span>Peers: <span id="header-peer-count">0</span></span>
+                </div>
+                <div class="indicator-badge">
+                    <span>⚡ Mensajes: <span id="header-message-count">0</span></span>
+                </div>
+                <div class="indicator-badge" id="network-activity">
+                    <div class="health-rings" id="health-rings">
+                        <div class="ring ring-1"></div>
+                        <div class="ring ring-2"></div>
+                        <div class="ring ring-3"></div>
+                    </div>
+                    <span>Red</span>
+                </div>
+                <!-- Uptime con fondo diferente -->
+                <div class="indicator-badge"
+                    style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
+                    <span>◷ <span id="header-uptime">00:00:00</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main id="content-row">
+            <!-- COLUMNA CENTRAL (Grafo + Panel Técnico) -->
+            <section id="center-column">
+
+                <!-- ÁREA DEL GRAFO SVG -->
+                <div id="graph-container">
+                    <div id="empty-state" class="empty-state">
+                        <div class="empty-title">Esperando conexiones...</div>
+                        <div class="empty-sub">Escanea el QR para unirte a la red</div>
+                        <div class="loading-dots"><span></span><span></span><span></span></div>
+                    </div>
+                    <svg id="graph-svg"></svg>
+                </div>
+
+                <!-- PANEL TÉCNICO INFERIOR -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+                    <div
+                        style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px;">
+                        Métricas del Nodo Central</div>
+                    <div id="server-status"
+                        style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 8px;">
+                        <div id="server-dot"
+                            style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 8px var(--color-danger); transition: all 0.3s ease;">
+                        </div>
+                        <span id="server-text">Servidor no disponible</span>
+                    </div>
+                </div>
+                <div id="tech-panel">
+                    <div class="stat-card" id="stat-peers">
+                        <div class="stat-icon">📡</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Nodos Activos</span>
+                            <span class="stat-value" id="peer-count">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-messages">
+                        <div class="stat-icon">✉️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Tráfico de Red</span>
+                            <span class="stat-value" id="message-count">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-uptime">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Tiempo de Actividad</span>
+                            <span class="stat-value" id="uptime-display">00:00:00</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-latency">
+                        <div class="stat-icon">📶</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Latencia Promedio</span>
+                            <span class="stat-value"><span id="latency-display">0</span> ms</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="stat-zones">
+                        <div class="stat-icon">🗺️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Zonas Activas</span>
+                            <span class="stat-value" id="zones-display">0</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- PANEL LATERAL: HISTORIAL DE EVENTOS -->
+            <aside id="event-log">
+                <div class="log-header">Historial de Eventos</div>
+                <div class="log-entries" id="log-entries-container">
+                    <!-- Las entradas se generarán dinámicamente desde display.js -->
+                    <!-- Ejemplo de estructura de entrada:
+                    <div class="log-entry type-join">
+                        <div class="log-time">10:45:01</div>
+                        <div class="log-content"><strong>Visitante 1</strong> se unió a la red</div>
+                    </div>
+                    -->
+                </div>
+            </aside>
+        </main>
+    </div>
+
+
+    <script src="mock-webrtc.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared/config.js"></script>
+    <script src="/shared/protocol.js"></script>
+    <script src="webrtc.js"></script>
+
+    <script src="display.js"></script>
+</body>
+
+</html>
