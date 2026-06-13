@@ -500,12 +500,34 @@ function getLatency(peerId) {
   return latencies.has(peerId) ? latencies.get(peerId) : null;
 }
 
+/**
+ * Desconecta limpiamente del servidor y cierra todas las conexiones WebRTC.
+ * Notifica al servidor con PEER_EXIT antes de desconectar.
+ */
+function desconectar() {
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+  if (socket) {
+    socket.emit(PROTOCOL.PEER_EXIT);
+    socket.disconnect();
+    socket = null;
+  }
+  for (const [peerId] of peers) {
+    cleanupPeer(peerId);
+  }
+  myId = null;
+  myNombre = null;
+}
+
 // --- Exportar API pública globalmente ---
 // Como este script se carga con <script>, necesita estar en window
 // para que peer.js y display.js puedan accederlo
 
 const WebRTCEngine = {
   conectar,
+  desconectar,
   sendMessage,
   broadcast,
   onMessage,
