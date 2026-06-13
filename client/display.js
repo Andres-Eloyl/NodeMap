@@ -75,11 +75,11 @@ async function initGraph() {
     width = container.clientWidth;
     height = container.clientHeight;
 
-    svg = d3.select("#graph-container").append("svg")
+    svg = d3.select("#graph-svg")
         .attr("width", width)
         .attr("height", height);
 
-    defs = svg.append("defs");
+    defs = svg.append("defs");
     const filter = defs.append("filter").attr("id", "node-glow")
         .attr("x", "-50%").attr("y", "-50%")
         .attr("width", "200%").attr("height", "200%");
