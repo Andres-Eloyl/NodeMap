@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test WebRTC Engine</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2e3d;
+      --text: #e4e6ed;
+      --text-dim: #8b8fa3;
+      --accent: #6c63ff;
+      --green: #34d399;
+      --red: #f87171;
+      --orange: #fbbf24;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container { max-width: 700px; margin: 0 auto; }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 24px; }
+
+    .connect-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+
+    input {
+      flex: 1; padding: 10px 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 0.85rem; outline: none;
+    }
+
+    input:focus { border-color: var(--accent); }
+
+    button {
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-weight: 600;
+      font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+    }
+
+    .btn-connect { background: var(--accent); color: white; }
+    .btn-connect:hover { background: #5b53e0; }
+    .btn-disconnect { background: var(--red); color: white; display: none; }
+    .btn-disconnect:hover { background: #ef4444; }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-weight: 600; font-size: 0.9rem; margin-bottom: 10px;
+      color: var(--text-dim);
+    }
+
+    .peers-list { list-style: none; }
+
+    .peers-list li {
+      padding: 8px 12px; margin-bottom: 4px;
+      background: var(--bg); border-radius: 6px;
+      font-size: 0.82rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .latency { color: var(--orange); font-size: 0.75rem; }
+
+    .stats {
+      display: flex; gap: 16px; margin-bottom: 16px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.6rem; font-weight: 700; color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;
+    }
+
+    .log {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px;
+      max-height: 250px; overflow-y: auto;
+      font-family: 'Courier New', monospace; font-size: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .log-entry { padding: 2px 0; }
+    .log-entry.info { color: var(--text-dim); }
+    .log-entry.ok { color: var(--green); }
+    .log-entry.warn { color: var(--orange); }
+    .log-entry.err { color: var(--red); }
+
+    .chat-area { display: none; }
+    .chat-area.visible { display: block; }
+
+    .messages-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px;
+      min-height: 100px; max-height: 200px; overflow-y: auto;
+      font-size: 0.82rem; margin-bottom: 10px;
+    }
+
+    .msg { padding: 4px 0; }
+    .msg.sent { color: var(--accent); }
+    .msg.received { color: var(--green); }
+
+    .chat-input { display: flex; gap: 10px; }
+    .btn-send { background: var(--green); color: #0f1117; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Test WebRTC Engine</h1>
+  <p class="subtitle">Abre en varias tabs para probar mesh completo</p>
+
+  <div class="connect-bar">
+    <input type="text" id="nombreInput" placeholder="Tu nombre..." />
+    <button class="btn-connect" id="btnConnect">Conectar</button>
+    <button class="btn-disconnect" id="btnDisconnect">Salir</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-value" id="statPeers">0</div>
+      <div class="stat-label">Peers</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="statMsgs">0</div>
+      <div class="stat-label">Mensajes</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="statLatency">-</div>
+      <div class="stat-label">Latencia avg</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Peers conectados</div>
+    <ul class="peers-list" id="peersList">
+      <li style="color:var(--text-dim)">Sin conexion</li>
+    </ul>
+  </div>
+
+  <div class="panel chat-area" id="chatArea">
+    <div class="panel-title">Chat (broadcast)</div>
+    <div class="messages-box" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Mensaje..." />
+      <button class="btn-send" id="btnSend">Enviar</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/protocol.js"></script>
+<script src="/shared/config.js"></script>
+<script src="/client/webrtc.js"></script>
+<script>
+  const $nombre = document.getElementById("nombreInput");
+  const $btnConnect = document.getElementById("btnConnect");
+  const $btnDisconnect = document.getElementById("btnDisconnect");
+  const $peersList = document.getElementById("peersList");
+  const $chatArea = document.getElementById("chatArea");
+  const $chatMessages = document.getElementById("chatMessages");
+  const $chatInput = document.getElementById("chatInput");
+  const $btnSend = document.getElementById("btnSend");
+  const $log = document.getElementById("log");
+  const $statPeers = document.getElementById("statPeers");
+  const $statMsgs = document.getElementById("statMsgs");
+  const $statLatency = document.getElementById("statLatency");
+
+  let msgCount = 0;
+
+  function log(text, type) {
+    const div = document.createElement("div");
+    div.className = "log-entry " + (type || "info");
+    const ts = new Date().toLocaleTimeString();
+    div.textContent = ts + " " + text;
+    $log.appendChild(div);
+    $log.scrollTop = $log.scrollHeight;
+  }
+
+  function updatePeersList() {
+    const list = WebRTCEngine.getPeers();
+    $statPeers.textContent = list.length;
+
+    if (list.length === 0) {
+      $peersList.innerHTML = '<li style="color:var(--text-dim)">Sin peers</li>';
+      $statLatency.textContent = "-";
+      return;
+    }
+
+    $peersList.innerHTML = "";
+    let totalLat = 0;
+    let latCount = 0;
+
+    for (const p of list) {
+      const li = document.createElement("li");
+      const lat = WebRTCEngine.getLatency(p.id);
+      const latText = lat !== null ? Math.round(lat) + "ms" : "...";
+      if (lat !== null) { totalLat += lat; latCount++; }
+      li.innerHTML = '<span>' + p.nombre + ' <span style="color:var(--text-dim);font-size:0.7rem">' + p.id.substring(0,8) + '</span></span><span class="latency">' + latText + '</span>';
+      $peersList.appendChild(li);
+    }
+
+    $statLatency.textContent = latCount > 0 ? Math.round(totalLat / latCount) + "ms" : "-";
+  }
+
+  function addChat(text, type) {
+    const div = document.createElement("div");
+    div.className = "msg " + type;
+    div.textContent = text;
+    $chatMessages.appendChild(div);
+    $chatMessages.scrollTop = $chatMessages.scrollHeight;
+  }
+
+  $btnConnect.addEventListener("click", () => {
+    const nombre = $nombre.value.trim();
+    if (!nombre) return;
+    WebRTCEngine.conectar(nombre);
+    log("Conectando como " + nombre, "ok");
+    $btnConnect.style.display = "none";
+    $btnDisconnect.style.display = "block";
+    $nombre.disabled = true;
+    $chatArea.classList.add("visible");
+  });
+
+  $btnDisconnect.addEventListener("click", () => {
+    WebRTCEngine.desconectar();
+    log("Desconectado", "warn");
+    $btnConnect.style.display = "block";
+    $btnDisconnect.style.display = "none";
+    $nombre.disabled = false;
+    $chatArea.classList.remove("visible");
+    updatePeersList();
+  });
+
+  WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
+    log(data.nombre + " se conecto", "ok");
+    updatePeersList();
+  });
+
+  WebRTCEngine.onMessage(PROTOCOL.PEER_LEAVE, (data) => {
+    log("Peer " + data.id.substring(0,8) + " se desconecto", "warn");
+    updatePeersList();
+  });
+
+  WebRTCEngine.onMessage(PROTOCOL.PEER_EXIT, (data) => {
+    log((data.nombre || data.id.substring(0,8)) + " salio voluntariamente", "warn");
+    updatePeersList();
+  });
+
+  WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
+    addChat(data.nombre + ": " + data.texto, "received");
+    msgCount++;
+    $statMsgs.textContent = msgCount;
+  });
+
+  function sendChat() {
+    const texto = $chatInput.value.trim();
+    if (!texto) return;
+    const nombre = $nombre.value.trim();
+    WebRTCEngine.broadcast(PROTOCOL.CHAT, {
+      id: "me",
+      nombre: nombre,
+      texto: texto,
+    });
+    addChat("Tu: " + texto, "sent");
+    msgCount++;
+    $statMsgs.textContent = msgCount;
+    $chatInput.value = "";
+  }
+
+  $btnSend.addEventListener("click", sendChat);
+  $chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendChat();
+  });
+
+  setInterval(updatePeersList, 2000);
+</script>
+
+</body>
+</html>
