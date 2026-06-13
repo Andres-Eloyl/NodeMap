@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC PoC</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-hover: #222633;
+      --border: #2a2e3d;
+      --text: #e4e6ed;
+      --text-dim: #8b8fa3;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108, 99, 255, 0.25);
+      --green: #34d399;
+      --green-glow: rgba(52, 211, 153, 0.25);
+      --red: #f87171;
+      --orange: #fbbf24;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    header { text-align: center; margin-bottom: 32px; }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    header p { color: var(--text-dim); font-size: 0.9rem; }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--red);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .status-dot.connected {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow);
+    }
+
+    .status-text { font-size: 0.85rem; color: var(--text-dim); }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.3s;
+    }
+
+    .step.active { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+    .step.done { border-color: var(--green); opacity: 0.7; }
+
+    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+
+    .step-number {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .step.active .step-number { background: var(--accent); }
+    .step.done .step-number { background: var(--green); }
+    .step-title { font-weight: 600; font-size: 1rem; }
+    .step-desc { color: var(--text-dim); font-size: 0.82rem; margin-bottom: 14px; line-height: 1.5; }
+
+    textarea {
+      width: 100%; min-height: 100px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      padding: 12px; resize: vertical; outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-dim); opacity: 0.6; }
+
+    .btn-group { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+    button {
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600; font-size: 0.82rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover:not(:disabled) { background: #5b53e0; box-shadow: 0 4px 15px var(--accent-glow); }
+    .btn-secondary { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--border); }
+    .btn-green { background: var(--green); color: #0f1117; }
+    .btn-green:hover:not(:disabled) { background: #2cc78a; box-shadow: 0 4px 15px var(--green-glow); }
+
+    .chat-section { display: none; }
+    .chat-section.visible { display: block; }
+
+    .messages {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 120px; max-height: 250px;
+      overflow-y: auto; margin-bottom: 12px;
+      font-size: 0.82rem;
+    }
+
+    .messages .msg { padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+    .messages .msg:last-child { border-bottom: none; }
+    .messages .msg.sent { color: var(--accent); }
+    .messages .msg.received { color: var(--green); }
+    .messages .msg.system { color: var(--orange); font-style: italic; }
+
+    .chat-input { display: flex; gap: 10px; }
+
+    .chat-input input {
+      flex: 1; padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; outline: none;
+    }
+
+    .chat-input input:focus { border-color: var(--accent); }
+
+    .ice-count {
+      display: inline-block;
+      background: var(--accent-glow); color: var(--accent);
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin-left: 8px;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      header h1 { font-size: 1.3rem; }
+      .btn-group { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>WebRTC Proof of Concept</h1>
+  <p>Conexion manual entre dos tabs</p>
+</header>
+
+<div class="container">
+
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Desconectado</span>
+  </div>
+
+  <div class="step active" id="step1">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <span class="step-title">Crear Offer (solo en Tab A)</span>
+    </div>
+    <p class="step-desc">
+      Clic en "Crear Offer" para generar RTCPeerConnection y offer SDP.
+      Copia el SDP y pegalo en Tab B.
+    </p>
+    <div class="btn-group">
+      <button class="btn-primary" id="btnCreateOffer">Crear Offer</button>
+      <button class="btn-secondary" id="btnCopyLocal" disabled>Copiar SDP local</button>
+    </div>
+    <textarea id="localSdp" placeholder="SDP local aparecera aqui..." readonly style="margin-top:12px"></textarea>
+  </div>
+
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <span class="step-title">Pegar SDP remoto</span>
+    </div>
+    <p class="step-desc">
+      <strong>Tab B:</strong> pega la offer de Tab A y clic en "Aceptar Offer".<br>
+      <strong>Tab A:</strong> pega la answer de Tab B y clic en "Aceptar Answer".
+    </p>
+    <textarea id="remoteSdp" placeholder="Pega el SDP del otro tab aqui..."></textarea>
+    <div class="btn-group">
+      <button class="btn-primary" id="btnAcceptOffer">Aceptar Offer -> Crear Answer</button>
+      <button class="btn-green" id="btnAcceptAnswer">Aceptar Answer</button>
+    </div>
+  </div>
+
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <span class="step-title">ICE Candidates <span class="ice-count" id="iceCount">0</span></span>
+    </div>
+    <p class="step-desc">
+      Los ICE candidates se generan automaticamente. Copia los de este tab y pegalos en el otro.
+    </p>
+    <label style="font-size:0.78rem; color:var(--text-dim); margin-bottom:4px; display:block;">Mis ICE candidates:</label>
+    <textarea id="localIce" placeholder="ICE candidates locales..." readonly></textarea>
+    <div class="btn-group">
+      <button class="btn-secondary" id="btnCopyIce">Copiar ICE locales</button>
+    </div>
+    <label style="font-size:0.78rem; color:var(--text-dim); margin:12px 0 4px; display:block;">ICE candidates remotos:</label>
+    <textarea id="remoteIce" placeholder="Pega ICE candidates del otro tab..."></textarea>
+    <div class="btn-group">
+      <button class="btn-primary" id="btnAddIce">Agregar ICE remoto</button>
+    </div>
+  </div>
+
+  <div class="step chat-section" id="step4">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <span class="step-title">DataChannel abierto</span>
+    </div>
+    <p class="step-desc">Conexion P2P establecida. Envia mensajes directamente entre tabs.</p>
+    <div class="messages" id="messages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Escribe un mensaje..." />
+      <button class="btn-green" id="btnSend">Enviar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const iceServers = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+  ];
+
+  let pc = null;
+  let dc = null;
+  let localIceCandidates = [];
+  let isOfferer = false;
+
+  const $statusDot   = document.getElementById("statusDot");
+  const $statusText  = document.getElementById("statusText");
+  const $localSdp    = document.getElementById("localSdp");
+  const $remoteSdp   = document.getElementById("remoteSdp");
+  const $localIce    = document.getElementById("localIce");
+  const $remoteIce   = document.getElementById("remoteIce");
+  const $iceCount    = document.getElementById("iceCount");
+  const $messages    = document.getElementById("messages");
+  const $chatInput   = document.getElementById("chatInput");
+
+  const $btnCreateOffer  = document.getElementById("btnCreateOffer");
+  const $btnCopyLocal    = document.getElementById("btnCopyLocal");
+  const $btnAcceptOffer  = document.getElementById("btnAcceptOffer");
+  const $btnAcceptAnswer = document.getElementById("btnAcceptAnswer");
+  const $btnCopyIce      = document.getElementById("btnCopyIce");
+  const $btnAddIce       = document.getElementById("btnAddIce");
+  const $btnSend         = document.getElementById("btnSend");
+
+  const steps = [
+    document.getElementById("step1"),
+    document.getElementById("step2"),
+    document.getElementById("step3"),
+    document.getElementById("step4"),
+  ];
+
+  function setStatus(text, connected) {
+    $statusText.textContent = text;
+    $statusDot.classList.toggle("connected", connected);
+  }
+
+  function activateStep(n) {
+    steps.forEach((s, i) => {
+      s.classList.remove("active");
+      if (i < n) s.classList.add("done");
+    });
+    if (steps[n]) {
+      steps[n].classList.add("active");
+      if (n === 3) steps[n].classList.add("visible");
+    }
+  }
+
+  function addMessage(text, type) {
+    const div = document.createElement("div");
+    div.className = `msg ${type}`;
+    div.textContent = text;
+    $messages.appendChild(div);
+    $messages.scrollTop = $messages.scrollHeight;
+  }
+
+  function createPC() {
+    pc = new RTCPeerConnection({ iceServers });
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        localIceCandidates.push(e.candidate);
+        $localIce.value = JSON.stringify(localIceCandidates, null, 2);
+        $iceCount.textContent = localIceCandidates.length;
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      const state = pc.iceConnectionState;
+      if (state === "connected" || state === "completed") {
+        setStatus("Conexion P2P establecida", true);
+      } else if (state === "disconnected" || state === "failed") {
+        setStatus("ICE: " + state, false);
+      }
+    };
+
+    pc.ondatachannel = (e) => {
+      dc = e.channel;
+      setupDC();
+    };
+  }
+
+  function setupDC() {
+    dc.onopen = () => {
+      setStatus("DataChannel abierto", true);
+      activateStep(3);
+      addMessage("DataChannel abierto - conexion P2P directa", "system");
+    };
+
+    dc.onclose = () => {
+      setStatus("DataChannel cerrado", false);
+      addMessage("DataChannel cerrado", "system");
+    };
+
+    dc.onmessage = (e) => {
+      addMessage("< " + e.data, "received");
+    };
+  }
+
+  $btnCreateOffer.addEventListener("click", async () => {
+    isOfferer = true;
+    createPC();
+    dc = pc.createDataChannel("chat");
+    setupDC();
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    $localSdp.value = JSON.stringify(pc.localDescription);
+    $btnCopyLocal.disabled = false;
+    $btnCreateOffer.disabled = true;
+    setStatus("Offer creada - copia el SDP a Tab B", false);
+    activateStep(1);
+  });
+
+  $btnCopyLocal.addEventListener("click", () => {
+    navigator.clipboard.writeText($localSdp.value);
+    $btnCopyLocal.textContent = "Copiado";
+    setTimeout(() => { $btnCopyLocal.textContent = "Copiar SDP local"; }, 1500);
+  });
+
+  $btnAcceptOffer.addEventListener("click", async () => {
+    if (!$remoteSdp.value.trim()) return;
+    createPC();
+    const offer = JSON.parse($remoteSdp.value);
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    $localSdp.value = JSON.stringify(pc.localDescription);
+    $btnCopyLocal.disabled = false;
+    $btnAcceptOffer.disabled = true;
+    $btnAcceptAnswer.disabled = true;
+    setStatus("Answer creada - copia el SDP a Tab A", false);
+    activateStep(2);
+  });
+
+  $btnAcceptAnswer.addEventListener("click", async () => {
+    if (!$remoteSdp.value.trim() || !pc) return;
+    const answer = JSON.parse($remoteSdp.value);
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    $btnAcceptAnswer.disabled = true;
+    $btnAcceptOffer.disabled = true;
+    setStatus("Answer aceptada - intercambiando ICE...", false);
+    activateStep(2);
+  });
+
+  $btnCopyIce.addEventListener("click", () => {
+    navigator.clipboard.writeText($localIce.value);
+    $btnCopyIce.textContent = "Copiado";
+    setTimeout(() => { $btnCopyIce.textContent = "Copiar ICE locales"; }, 1500);
+  });
+
+  $btnAddIce.addEventListener("click", async () => {
+    if (!$remoteIce.value.trim() || !pc) return;
+    try {
+      const candidates = JSON.parse($remoteIce.value);
+      for (const c of candidates) {
+        await pc.addIceCandidate(new RTCIceCandidate(c));
+      }
+      $btnAddIce.textContent = candidates.length + " candidatos agregados";
+      setTimeout(() => { $btnAddIce.textContent = "Agregar ICE remoto"; }, 2000);
+    } catch (err) {
+      alert("Error al parsear ICE: " + err.message);
+    }
+  });
+
+  function sendChat() {
+    const text = $chatInput.value.trim();
+    if (!text || !dc || dc.readyState !== "open") return;
+    dc.send(text);
+    addMessage("> " + text, "sent");
+    $chatInput.value = "";
+  }
+
+  $btnSend.addEventListener("click", sendChat);
+  $chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendChat();
+  });
+</script>
+
+</body>
+</html>
