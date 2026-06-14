@@ -203,13 +203,13 @@
     </style>
 </head>
 <body class="font-body-md text-body-md h-[100dvh] w-screen flex flex-col relative grid-bg">
-
-<!-- Screen 1: Entry / Login -->
-<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden overflow-y-auto py-8" id="screen-entry">
-    <!-- Dynamic Animated Background -->
+    <!-- Dynamic Animated Background (Global) -->
     <div id="animated-bg">
         <!-- JS will populate lines here -->
     </div>
+
+<!-- Screen 1: Entry / Login -->
+<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent px-margin-mobile view-hidden overflow-y-auto py-8" id="screen-entry">
 
     <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto relative z-10">
         <div class="text-center mb-stack-sm flex flex-col items-center">
@@ -244,7 +244,7 @@
 </div>
 
 <!-- Screen 2: Zone Selection -->
-<div class="absolute inset-0 z-40 bg-background flex flex-col view-hidden overflow-y-auto pb-8" id="screen-zone">
+<div class="absolute inset-0 z-40 bg-transparent flex flex-col view-hidden overflow-y-auto pb-8" id="screen-zone">
     <div class="p-margin-mobile flex-none text-center pt-[10vh]">
         <h2 class="font-headline-lg text-headline-lg text-primary">Elige una Zona</h2>
         <p class="font-label-mono text-label-mono text-on-surface-variant mt-2">HAZ CLIC PARA ENTRAR</p>
@@ -277,8 +277,8 @@
     </div>
 </div>
 
-<!-- Screen 3: Main App -->
-<div class="absolute inset-0 z-30 flex flex-col md:flex-row bg-transparent" id="screen-main">
+<!-- Screen 3: Main Layout -->
+<div class="absolute inset-0 z-30 flex flex-col md:flex-row bg-transparent view-hidden" id="screen-main">
     
     <!-- Mobile Header -->
     <header class="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-outline-variant flex-none z-50 order-first w-full shadow-md">
@@ -319,7 +319,7 @@
     </aside>
     
     <!-- Main Content Area -->
-    <main class="flex-grow relative overflow-hidden bg-background">
+    <main class="flex-grow relative overflow-hidden bg-transparent">
         <!-- Tab: Map -->
         <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col" id="tab-map">
             <div class="flex justify-between items-center mb-stack-md md:mb-stack-lg flex-none z-20">
