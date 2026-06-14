@@ -159,7 +159,7 @@
             background: rgba(255, 255, 255, 0.02);
         }
         .map-container {
-            touch-action: pan-x pan-y;
+            /* Removing touch-action to fix mobile scroll */
         }
     </style>
 </head>
@@ -167,7 +167,7 @@
 
 <!-- Login Overlay -->
 <div id="login-overlay" class="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center p-6">
-    <img src="https://lh3.googleusercontent.com/aida/AP1WRLsLosRpLWns7j26RjkbaWPEP62goHfRGNXutxG1OuWj0y75yH7oHdAz6rbSUQ0vmPWdH3yIm0w-5XN03HwJsottX4eNVDLhEhFmdMh441GR09K6N6FC1hdxHoMvi4R1_Pzc4Ftbee8vMklPPD82OC0Qq5Cyl6TYs_wShVNBA4Msmvo08xPSAeecQ7oHKSvWN2UPhOWWxrEUC_J4Her1hIUtYw8Q0zgnkfKF4s6WX9CURg0kntosCJ76w5Uw" alt="NodeMap Logo" class="h-24 w-24 mb-6">
+    <img src="/logo.png" alt="NodeMap Logo" class="h-24 w-24 mb-6" style="filter: drop-shadow(0 0 10px rgba(255,179,173,0.5));">
     <h1 class="font-headline-lg text-primary mb-2 text-center">Bienvenido a NodeMap</h1>
     <p class="text-on-surface-variant text-center mb-8">Conéctate a la red P2P del evento en tiempo real.</p>
     
@@ -183,14 +183,21 @@
 
 <!-- TopAppBar -->
 <header class="bg-surface dark:bg-surface w-full top-0 sticky bg-surface-dim dark:bg-surface-dim border-b border-outline-variant flat no shadows transition-colors duration-200 flex justify-between items-center px-margin-mobile h-16 z-40">
-<div class="flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida/AP1WRLsLosRpLWns7j26RjkbaWPEP62goHfRGNXutxG1OuWj0y75yH7oHdAz6rbSUQ0vmPWdH3yIm0w-5XN03HwJsottX4eNVDLhEhFmdMh441GR09K6N6FC1hdxHoMvi4R1_Pzc4Ftbee8vMklPPD82OC0Qq5Cyl6TYs_wShVNBA4Msmvo08xPSAeecQ7oHKSvWN2UPhOWWxrEUC_J4Her1hIUtYw8Q0zgnkfKF4s6WX9CURg0kntosCJ76w5Uw" alt="NodeMap Logo" class="h-8 w-8 flex-shrink-0 object-contain"><h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary tracking-tighter">NodeMap</h1></div><button id="btn-logout" class="flex items-center justify-center p-unit hover:bg-surface-variant/50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary dark:text-primary text-[24px]">logout</span></button>
+<div class="flex items-center gap-2"><img src="/logo.png" alt="NodeMap Logo" class="h-8 w-8 flex-shrink-0 object-contain"><h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary tracking-tighter">NodeMap</h1></div><button id="btn-logout" class="flex items-center justify-center p-unit hover:bg-surface-variant/50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary dark:text-primary text-[24px]">logout</span></button>
 </header>
 <!-- Main Content Area -->
 <main class="flex-1 flex flex-col relative z-0 overflow-auto" id="main-content">
 
 <!-- TAB 1: Floor Plan Map (Scrollable/Zoomable) -->
-<div id="view-map" class="flex-1 overflow-auto map-container relative bg-[#13121d] hide-scrollbar flex flex-col items-center">
-<div class="relative bg-[#1b1a26] border-outline-variant w-full max-w-full p-unit flex-1 flex flex-col"><div class="grid grid-cols-12 gap-1 h-full relative flex-1">
+<div id="view-map" class="flex-1 overflow-y-auto map-container relative bg-[#13121d] hide-scrollbar block pb-20">
+
+<!-- Current Zone Indicator Banner (Moved here so it's not absolute) -->
+<div class="relative w-fit mx-auto mt-4 mb-4 bg-surface-container-high/90 border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg z-10 pointer-events-none">
+    <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_5px_var(--tw-colors-primary)]"></div>
+    <span class="text-xs font-label-md text-on-surface uppercase tracking-widest">Estás en: <span id="current-zone-display" class="text-primary font-bold">Ninguna</span></span>
+</div>
+
+<div class="relative bg-[#1b1a26] border-outline-variant w-full max-w-full p-2 h-[800px] flex flex-col"><div class="grid grid-cols-12 gap-1 h-full relative flex-1">
 
 <!-- Left Column (Aulas) -> Zona A -->
 <div class="col-span-3 flex flex-col gap-1 cursor-pointer hover:bg-primary/10 transition-colors rounded p-1 border border-transparent hover:border-primary/30" data-zone="Zona A" onclick="setZone('Zona A')">
@@ -240,20 +247,13 @@
 
 <!-- Bottom Entrance Row -> Entrada -->
 </div></div>
-<div class="flex justify-center w-full mt-2 cursor-pointer" data-zone="Entrada" onclick="setZone('Entrada')">
+<div class="flex justify-center w-full mt-4 cursor-pointer mb-4" data-zone="Entrada" onclick="setZone('Entrada')">
     <div class="w-16 border-2 border-primary/50 rounded pt-1 pb-0.5 flex flex-col items-center bg-primary/10 shadow-[0_0_8px_rgba(255,179,173,0.4)] hover:bg-primary/20 transition-colors">
         <span class="material-symbols-outlined text-primary text-[12px]">sensor_door</span>
         <div class="text-[8px] font-headline-sm text-primary text-center uppercase tracking-widest">Entrada</div>
     </div>
 </div>
 </div>
-
-<!-- Current Zone Indicator Banner (Floating on map) -->
-<div class="absolute top-4 left-1/2 -translate-x-1/2 bg-surface-container-high/90 border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg backdrop-blur z-10 pointer-events-none">
-    <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_5px_var(--tw-colors-primary)]"></div>
-    <span class="text-xs font-label-md text-on-surface uppercase tracking-widest">Estás en: <span id="current-zone-display" class="text-primary font-bold">Ninguna</span></span>
-</div>
-
 </div>
 
 <!-- TAB 2: Nodes -->
