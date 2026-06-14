@@ -151,7 +151,7 @@ async function initGraph() {
             .style("padding", "12px")
             .style("border-radius", "8px")
             .style("color", "#fff")
-            .style("font-family", "Inter, sans-serif")
+            .style("font-family", "Montserrat, sans-serif")
             .style("z-index", "1000")
             .style("backdrop-filter", "blur(8px)")
             .style("box-shadow", "0 4px 15px rgba(0,0,0,0.5)");
@@ -166,7 +166,7 @@ async function initGraph() {
             .style("padding", "14px")
             .style("border-radius", "10px")
             .style("color", "#fff")
-            .style("font-family", "Inter, sans-serif")
+            .style("font-family", "Montserrat, sans-serif")
             .style("z-index", "1000")
             .style("backdrop-filter", "blur(10px)")
             .style("box-shadow", "0 4px 20px rgba(0,0,0,0.6)")
@@ -259,7 +259,7 @@ function initZoneCounters() {
             .attr("class", "counter-text")
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .style("font-family", "'JetBrains Mono', monospace")
+            .style("font-family", "Montserrat, monospace")
             .style("font-size", "16px")
             .style("font-weight", "bold")
             .style("fill", ZONAS[zoneName]?.color || "#fff")
@@ -403,7 +403,7 @@ function renderNodes() {
         .style("filter", "url(#node-glow)");
     nodeScale.append("text")
         .attr("dy", d => d.radius + 16)
-        .style("font-family", "Inter, sans-serif")
+        .style("font-family", "Montserrat, sans-serif")
         .style("font-size", "12px")
         .style("font-weight", "500")
         .style("fill", "rgba(255, 255, 255, 0.85)")
@@ -1065,6 +1065,201 @@ function initParticles() {
                 p.y = Math.random() * canvas.height;
             }
             ctx.beginPath();
+        bumpNetworkBars();
+        addLogEntry(`<strong>${data.nombre || 'Un peer'}</strong> salió de la red`, "leave");
+        removeNode(data.id);
+    });
+    
+    engine.onMessage('chat', (data) => {
+        bumpNetworkBars();
+        metrics.mensajesTotales++;
+        const source = nodes.find(n => n.id === data.id);
+        const target = nodes.find(n => n.id === data.destino);
+        
+        if (source && target) {
+            animateChat(source, target);
+            addLogEntry(`<strong>${source.nombre}</strong> → <strong>${target.nombre}</strong>: "${data.texto}"`, "msg");
+        }
+    });
+    engine.onMessage('position', (data) => {
+        bumpNetworkBars();
+        const node = nodes.find(n => n.id === data.id);
+        if (node) {
+            changeNodeZone(node, data.zona);
+            addLogEntry(`<strong>${node.nombre}</strong> se movió a <strong>${data.zona}</strong>`, "zone");
+        }
+    });
+}
+
+
+function formatUptime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
+
+let serverConnected = false;
+let lastServerLogTimestamp = 0;
+
+function updateMetricsDisplay() {
+    if (!serverConnected) {
+        metrics.peersActivos = nodes.length;
+        const uptimeStr = formatUptime(Date.now() - metrics.startTime);
+        const hp = document.getElementById('header-peer-count');
+        if (hp && hp.innerText != metrics.peersActivos) {
+            hp.innerText = metrics.peersActivos;
+            d3.select(hp).transition().duration(150).style("transform", "scale(1.3)").transition().duration(150).style("transform", "scale(1)");
+        }
+        
+        const hm = document.getElementById('header-message-count');
+        if (hm && hm.innerText != metrics.mensajesTotales) {
+            hm.innerText = metrics.mensajesTotales;
+        }
+        
+        const hu = document.getElementById('header-uptime');
+        if (hu) hu.innerText = uptimeStr;
+        const tp = document.getElementById('peer-count');
+        if (tp) tp.innerText = metrics.peersActivos;
+        
+        const tm = document.getElementById('message-count');
+        if (tm) tm.innerText = metrics.mensajesTotales;
+        
+        const tu = document.getElementById('uptime-display');
+        if (tu) tu.innerText = uptimeStr;
+    }
+    const engine = window.MockWebRTC || window.WebRTCEngine;
+    const tl = document.getElementById('latency-display');
+    if (engine && tl) {
+        const currentPeers = engine.getPeers();
+        let sum = 0;
+        let count = 0;
+        currentPeers.forEach(p => {
+            const l = engine.getLatency(p.id);
+            if (l !== null) { sum += l; count++; }
+        });
+        const avg = count > 0 ? Math.round(sum / count) : 0;
+        tl.innerText = avg;
+    }
+    const tz = document.getElementById('zones-display');
+    if (tz) {
+        const activeZones = new Set(nodes.map(n => n.zona)).size;
+        tz.innerText = activeZones;
+    }
+}
+setInterval(updateMetricsDisplay, 1000);
+
+async function fetchServerMetrics() {
+    try {
+        const response = await fetch("/metrics");
+        if (response.ok) {
+            const data = await response.json();
+            serverConnected = true;
+            const sd = document.getElementById('server-dot');
+            const st = document.getElementById('server-text');
+            if (sd && st) {
+                sd.style.background = 'var(--color-success)';
+                sd.style.boxShadow = '0 0 8px var(--color-success)';
+                st.innerText = 'Servidor conectado';
+            }
+            
+            metrics.peersActivos = data.peers_activos;
+            metrics.mensajesTotales = data.mensajes_totales;
+            const hp = document.getElementById('header-peer-count');
+            if (hp && hp.innerText != metrics.peersActivos) {
+                hp.innerText = metrics.peersActivos;
+                d3.select(hp).transition().duration(150).style("transform", "scale(1.3)").transition().duration(150).style("transform", "scale(1)");
+            }
+            const tp = document.getElementById('peer-count');
+            if (tp) tp.innerText = metrics.peersActivos;
+            const hm = document.getElementById('header-message-count');
+            if (hm && hm.innerText != metrics.mensajesTotales) {
+                hm.innerText = metrics.mensajesTotales;
+            }
+            const tm = document.getElementById('message-count');
+            if (tm) tm.innerText = metrics.mensajesTotales;
+            const uptimeStr = formatUptime(data.uptime_segundos * 1000);
+            const hu = document.getElementById('header-uptime');
+            if (hu) hu.innerText = uptimeStr;
+            const tu = document.getElementById('uptime-display');
+            if (tu) tu.innerText = uptimeStr;
+            if (data.log && Array.isArray(data.log)) {
+                data.log.forEach(entry => {
+                    if (entry.timestamp > lastServerLogTimestamp) {
+                        lastServerLogTimestamp = entry.timestamp;
+                        
+                        let type = "info";
+                        const txt = entry.evento.toLowerCase();
+                        if (txt.includes("entró")) type = "join";
+                        else if (txt.includes("salió") || txt.includes("desconectó")) type = "leave";
+                        else if (txt.includes("cambió")) type = "zone";
+                        else if (txt.includes("mensaje")) type = "msg";
+                        
+                        addLogEntry(entry.evento, type);
+                    }
+                });
+            }
+        } else {
+            throw new Error("HTTP error");
+        }
+    } catch (e) {
+        serverConnected = false;
+        const sd = document.getElementById('server-dot');
+        const st = document.getElementById('server-text');
+        if (sd && st) {
+            sd.style.background = 'var(--color-danger)';
+            sd.style.boxShadow = '0 0 8px var(--color-danger)';
+            st.innerText = 'Servidor no disponible';
+        }
+    }
+}
+setInterval(fetchServerMetrics, 2000);
+
+function initParticles() {
+    const container = document.getElementById("graph-container");
+    const canvas = document.createElement("canvas");
+    canvas.id = "particles-bg";
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.zIndex = "0";
+    canvas.style.pointerEvents = "none";
+    container.prepend(canvas);
+    
+    const ctx = canvas.getContext("2d");
+    const particles = [];
+    
+    const resize = () => {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+    
+    for (let i = 0; i < 40; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            radius: Math.random() * 1.5 + 0.5,
+            opacity: Math.random() * 0.05 + 0.02
+        });
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                p.x = Math.random() * canvas.width;
+                p.y = Math.random() * canvas.height;
+            }
+            ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
             ctx.fill();
@@ -1074,30 +1269,29 @@ function initParticles() {
     animate();
 }
 
-
 async function init() {
-    initParticles();
-    await initGraph();
+    initParticles();
+    await initGraph();
     const canUseReal = window.WebRTCEngine && typeof io !== "undefined";
     const IS_MOCK = !canUseReal;
     const engine = canUseReal ? window.WebRTCEngine : window.MockWebRTC;
-    if (!engine) return;
+    if (!engine) return;
     const badgeContainer = document.getElementById("mode-badge");
     if (badgeContainer) {
         if (IS_MOCK) {
-            badgeContainer.innerHTML = `<span style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.5); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace;">SIMULACIÓN</span>`;
+            badgeContainer.innerHTML = `<span style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.5); letter-spacing: 1px; font-family: 'Montserrat', monospace;">SIMULACIÓN</span>`;
         } else {
-            badgeContainer.innerHTML = `<span style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 6px;"><div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>EN VIVO</span>`;
+            badgeContainer.innerHTML = `<span style="font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); letter-spacing: 1px; font-family: 'Montserrat', monospace; display: flex; align-items: center; gap: 6px;"><div style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>EN VIVO</span>`;
         }
-    }
+    }
     if (IS_MOCK) {
         engine.start();
     } else {
         engine.conectar("Display");
-    }
+    }
     const initialPeers = engine.getPeers();
     initialPeers.forEach(p => addNode(p, true));
 
     setupEventListeners();
-}
+}
 document.addEventListener("DOMContentLoaded", init);

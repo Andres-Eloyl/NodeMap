@@ -28,8 +28,8 @@
   --radius-lg: 16px;
   
   /* Typography */
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Montserrat', sans-serif;
+  --font-mono: 'Montserrat', monospace;
 }
 
 html, body {
@@ -91,6 +91,7 @@ body::before {
 .logo-area h1 {
   margin: 0;
   font-size: 22px;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   background: linear-gradient(90deg, var(--brand-cyan), var(--brand-violet));
   -webkit-background-clip: text;
@@ -333,6 +334,11 @@ body::before {
 
 /* Media Query */
 @media (max-width: 1200px) {
+  #event-log {
+    width: 220px;
+  }
+}
+@media (max-width: 768px) {
   #event-log {
     display: none;
   }
