@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- WebRTC Event Hooks ---
-    WebRTCEngine.onMessage(PROTOCOL.CHAT, (data, id, nombre) => {
-        appendMessage(nombre, data.text, false);
+    WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
+        appendMessage(data.nombre || 'Desconocido', data.text, false);
     });
 
     // --- UI Event Listeners ---
@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
             appendMessage(myNombre, msg, true);
             chatInput.value = '';
             // Send to all peers via P2P
-            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg });
+            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
         }
     });
 
