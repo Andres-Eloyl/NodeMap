@@ -118,7 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const top = 50 + Math.sin(angle) * distance;
             const left = 50 + Math.cos(angle) * distance;
 
-            node.className = `absolute w-10 h-10 rounded-full border border-secondary bg-surface-variant/90 backdrop-blur-md flex items-center justify-center z-10 shadow-lg`;
+            const animClass = ['animate-drift', 'animate-drift-slow', 'animate-drift-fast'][Math.abs(peer.id.hashCode() % 3)];
+
+            node.className = `absolute w-10 h-10 rounded-full border border-secondary bg-surface-variant/90 backdrop-blur-md flex items-center justify-center z-10 shadow-lg ${animClass}`;
             node.style.top = `${top}%`;
             node.style.left = `${left}%`;
             node.innerHTML = `
