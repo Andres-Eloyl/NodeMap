@@ -113,6 +113,42 @@
             75% { transform: translate(calc(-50% - 10px), calc(-50% + 10px)); }
             100% { transform: translate(-50%, -50%); }
         }
+        @keyframes slide-bg {
+            from { right: -25vw; }
+            to { right: 125vw; }
+        }
+        #animated-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .rainbow-line {
+            height: 100vh;
+            width: 0;
+            top: 0;
+            position: absolute;
+            transform: rotate(10deg);
+            transform-origin: top right;
+            opacity: 0.6; /* Slight opacity so it's not overpowering */
+        }
+        .mask-h {
+            box-shadow: 0 0 50vh 40vh #13121d;
+            width: 100vw;
+            height: 0;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+        }
+        .mask-v {
+            box-shadow: 0 0 35vw 25vw #13121d;
+            width: 0;
+            height: 100vh;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+        }
         .animate-walk { animation: walk 12s linear infinite; }
         .animate-walk-slow { animation: walk 18s linear infinite reverse; }
         .animate-walk-fast { animation: walk 8s linear infinite alternate; }
@@ -186,11 +222,11 @@
 
 <!-- Screen 1: Entry / Login -->
 <div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden overflow-y-auto py-8 relative" id="screen-entry">
-    <!-- Animated Background -->
-    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-walk" style="top: -10%; left: -10%;"></div>
-        <div class="absolute w-96 h-96 bg-tertiary/10 rounded-full blur-3xl animate-walk-slow" style="bottom: -10%; right: -10%;"></div>
-        <div class="absolute w-64 h-64 bg-secondary/10 rounded-full blur-3xl animate-walk-fast" style="top: 40%; left: 40%;"></div>
+    <!-- Dynamic Animated Background -->
+    <div id="animated-bg">
+        <!-- JS will populate lines here -->
+        <div class="mask-h z-10"></div>
+        <div class="mask-v z-10"></div>
     </div>
 
     <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto relative z-10">
@@ -403,5 +439,42 @@
 <script src="/shared/protocol.js"></script>
 <script src="webrtc.js"></script>
 <script src="peer.js"></script>
+<script>
+    // Generate Dynamic Background
+    document.addEventListener('DOMContentLoaded', () => {
+        const bgContainer = document.getElementById('animated-bg');
+        if (bgContainer) {
+            const length = 25;
+            const animationTime = 45;
+            // Primary, Secondary, Tertiary tailwind config colors
+            const baseColors = ['#ffb3ad', '#e3bdba', '#69d8d4']; 
+            
+            for (let i = 1; i <= length; i++) {
+                const div = document.createElement('div');
+                div.className = 'rainbow-line';
+                
+                // Shuffle colors randomly for each line
+                const colors = [...baseColors].sort(() => Math.random() - 0.5);
+                
+                div.style.boxShadow = `
+                    -130px 0 80px 40px #13121d, 
+                    -50px 0 50px 25px ${colors[0]},
+                    0 0 50px 25px ${colors[1]}, 
+                    50px 0 50px 25px ${colors[2]},
+                    130px 0 80px 40px #13121d
+                `;
+                
+                const duration = animationTime - (animationTime / length / 2 * i);
+                const delay = -(i / length * animationTime);
+                
+                div.style.animation = `slide-bg ${duration}s linear infinite`;
+                div.style.animationDelay = `${delay}s`;
+                
+                // Append before the masks
+                bgContainer.insertBefore(div, bgContainer.firstChild);
+            }
+        }
+    });
+</script>
 </body>
 </html>
