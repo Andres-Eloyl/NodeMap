@@ -12,6 +12,7 @@ const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 const inicio = Date.now();
 
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../client/peer.html")));
 app.use(express.static(path.join(__dirname, "../client")));
 app.use("/shared", express.static(path.join(__dirname, "../shared")));
 

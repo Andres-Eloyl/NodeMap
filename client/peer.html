@@ -1,1 +1,320 @@
+<!DOCTYPE html><html class="dark" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>NetMesh - Mobile Node Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#e5e0f0",
+                      "surface-container-high": "#2a2934",
+                      "tertiary-fixed": "#87f4f0",
+                      "on-surface": "#e5e0f0",
+                      "error-container": "#93000a",
+                      "tertiary": "#69d8d4",
+                      "surface-tint": "#ffb3ad",
+                      "secondary-fixed-dim": "#3cddc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed-variant": "#005047",
+                      "outline-variant": "#5b403e",
+                      "on-tertiary-fixed": "#00201f",
+                      "primary": "#ffb3ad",
+                      "on-primary-fixed-variant": "#930013",
+                      "outline": "#ab8986",
+                      "on-error": "#690005",
+                      "on-secondary": "#003731",
+                      "secondary-container": "#03c6b2",
+                      "on-tertiary-fixed-variant": "#00504e",
+                      "surface-container-lowest": "#0e0d18",
+                      "tertiary-container": "#24a09d",
+                      "on-secondary-fixed": "#00201c",
+                      "primary-fixed-dim": "#ffb3ad",
+                      "primary-container": "#ff5451",
+                      "on-secondary-container": "#004d44",
+                      "on-primary": "#68000a",
+                      "on-primary-container": "#5c0008",
+                      "inverse-surface": "#e5e0f0",
+                      "surface": "#13121d",
+                      "on-tertiary": "#003736",
+                      "inverse-on-surface": "#302f3b",
+                      "surface-container-low": "#1b1a26",
+                      "background": "#13121d",
+                      "primary-fixed": "#ffdad7",
+                      "on-tertiary-container": "#00302e",
+                      "secondary-fixed": "#62fae3",
+                      "tertiary-fixed-dim": "#69d8d4",
+                      "inverse-primary": "#b91a24",
+                      "on-primary-fixed": "#410004",
+                      "on-surface-variant": "#e4beba",
+                      "surface-variant": "#353340",
+                      "surface-container-highest": "#353340",
+                      "surface-bright": "#393844",
+                      "secondary": "#44e2cd",
+                      "surface-container": "#1f1e2a",
+                      "surface-dim": "#13121d",
+                      "on-error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "section-divider": "1px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "margin-page": "24px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: #15141f;
+        }
+        .hud-overlay {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .map-container {
+            touch-action: pan-x pan-y;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-hidden">
 
+<!-- Login Overlay -->
+<div id="login-overlay" class="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center p-6">
+    <img src="https://lh3.googleusercontent.com/aida/AP1WRLsLosRpLWns7j26RjkbaWPEP62goHfRGNXutxG1OuWj0y75yH7oHdAz6rbSUQ0vmPWdH3yIm0w-5XN03HwJsottX4eNVDLhEhFmdMh441GR09K6N6FC1hdxHoMvi4R1_Pzc4Ftbee8vMklPPD82OC0Qq5Cyl6TYs_wShVNBA4Msmvo08xPSAeecQ7oHKSvWN2UPhOWWxrEUC_J4Her1hIUtYw8Q0zgnkfKF4s6WX9CURg0kntosCJ76w5Uw" alt="NodeMap Logo" class="h-24 w-24 mb-6">
+    <h1 class="font-headline-lg text-primary mb-2 text-center">Bienvenido a NodeMap</h1>
+    <p class="text-on-surface-variant text-center mb-8">Conéctate a la red P2P del evento en tiempo real.</p>
+    
+    <div class="w-full max-w-sm bg-surface-container rounded-xl p-6 border border-outline-variant shadow-lg">
+        <label class="block text-label-md text-primary mb-2">NOMBRE O ALIAS</label>
+        <input type="text" id="username-input" class="w-full bg-surface-dim border border-outline-variant rounded-lg p-3 text-on-surface mb-6 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Ej. Juan Pérez" maxlength="15">
+        <button id="btn-connect" class="w-full bg-primary text-on-primary font-headline-sm py-3 rounded-lg shadow-[0_0_15px_rgba(255,179,173,0.3)] hover:bg-primary-fixed transition-colors">Conectar a la Red</button>
+    </div>
+</div>
+
+<!-- Main App Wrapper (Hidden initially) -->
+<div id="app-wrapper" class="flex-col h-full hidden">
+
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface w-full top-0 sticky bg-surface-dim dark:bg-surface-dim border-b border-outline-variant flat no shadows transition-colors duration-200 flex justify-between items-center px-margin-mobile h-16 z-40">
+<div class="flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida/AP1WRLsLosRpLWns7j26RjkbaWPEP62goHfRGNXutxG1OuWj0y75yH7oHdAz6rbSUQ0vmPWdH3yIm0w-5XN03HwJsottX4eNVDLhEhFmdMh441GR09K6N6FC1hdxHoMvi4R1_Pzc4Ftbee8vMklPPD82OC0Qq5Cyl6TYs_wShVNBA4Msmvo08xPSAeecQ7oHKSvWN2UPhOWWxrEUC_J4Her1hIUtYw8Q0zgnkfKF4s6WX9CURg0kntosCJ76w5Uw" alt="NodeMap Logo" class="h-8 w-8 flex-shrink-0 object-contain"><h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary tracking-tighter">NodeMap</h1></div><button id="btn-logout" class="flex items-center justify-center p-unit hover:bg-surface-variant/50 rounded-full transition-colors"><span class="material-symbols-outlined text-primary dark:text-primary text-[24px]">logout</span></button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative z-0 overflow-auto" id="main-content">
+
+<!-- TAB 1: Floor Plan Map (Scrollable/Zoomable) -->
+<div id="view-map" class="flex-1 overflow-auto map-container relative bg-[#13121d] hide-scrollbar flex flex-col items-center">
+<div class="relative bg-[#1b1a26] border-outline-variant w-full max-w-full p-unit flex-1 flex flex-col"><div class="grid grid-cols-12 gap-1 h-full relative flex-1">
+
+<!-- Left Column (Aulas) -> Zona A -->
+<div class="col-span-3 flex flex-col gap-1 cursor-pointer hover:bg-primary/10 transition-colors rounded p-1 border border-transparent hover:border-primary/30" data-zone="Zona A" onclick="setZone('Zona A')">
+<div class="text-[8px] font-label-mono text-primary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-primary/30 pb-1">Zona A</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 6</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 5</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 4</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 3</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Almacen</div>
+</div>
+<!-- First Vertical Pasillo -> Pasillo -->
+<div class="col-span-1 flex items-center justify-center bg-surface-container-high/20 rounded border-x border-dashed border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors" data-zone="Pasillo" onclick="setZone('Pasillo')">
+<div class="[writing-mode:vertical-lr] rotate-180 text-[9px] text-outline uppercase tracking-widest">Pasillo</div>
+</div>
+<!-- Center Column (Labs & Stairs) -> Zona B -->
+<div class="col-span-4 flex flex-col gap-1 cursor-pointer hover:bg-secondary/10 transition-colors rounded p-1 border border-transparent hover:border-secondary/30" data-zone="Zona B" onclick="setZone('Zona B')">
+<div class="text-[8px] font-label-mono text-secondary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-secondary/30 pb-1">Zona B</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Servicio Comunitario</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="flex justify-center gap-2 py-1"><span class="material-symbols-outlined text-outline text-sm">stairs</span><div class="relative flex items-center justify-center px-2"><span class="text-[8px] text-outline uppercase font-label-mono">Escaleras</span></div><span class="material-symbols-outlined text-outline text-sm">stairs</span></div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio de computación</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio de Robótica</div>
+</div>
+<!-- Second Vertical Pasillo -> Pasillo -->
+<div class="col-span-1 flex items-center justify-center bg-surface-container-high/20 rounded border-x border-dashed border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors" data-zone="Pasillo" onclick="setZone('Pasillo')">
+<div class="[writing-mode:vertical-lr] rotate-180 text-[9px] text-outline uppercase tracking-widest">Pasillo</div>
+</div>
+<!-- Right Column (Offices/Telecom) -> Zona C -->
+<div class="col-span-3 flex flex-col gap-1 cursor-pointer hover:bg-tertiary/10 transition-colors rounded p-1 border border-transparent hover:border-tertiary/30" data-zone="Zona C" onclick="setZone('Zona C')">
+<div class="text-[8px] font-label-mono text-tertiary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-tertiary/30 pb-1">Zona C</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Escuela de telecomunicaciones</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Baños</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
+<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center flex-1">Oficinas</div>
+</div>
+<!-- Escenario -> Added this block since Escenario wasn't explicitly drawn but we need it -->
+<div class="col-span-12 flex items-center justify-center bg-surface-container-high/30 rounded border border-dashed border-primary/20 py-2 cursor-pointer hover:bg-primary/10 transition-colors mt-1" data-zone="Escenario" onclick="setZone('Escenario')">
+<span class="material-symbols-outlined text-primary text-sm mr-2">mic</span><span class="text-[10px] font-label-mono text-primary uppercase tracking-widest">Escenario Principal</span>
+</div>
+
+<!-- Bottom Entrance Row -> Entrada -->
+</div></div>
+<div class="flex justify-center w-full mt-2 cursor-pointer" data-zone="Entrada" onclick="setZone('Entrada')">
+    <div class="w-16 border-2 border-primary/50 rounded pt-1 pb-0.5 flex flex-col items-center bg-primary/10 shadow-[0_0_8px_rgba(255,179,173,0.4)] hover:bg-primary/20 transition-colors">
+        <span class="material-symbols-outlined text-primary text-[12px]">sensor_door</span>
+        <div class="text-[8px] font-headline-sm text-primary text-center uppercase tracking-widest">Entrada</div>
+    </div>
+</div>
+</div>
+
+<!-- Current Zone Indicator Banner (Floating on map) -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 bg-surface-container-high/90 border border-outline-variant rounded-full px-4 py-1.5 flex items-center gap-2 shadow-lg backdrop-blur z-10 pointer-events-none">
+    <div class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_5px_var(--tw-colors-primary)]"></div>
+    <span class="text-xs font-label-md text-on-surface uppercase tracking-widest">Estás en: <span id="current-zone-display" class="text-primary font-bold">Ninguna</span></span>
+</div>
+
+</div>
+
+<!-- TAB 2: Nodes -->
+<div id="view-nodes" class="hidden flex-1 overflow-auto bg-background p-4 flex flex-col gap-3">
+    <h2 class="text-primary font-headline-md mb-2 flex items-center gap-2"><span class="material-symbols-outlined">lan</span> Nodos P2P Conectados</h2>
+    <div class="bg-surface-container p-3 rounded-lg border border-outline-variant flex justify-between items-center text-sm">
+        <span class="text-on-surface-variant">Mi ID en la red:</span>
+        <span id="my-id-display" class="font-mono text-primary font-bold">---</span>
+    </div>
+    <div id="nodes-list" class="flex flex-col gap-2">
+        <!-- Generado por JS -->
+    </div>
+</div>
+
+<!-- TAB 3: Chat -->
+<div id="view-chat" class="hidden flex-1 flex flex-col bg-background h-full">
+    <div class="bg-surface-container-low border-b border-outline-variant p-3 shadow-md flex items-center justify-between">
+        <h2 class="text-primary font-headline-sm flex items-center gap-2"><span class="material-symbols-outlined text-lg">chat</span> Chat Global P2P</h2>
+        <span id="chat-status" class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full font-label-md">Conectado</span>
+    </div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+        <!-- Mensajes generados por JS -->
+        <div class="text-center text-xs text-on-surface-variant mt-2 mb-4 bg-surface-container/50 py-1 px-3 rounded-full mx-auto font-label-md">Las conexiones están encriptadas vía WebRTC</div>
+    </div>
+    <div class="bg-surface-container p-3 border-t border-outline-variant">
+        <form id="chat-form" class="flex gap-2 relative">
+            <input type="text" id="chat-input" class="flex-1 bg-surface-dim border border-outline-variant rounded-full pl-4 pr-12 py-3 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner" placeholder="Escribe un mensaje a la red..." autocomplete="off">
+            <button type="submit" class="absolute right-1 top-1 bottom-1 aspect-square bg-primary text-on-primary rounded-full flex items-center justify-center hover:bg-primary-fixed transition-colors shadow-md">
+                <span class="material-symbols-outlined text-sm font-bold">send</span>
+            </button>
+        </form>
+    </div>
+</div>
+<!-- Collaborators Drawer/Panel (Overlay on mobile) -->
+<div class="bg-surface-container-low border-t border-outline-variant p-4 pb-20"><h3 class="text-primary text-[10px] uppercase tracking-widest font-label-mono mb-3 text-center">Colaboradores</h3><div class="flex flex-col gap-2"><a class="flex items-center gap-2 p-2 rounded bg-surface/50 border border-outline/20 hover:bg-surface-variant/50 transition-colors" href="https://github.com/andrestovarp" target="_blank"><span class="material-symbols-outlined text-primary text-sm">link</span><span class="text-on-surface text-[11px] font-body-md">Andres Tovar</span></a><a class="flex items-center gap-2 p-2 rounded bg-surface/50 border border-outline/20 hover:bg-surface-variant/50 transition-colors" href="https://github.com/mariagtovarp" target="_blank"><span class="material-symbols-outlined text-primary text-sm">link</span><span class="text-on-surface text-[11px] font-body-md">Maria Tovar</span></a><a class="flex items-center gap-2 p-2 rounded bg-surface/50 border border-outline/20 hover:bg-surface-variant/50 transition-colors" href="https://github.com/ErasmoAlvarado" target="_blank"><span class="material-symbols-outlined text-primary text-sm">link</span><span class="text-on-surface text-[11px] font-body-md">Erasmo Alvarado</span></a></div></div>
+</main>
+
+<!-- BottomNavBar -->
+<nav class="bg-surface-container dark:bg-surface-container fixed bottom-0 w-full z-50 h-[64px] bg-surface-container dark:bg-surface-container border-t-2 border-outline-variant flat no shadows active:scale-95 transition-transform flex justify-around items-stretch w-full">
+<!-- Active Tab: Map -->
+<a id="nav-map" class="flex flex-col items-center justify-center text-primary dark:text-primary border-t-2 border-primary -mt-[2px] h-full hover:bg-secondary-container/30 w-full flex-1" href="#" onclick="switchTab('map')">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-label-mono text-label-mono mt-1 text-[10px] uppercase tracking-widest">Mapa</span>
+</a>
+<!-- Inactive Tab: Nodes -->
+<a id="nav-nodes" class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-container h-full hover:bg-secondary-container/30 w-full flex-1" href="#" onclick="switchTab('nodes')">
+<span class="material-symbols-outlined">lan</span>
+<span class="font-label-mono text-label-mono mt-1 text-[10px] uppercase tracking-widest">Nodos</span>
+</a>
+<!-- Inactive Tab: Chat -->
+<a id="nav-chat" class="flex flex-col items-center justify-center text-on-secondary-container dark:text-on-secondary-container h-full hover:bg-secondary-container/30 w-full flex-1" href="#" onclick="switchTab('chat')">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-mono text-label-mono mt-1 text-[10px] uppercase tracking-widest">Chat</span>
+</a>
+</div> <!-- End of app-wrapper -->
+
+<!-- Scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/config.js"></script>
+<script src="/shared/protocol.js"></script>
+<script src="webrtc.js"></script>
+<script src="peer.js"></script>
+
+</body></html>
