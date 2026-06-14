@@ -85,13 +85,13 @@ document.addEventListener("DOMContentLoaded", () => {
             nodesList.innerHTML = peers.map(peer => {
                 const lat = WebRTCEngine.getLatency(peer.id) || '---';
                 return `
-                    <div class="layer-1 flex items-center justify-between p-4 rounded-lg border border-outline-variant">
+                    <div class="layer-1 flex items-center justify-between p-4 rounded-lg border border-outline-variant hover:border-primary/50 transition-colors">
                         <div class="flex items-center gap-4">
-                            <div class="w-3 h-3 rounded-full bg-secondary animate-pulse"></div>
+                            <div class="w-3 h-3 rounded-full bg-secondary shadow-[0_0_8px_rgba(105,216,212,0.6)] animate-pulse"></div>
                             <span class="material-symbols-outlined text-secondary text-2xl">person</span>
                             <div>
                                 <div class="font-body-lg text-on-surface font-medium">${peer.nombre}</div>
-                                <div class="font-label-mono text-label-mono text-on-surface-variant mt-1">ID: ${peer.id.substring(0,6)}</div>
+                                <div class="font-label-mono text-label-mono text-on-surface-variant mt-1 uppercase tracking-wider">ID: ${peer.id.substring(0,6)} • ${peer.zona || 'Desconocida'}</div>
                             </div>
                         </div>
                         <div class="text-right">
@@ -105,26 +105,39 @@ document.addEventListener("DOMContentLoaded", () => {
             }).join('');
         }
 
-        // Update Map Nodes
-        const selfNode = mapCanvas.firstElementChild; // Keep self node
+        // Update Map
+        const mapCanvas = document.getElementById('map-canvas');
+        if (!mapCanvas) return;
+
+        // The central stairs node (red dot) MUST stay fixed
+        const stairsNode = document.createElement('div');
+        stairsNode.className = "absolute w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-10 backdrop-blur-sm pointer-events-auto";
+        stairsNode.style.left = "50%";
+        stairsNode.style.top = "53%";
+        stairsNode.style.transform = "translate(-50%, -50%)";
+        stairsNode.innerHTML = `<span class="material-symbols-outlined text-primary">my_location</span>`;
+
         mapCanvas.innerHTML = '';
-        mapCanvas.appendChild(selfNode);
+        mapCanvas.appendChild(stairsNode);
 
-        peers.forEach((peer, i) => {
+        // Include myself in the map
+        const allNodes = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true }];
+
+        allNodes.forEach((peer, i) => {
             const node = document.createElement('div');
-            // Randomly scatter nodes around center to simulate map presence
-            const angle = (i / peers.length) * Math.PI * 2;
-            const distance = 25 + (Math.abs(peer.id.hashCode() % 20)); // Deterministic but scattered based on string hash
-            const top = 50 + Math.sin(angle) * distance;
-            const left = 50 + Math.cos(angle) * distance;
+            
+            const coords = zoneCoordinates[peer.zona] || { topMin: 45, topMax: 55, leftMin: 45, leftMax: 55 };
+            const hash = Math.abs(peer.id.hashCode());
+            const top = coords.topMin + (hash % (coords.topMax - coords.topMin));
+            const left = coords.leftMin + ((hash >> 2) % (coords.leftMax - coords.leftMin));
 
-            const animClass = ['animate-drift', 'animate-drift-slow', 'animate-drift-fast'][Math.abs(peer.id.hashCode() % 3)];
+            const animClass = ['animate-walk', 'animate-walk-slow', 'animate-walk-fast'][hash % 3];
 
-            node.className = `absolute w-10 h-10 rounded-full border border-secondary bg-surface-variant/90 backdrop-blur-md flex items-center justify-center z-10 shadow-lg ${animClass}`;
+            node.className = `absolute w-10 h-10 rounded-full border ${peer.isSelf ? 'border-primary bg-primary/90' : 'border-secondary bg-surface-variant/90'} backdrop-blur-md flex items-center justify-center z-10 shadow-lg ${animClass}`;
             node.style.top = `${top}%`;
             node.style.left = `${left}%`;
             node.innerHTML = `
-                <span class="material-symbols-outlined text-secondary text-sm">person</span>
+                <span class="material-symbols-outlined ${peer.isSelf ? 'text-on-primary' : 'text-secondary'} text-sm">person</span>
                 <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[10px] text-on-surface-variant bg-surface/80 px-1 rounded">${peer.nombre}</div>
             `;
             mapCanvas.appendChild(node);

@@ -106,15 +106,16 @@
         }
     </script>
     <style>
-        @keyframes drift {
+        @keyframes walk {
             0% { transform: translate(-50%, -50%); }
-            33% { transform: translate(calc(-50% - 15px), calc(-50% + 10px)); }
-            66% { transform: translate(calc(-50% + 10px), calc(-50% - 15px)); }
+            25% { transform: translate(calc(-50% + 15px), calc(-50% + 5px)); }
+            50% { transform: translate(calc(-50% + 5px), calc(-50% + 20px)); }
+            75% { transform: translate(calc(-50% - 10px), calc(-50% + 10px)); }
             100% { transform: translate(-50%, -50%); }
         }
-        .animate-drift { animation: drift 10s ease-in-out infinite; }
-        .animate-drift-slow { animation: drift 15s ease-in-out infinite reverse; }
-        .animate-drift-fast { animation: drift 7s ease-in-out infinite alternate; }
+        .animate-walk { animation: walk 12s linear infinite; }
+        .animate-walk-slow { animation: walk 18s linear infinite reverse; }
+        .animate-walk-fast { animation: walk 8s linear infinite alternate; }
 
         body {
             background-color: #15141f;
@@ -350,7 +351,7 @@
                     </div>
                     <!-- Map Nodes Layer -->
                     <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none" id="map-canvas">
-                        <div class="absolute w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-10 backdrop-blur-sm pointer-events-auto animate-drift" style="left: 50%; top: 53%;">
+                        <div class="absolute w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-10 backdrop-blur-sm pointer-events-auto" style="left: 50%; top: 53%; transform: translate(-50%, -50%);">
                             <span class="material-symbols-outlined text-primary">my_location</span>
                         </div>
                     </div>

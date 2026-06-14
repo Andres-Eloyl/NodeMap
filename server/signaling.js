@@ -36,7 +36,8 @@ const initSignaling = function(io) {
   io.on("connection", (socket) => {
     const id = generarId();
     const nombre = socket.handshake.query.nombre || "Anónimo";
-    const peer = { id, socket, nombre, zona: null };
+    const zona = socket.handshake.query.zona || "Zona A";
+    const peer = { id, socket, nombre, zona };
 
     peers.set(id, peer);
     socket.peerId = id;
@@ -44,12 +45,12 @@ const initSignaling = function(io) {
     const listaPeers = [];
     peers.forEach((p, peerId) => {
       if (peerId !== id) {
-        listaPeers.push({ id: p.id, nombre: p.nombre });
+        listaPeers.push({ id: p.id, nombre: p.nombre, zona: p.zona });
       }
     });
 
     socket.emit(PROTOCOL.PEER_LIST, { miId: id, peers: listaPeers });
-    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre });
+    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona });
 
     addToLog(`${nombre} entró a la red`);
     console.log(`🟢 Peer conectado: ${nombre} (${id}) — Total: ${peers.size}`);

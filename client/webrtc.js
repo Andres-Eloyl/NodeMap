@@ -36,7 +36,7 @@ function getChannelLabel() {
   return (typeof CONFIG !== "undefined" && CONFIG.DATA_CHANNEL_LABEL) || "data";
 }
 
-function initConnection(peerId, nombre) {
+function initConnection(peerId, nombre, zona) {
   if (peers.has(peerId)) return;
 
   const pc = new RTCPeerConnection(getIceConfig());
@@ -62,7 +62,7 @@ function initConnection(peerId, nombre) {
     setupDataChannel(peerId, nombre, event.channel);
   };
 
-  const peerEntry = { id: peerId, nombre, pc, dc: null };
+  const peerEntry = { id: peerId, nombre, zona, pc, dc: null };
 
   if (shouldIOffer(peerId)) {
     const dc = pc.createDataChannel(getChannelLabel());
@@ -120,24 +120,24 @@ function setupDataChannel(peerId, nombre, dc) {
   };
 }
 
-function conectar(nombre) {
+function conectar(nombre, zona) {
   myNombre = nombre;
 
   const serverUrl = (typeof CONFIG !== "undefined" && CONFIG.PORT)
     ? `http://${window.location.hostname}:${CONFIG.PORT}`
     : window.location.origin;
 
-  socket = io(serverUrl, { query: { nombre } });
+  socket = io(serverUrl, { query: { nombre, zona } });
 
   socket.on(PROTOCOL.PEER_LIST, (data) => {
     myId = data.miId;
     for (const peer of data.peers) {
-      initConnection(peer.id, peer.nombre);
+      initConnection(peer.id, peer.nombre, peer.zona);
     }
   });
 
   socket.on(PROTOCOL.PEER_JOIN, (data) => {
-    initConnection(data.id, data.nombre);
+    initConnection(data.id, data.nombre, data.zona);
   });
 
   socket.on(PROTOCOL.OFFER, async (data) => {
@@ -308,7 +308,7 @@ function getPeers() {
   const result = [];
   for (const [id, peer] of peers) {
     if (peer.dc && peer.dc.readyState === "open") {
-      result.push({ id, nombre: peer.nombre });
+      result.push({ id, nombre: peer.nombre, zona: peer.zona });
     }
   }
   return result;
