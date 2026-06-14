@@ -133,22 +133,6 @@
             transform-origin: top right;
             opacity: 0.6; /* Slight opacity so it's not overpowering */
         }
-        .mask-h {
-            box-shadow: 0 0 50vh 40vh #13121d;
-            width: 100vw;
-            height: 0;
-            bottom: 0;
-            left: 0;
-            position: absolute;
-        }
-        .mask-v {
-            box-shadow: 0 0 35vw 25vw #13121d;
-            width: 0;
-            height: 100vh;
-            bottom: 0;
-            left: 0;
-            position: absolute;
-        }
         .animate-walk { animation: walk 12s linear infinite; }
         .animate-walk-slow { animation: walk 18s linear infinite reverse; }
         .animate-walk-fast { animation: walk 8s linear infinite alternate; }
@@ -225,8 +209,6 @@
     <!-- Dynamic Animated Background -->
     <div id="animated-bg">
         <!-- JS will populate lines here -->
-        <div class="mask-h z-10"></div>
-        <div class="mask-v z-10"></div>
     </div>
 
     <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto relative z-10">
