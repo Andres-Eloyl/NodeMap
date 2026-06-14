@@ -185,8 +185,15 @@
 <body class="font-body-md text-body-md h-[100dvh] w-screen flex flex-col relative grid-bg">
 
 <!-- Screen 1: Entry / Login -->
-<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden overflow-y-auto py-8" id="screen-entry">
-    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto">
+<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden overflow-y-auto py-8 relative" id="screen-entry">
+    <!-- Animated Background -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-walk" style="top: -10%; left: -10%;"></div>
+        <div class="absolute w-96 h-96 bg-tertiary/10 rounded-full blur-3xl animate-walk-slow" style="bottom: -10%; right: -10%;"></div>
+        <div class="absolute w-64 h-64 bg-secondary/10 rounded-full blur-3xl animate-walk-fast" style="top: 40%; left: 40%;"></div>
+    </div>
+
+    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto relative z-10">
         <div class="text-center mb-stack-sm flex flex-col items-center">
             <img src="/logo.svg" alt="NodeMap Logo" class="h-20 w-20 mb-4" style="filter: drop-shadow(0 0 10px rgba(255,179,173,0.5));">
             <h1 class="font-headline-lg text-headline-lg text-primary">NodeMap</h1>

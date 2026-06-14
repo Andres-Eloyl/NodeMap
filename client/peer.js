@@ -123,6 +123,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Include myself in the map
         const allNodes = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true }];
 
+        const zoneCoordinates = {
+            'Zona A': { topMin: 15, topMax: 35, leftMin: 15, leftMax: 35 },
+            'Zona B': { topMin: 15, topMax: 35, leftMin: 65, leftMax: 85 },
+            'Zona C': { topMin: 65, topMax: 85, leftMin: 40, leftMax: 60 },
+        };
+
         allNodes.forEach((peer, i) => {
             const node = document.createElement('div');
             
