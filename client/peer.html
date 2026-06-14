@@ -1,214 +1,363 @@
-<!DOCTYPE html><html class="dark" lang="es" style=""><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>NodeMap - Mobile Node Map</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<script id="tailwind-config">
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>NodeMap - Mapa de Usuarios</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
         tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "on-background": "#e5e0f0",
-                      "surface-container-high": "#2a2934",
-                      "tertiary-fixed": "#87f4f0",
-                      "on-surface": "#e5e0f0",
-                      "error-container": "#93000a",
-                      "tertiary": "#69d8d4",
-                      "surface-tint": "#ffb3ad",
-                      "secondary-fixed-dim": "#3cddc7",
-                      "error": "#ffb4ab",
-                      "on-secondary-fixed-variant": "#005047",
-                      "outline-variant": "#5b403e",
-                      "on-tertiary-fixed": "#00201f",
-                      "primary": "#ffb3ad",
-                      "on-primary-fixed-variant": "#930013",
-                      "outline": "#ab8986",
-                      "on-error": "#690005",
-                      "on-secondary": "#003731",
-                      "secondary-container": "#03c6b2",
-                      "on-tertiary-fixed-variant": "#00504e",
-                      "surface-container-lowest": "#0e0d18",
-                      "tertiary-container": "#24a09d",
-                      "on-secondary-fixed": "#00201c",
-                      "primary-fixed-dim": "#ffb3ad",
-                      "primary-container": "#ff5451",
-                      "on-secondary-container": "#004d44",
-                      "on-primary": "#68000a",
-                      "on-primary-container": "#5c0008",
-                      "inverse-surface": "#e5e0f0",
-                      "surface": "#13121d",
-                      "on-tertiary": "#003736",
-                      "inverse-on-surface": "#302f3b",
-                      "surface-container-low": "#1b1a26",
-                      "background": "#13121d",
-                      "primary-fixed": "#ffdad7",
-                      "on-tertiary-container": "#00302e",
-                      "secondary-fixed": "#62fae3",
-                      "tertiary-fixed-dim": "#69d8d4",
-                      "inverse-primary": "#b91a24",
-                      "on-primary-fixed": "#410004",
-                      "on-surface-variant": "#e4beba",
-                      "surface-variant": "#353340",
-                      "surface-container-highest": "#353340",
-                      "surface-bright": "#393844",
-                      "secondary": "#44e2cd",
-                      "surface-container": "#1f1e2a",
-                      "surface-dim": "#13121d",
-                      "on-error-container": "#ffdad6"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.125rem",
-                      "lg": "0.25rem",
-                      "xl": "0.5rem",
-                      "full": "0.75rem"
-              },
-              "spacing": {
-                      "section-divider": "1px",
-                      "gutter": "16px",
-                      "unit": "4px",
-                      "margin-page": "24px"
-              },
-              "fontFamily": {
-                      "headline-sm": [
-                              "Plus Jakarta Sans"
-                      ],
-                      "headline-md": [
-                              "Plus Jakarta Sans"
-                      ],
-                      "label-sm": [
-                              "Inter"
-                      ],
-                      "headline-lg": [
-                              "Plus Jakarta Sans"
-                      ],
-                      "body-md": [
-                              "Inter"
-                      ],
-                      "body-lg": [
-                              "Inter"
-                      ],
-                      "label-md": [
-                              "Inter"
-                      ]
-              },
-              "fontSize": {
-                      "headline-sm": [
-                              "18px",
-                              {
-                                      "lineHeight": "1.4",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "headline-md": [
-                              "24px",
-                              {
-                                      "lineHeight": "1.3",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "label-sm": [
-                              "11px",
-                              {
-                                      "lineHeight": "1",
-                                      "fontWeight": "500"
-                              }
-                      ],
-                      "headline-lg": [
-                              "32px",
-                              {
-                                      "lineHeight": "1.2",
-                                      "letterSpacing": "-0.02em",
-                                      "fontWeight": "700"
-                              }
-                      ],
-                      "body-md": [
-                              "14px",
-                              {
-                                      "lineHeight": "1.5",
-                                      "fontWeight": "400"
-                              }
-                      ],
-                      "body-lg": [
-                              "16px",
-                              {
-                                      "lineHeight": "1.6",
-                                      "fontWeight": "400"
-                              }
-                      ],
-                      "label-md": [
-                              "12px",
-                              {
-                                      "lineHeight": "1",
-                                      "letterSpacing": "0.05em",
-                                      "fontWeight": "600"
-                              }
-                      ]
-              }
-            },
-          }
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#393844",
+                        "surface-container-highest": "#353340",
+                        "tertiary": "#69d8d4",
+                        "surface": "#13121d",
+                        "tertiary-fixed-dim": "#69d8d4",
+                        "outline-variant": "#5b403e",
+                        "surface-container": "#1f1e2a",
+                        "primary-container": "#ff5451",
+                        "primary": "#ffb3ad",
+                        "surface-dim": "#13121d",
+                        "on-secondary-fixed-variant": "#005047",
+                        "on-tertiary-fixed-variant": "#00504e",
+                        "surface-container-low": "#1b1a26",
+                        "tertiary-container": "#24a09d",
+                        "secondary-container": "#03c6b2",
+                        "on-error-container": "#ffdad6",
+                        "background": "#13121d",
+                        "secondary-fixed": "#62fae3",
+                        "inverse-surface": "#e5e0f0",
+                        "outline": "#ab8986",
+                        "on-primary-fixed-variant": "#930013",
+                        "error": "#ffb4ab",
+                        "on-background": "#e5e0f0",
+                        "surface-tint": "#ffb3ad",
+                        "on-surface-variant": "#e4beba",
+                        "on-tertiary": "#003736",
+                        "tertiary-fixed": "#87f4f0",
+                        "primary-fixed": "#ffdad7",
+                        "primary-fixed-dim": "#ffb3ad",
+                        "on-secondary-container": "#004d44",
+                        "surface-container-lowest": "#0e0d18",
+                        "surface-variant": "#353340",
+                        "secondary": "#44e2cd",
+                        "on-primary-container": "#5c0008",
+                        "on-secondary": "#003731",
+                        "on-surface": "#e5e0f0",
+                        "surface-container-high": "#2a2934",
+                        "inverse-on-surface": "#302f3b",
+                        "inverse-primary": "#b91a24",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "on-tertiary-container": "#00302e",
+                        "on-tertiary-fixed": "#00201f",
+                        "on-primary": "#68000a",
+                        "on-secondary-fixed": "#00201c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#410004"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "section-divider": "1px",
+                        "touch-target-min": "44px",
+                        "stack-md": "16px",
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "margin-desktop": "32px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-mono": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "1", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "label-mono": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
         }
     </script>
-<style>
+    <style>
         body {
             background-color: #15141f;
+            color: #e5e0f0;
+            margin: 0;
+            overflow: hidden;
         }
+        .layer-1 { background-color: #1f1e2a; }
+        .layer-2 { border: 1px solid #353340; }
+        .map-zone-glow { box-shadow: 0 0 15px 3px rgba(255, 84, 81, 0.3); }
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .blueprint-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.5fr 2fr 0.5fr 1fr;
+            grid-template-rows: repeat(17, 1fr);
+            background-color: #0e0d18;
+        }
+        .blueprint-room {
+            border: 1px solid #5b403e;
+            background-color: rgba(31, 30, 42, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8px;
+            font-size: 11px;
+            color: #e4beba;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+        .blueprint-room:hover {
+            background-color: rgba(255, 84, 81, 0.1);
+            border-color: #ffb3ad;
+        }
+        .blueprint-pasillo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ab8986;
+            letter-spacing: 0.1em;
+            font-size: 10px;
+        }
+        .blueprint-stairs {
+            background-image: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 4px,
+                rgba(255, 179, 173, 0.15) 4px,
+                rgba(255, 179, 173, 0.15) 6px
+            );
+        }
+        .zone-left { background-color: rgba(105, 216, 212, 0.03); }
+        .zone-center { background-color: rgba(68, 226, 205, 0.03); }
+        .zone-right { background-color: rgba(255, 179, 173, 0.03); }
+        .view-hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #353340; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5b403e; }
+        body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="bg-background text-on-background h-[100dvh] w-screen flex flex-col font-body-md overflow-hidden">
+<body class="font-body-md text-body-md h-screen w-screen flex flex-col relative grid-bg">
 
-<!-- TopAppBar -->
-<header class="bg-surface dark:bg-surface w-full top-0 sticky bg-surface-dim dark:bg-surface-dim border-b border-outline-variant flat no shadows transition-colors duration-200 flex justify-between items-center px-margin-mobile h-16 z-40">
-<div class="flex items-center gap-2"><img src="/logo.svg" alt="NodeMap Logo" class="h-8 w-8 flex-shrink-0 object-contain"><h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary tracking-tighter">NodeMap</h1></div>
-</header>
+<!-- Screen 1: Entry / Login -->
+<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden" id="screen-entry">
+    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md">
+        <div class="text-center mb-stack-sm flex flex-col items-center">
+            <img src="/logo.svg" alt="NodeMap Logo" class="h-20 w-20 mb-4" style="filter: drop-shadow(0 0 10px rgba(255,179,173,0.5));">
+            <h1 class="font-headline-lg text-headline-lg text-primary">NodeMap</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant">Entrar a la red P2P</p>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-label-mono text-label-mono text-on-surface-variant" for="nickname">TU NOMBRE</label>
+            <input autocomplete="off" class="w-full bg-[#1b1a26] border border-outline-variant focus:border-primary-container text-on-surface rounded-DEFAULT px-3 py-3 h-[48px] outline-none font-label-mono text-label-mono" id="nickname" placeholder="Escribe tu nombre (min 2 letras)" type="text"/>
+        </div>
+        <button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-DEFAULT h-[48px] flex items-center justify-center mt-stack-sm transition-colors hover:bg-primary-container/90 disabled:opacity-50 disabled:cursor-not-allowed" id="btn-enter">Conectar a la Red</button>
+    </div>
+</div>
 
-<!-- Main Content Area -->
-<main class="flex-1 flex flex-col relative z-0 overflow-auto" id="main-content">
-<!-- Floor Plan Map (Scrollable/Zoomable) -->
-<div class="flex-1 overflow-y-auto block p-4 pb-20 relative bg-[#13121d] hide-scrollbar flex flex-col items-center">
-<div class="relative bg-[#1b1a26] border-outline-variant w-full max-w-full p-2 min-h-[600px] flex flex-col"><div class="grid grid-cols-12 gap-1 h-full relative flex-1"><!-- Left Column (Aulas) -->
-<div class="col-span-3 flex flex-col gap-1"><div class="text-[8px] font-label-mono text-primary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-primary/30 pb-1">Zona A</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 6</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 5</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 4</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Aula 3</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Almacen</div>
+<!-- Screen 2: Zone Selection -->
+<div class="absolute inset-0 z-40 bg-background flex flex-col view-hidden" id="screen-zone">
+    <div class="p-margin-mobile flex-none text-center pt-[10vh]">
+        <h2 class="font-headline-lg text-headline-lg text-primary">Elige una Zona</h2>
+        <p class="font-label-mono text-label-mono text-on-surface-variant mt-2">HAZ CLIC PARA ENTRAR</p>
+    </div>
+    <div class="flex-grow p-margin-mobile flex flex-col md:flex-row gap-stack-md justify-center items-center max-w-4xl mx-auto w-full">
+        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona A">
+            <div class="absolute inset-0 bg-primary-container/10 group-hover:bg-primary-container/20 transition-colors"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                <span class="material-symbols-outlined text-primary mb-2 text-4xl">share</span>
+                <span class="font-headline-md text-headline-md text-on-surface">Zona A</span>
+                <span class="font-label-mono text-label-mono text-tertiary mt-1">Aulas</span>
+            </div>
+        </button>
+        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona B">
+            <div class="absolute inset-0 bg-secondary-container/10 group-hover:bg-secondary-container/20 transition-colors"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                <span class="material-symbols-outlined text-secondary mb-2 text-4xl">lan</span>
+                <span class="font-headline-md text-headline-md text-on-surface">Zona B</span>
+                <span class="font-label-mono text-label-mono text-secondary mt-1">Laboratorios</span>
+            </div>
+        </button>
+        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona C">
+            <div class="absolute inset-0 bg-tertiary-container/10 group-hover:bg-tertiary-container/20 transition-colors"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full">
+                <span class="material-symbols-outlined text-tertiary mb-2 text-4xl">route</span>
+                <span class="font-headline-md text-headline-md text-on-surface">Zona C</span>
+                <span class="font-label-mono text-label-mono text-tertiary mt-1">Oficinas</span>
+            </div>
+        </button>
+    </div>
 </div>
-<!-- First Vertical Pasillo -->
-<div class="col-span-1 flex items-center justify-center bg-surface-container-high/20 rounded border-x border-dashed border-primary/10">
-<div class="[writing-mode:vertical-lr] rotate-180 text-[9px] text-outline uppercase tracking-widest">Pasillo</div>
-</div>
-<!-- Center Column (Labs & Stairs) -->
-<div class="col-span-4 flex flex-col gap-1"><div class="text-[8px] font-label-mono text-primary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-primary/30 pb-1">Zona B</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Servicio Comunitario</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="flex justify-center gap-2 py-1"><span class="material-symbols-outlined text-outline text-sm">stairs</span><div class="relative flex items-center justify-center px-2"><span class="text-[8px] text-outline uppercase font-label-mono">Escaleras</span></div><span class="material-symbols-outlined text-outline text-sm">stairs</span></div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio de computación</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio de Robótica</div>
-</div>
-<!-- Second Vertical Pasillo -->
-<div class="col-span-1 flex items-center justify-center bg-surface-container-high/20 rounded border-x border-dashed border-primary/10">
-<div class="[writing-mode:vertical-lr] rotate-180 text-[9px] text-outline uppercase tracking-widest">Pasillo</div>
-</div>
-<!-- Right Column (Offices/Telecom) -->
-<div class="col-span-3 flex flex-col gap-1"><div class="text-[8px] font-label-mono text-primary/70 uppercase tracking-widest text-center mb-1 border-b border-dashed border-primary/30 pb-1">Zona C</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Escuela de telecomunicaciones</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Baños</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center">Laboratorio</div>
-<div class="p-1 border border-outline/20 rounded bg-surface/50 text-[9px] font-headline-sm text-on-surface text-center flex-1">Oficinas</div>
-</div>
-<!-- Bottom Entrance Row -->
-</div></div><div class="flex justify-center w-full mt-4"><div class="w-16 border-2 border-primary/50 rounded pt-1 pb-0.5 flex flex-col items-center bg-primary/10 shadow-[0_0_8px_rgba(255,179,173,0.4)]"><span class="material-symbols-outlined text-primary text-[12px]">sensor_door</span><div class="text-[8px] font-headline-sm text-primary text-center uppercase tracking-widest">Entrada</div></div></div>
-</div>
-</main>
 
-</body></html>
+<!-- Screen 3: Main App -->
+<div class="absolute inset-0 z-30 flex flex-col md:flex-row bg-transparent" id="screen-main">
+    <!-- Sidebar / Bottom Nav (Mobile) -->
+    <aside class="w-full md:w-64 bg-surface dark:bg-surface border-t md:border-t-0 md:border-r border-outline-variant flex md:flex-col z-50 flex-none order-last md:order-first">
+        <header class="hidden md:flex p-stack-lg justify-center items-center border-b border-outline-variant">
+            <div class="flex items-center gap-2">
+                <img src="/logo.svg" alt="Logo" class="w-8 h-8">
+                <span class="font-headline-lg text-headline-lg text-primary dark:text-primary tracking-tighter">NodeMap</span>
+            </div>
+        </header>
+        <nav class="flex-grow md:py-8 px-2 md:px-4 flex flex-row md:flex-col gap-2 justify-around md:justify-start">
+            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-primary bg-primary-container/20 transition-colors w-full text-center md:text-left active" data-target="tab-map">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+                <span class="font-headline-md text-[10px] md:text-sm">Mapa</span>
+            </button>
+            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors w-full text-center md:text-left" data-target="tab-nodes">
+                <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 0;'>group</span>
+                <span class="font-headline-md text-[10px] md:text-sm">Usuarios</span>
+            </button>
+            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors w-full text-center md:text-left" data-target="tab-chat">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">chat</span>
+                <span class="font-headline-md text-[10px] md:text-sm">Chat</span>
+            </button>
+        </nav>
+        <div class="hidden md:block p-4 border-t border-outline-variant">
+            <button class="w-full text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200 p-3 rounded-lg flex items-center gap-3" id="btn-logout">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">logout</span>
+                <span class="font-headline-md text-sm">Salir</span>
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Main Content Area -->
+    <main class="flex-grow relative overflow-hidden bg-background">
+        <!-- Tab: Map -->
+        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col" id="tab-map">
+            <div class="flex justify-between items-center mb-stack-md md:mb-stack-lg flex-none z-20">
+                <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface">Mapa</h2>
+                <div class="flex items-center gap-2">
+                    <button class="layer-1 layer-2 px-3 py-1.5 rounded-DEFAULT font-label-mono text-label-mono text-on-surface flex items-center gap-1 hover:bg-surface-variant transition-colors" id="btn-change-zone">
+                        <span class="material-symbols-outlined text-sm">swap_horiz</span> ZONA
+                    </button>
+                    <span class="font-label-mono text-[10px] md:text-label-mono text-primary border border-primary px-3 py-1.5 rounded bg-surface/50" id="current-zone-display">ZONA A</span>
+                </div>
+            </div>
+            <div class="flex-grow layer-1 layer-2 rounded-xl relative overflow-auto flex items-center justify-center">
+                <div class="absolute inset-4 min-w-[600px] min-h-[600px] z-0 blueprint-grid font-label-mono border-2 border-outline-variant rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
+                    <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none">
+                        <div class="zone-left rounded-sm h-full w-full border-r border-primary/30 relative" style="grid-column: 1 / 3;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona A</div>
+                        </div>
+                        <div class="zone-center rounded-sm h-full w-full border-r border-primary/30 relative" style="grid-column: 3 / 4;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona B</div>
+                        </div>
+                        <div class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona C</div>
+                        </div>
+                    </div>
+                    <!-- Blueprint layout... -->
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 1 / 3 / 2;">Aula 6</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 1 / 5 / 2;">Aula 5</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 1 / 7 / 2;">Aula 4</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 1 / 9 / 2;">Aula 3</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 1 / 11 / 2;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 1 / 13 / 2;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 1 / 15 / 2;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 15 / 1 / 17 / 2;">Almacen</div>
+                    <div class="blueprint-pasillo z-10" style="grid-area: 1 / 2 / 17 / 3; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 3 / 3 / 4;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 3 / 5 / 4;">Servicio Comunitario</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 3 / 7 / 4;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 3 / 9 / 4;">Laboratorio</div>
+                    <div class="flex gap-1 z-10" style="grid-area: 9 / 3 / 11 / 4;">
+                        <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-surface-container/80 px-1 py-0.5 rounded">Escaleras</span></div>
+                        <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-surface-container/80 px-1 py-0.5 rounded">Escaleras</span></div>
+                    </div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 3 / 14 / 4;">Laboratorio de Computación</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 14 / 3 / 17 / 4;">Laboratorio de Robótica</div>
+                    <div class="blueprint-pasillo z-10" style="grid-area: 1 / 4 / 17 / 5; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 5 / 4 / 6;">Escuela de telecomunicaciones</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 4 / 5 / 6 / 6;">Baños</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 6 / 5 / 9 / 6;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 5 / 11 / 6;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 5 / 13 / 6;">Laboratorio</div>
+                    <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 5 / 17 / 6;">Oficinas</div>
+                    <div class="flex items-center justify-center text-outline font-label-mono text-label-mono pb-2 pt-1 uppercase tracking-widest z-10" style="grid-area: 17 / 1 / 18 / 6; border-top: 1px dashed #5b403e;">
+                        Entrada
+                    </div>
+                    <!-- Map Nodes Layer -->
+                    <div class="relative w-full h-full flex items-center justify-center z-10 pointer-events-none" id="map-canvas">
+                        <div class="absolute w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-10 backdrop-blur-sm pointer-events-auto" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                            <span class="material-symbols-outlined text-primary">my_location</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Nodes -->
+        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col overflow-y-auto view-hidden" id="tab-nodes">
+            <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface mb-stack-md md:mb-stack-lg flex-none">Usuarios en mi Zona</h2>
+            <div class="flex flex-col gap-stack-md max-w-3xl" id="nodes-list">
+                <!-- Generado por JS -->
+            </div>
+        </div>
+        
+        <!-- Tab: Chat -->
+        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col view-hidden" id="tab-chat">
+            <div class="flex justify-between items-center mb-stack-md flex-none border-b border-outline-variant pb-4">
+                <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface">Chat P2P</h2>
+                <span class="font-label-mono text-[10px] md:text-label-mono text-primary flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>ENCRIPTADO
+                </span>
+            </div>
+            <div class="flex-grow overflow-y-auto flex flex-col gap-4 py-4 pr-4 max-w-4xl" id="chat-messages" style="scroll-behavior: smooth;">
+                <div class="text-center font-label-mono text-label-mono text-on-surface-variant my-2 opacity-50">Sistema: Conectado a la Red WebRTC</div>
+            </div>
+            <div class="flex-none pt-stack-md mt-4 max-w-4xl border-t border-outline-variant bg-background">
+                <form class="flex gap-2 md:gap-4 layer-2 bg-surface-container-low rounded-lg p-2" id="chat-form">
+                    <input autocomplete="off" class="flex-grow bg-transparent border-none text-on-surface font-body-lg focus:ring-0 px-2 md:px-4 h-[44px] md:min-h-[56px] outline-none" id="chat-input" placeholder="Mensaje..." type="text"/>
+                    <button class="bg-primary-container text-on-primary-container rounded-DEFAULT px-4 md:px-6 h-[44px] md:min-h-[56px] flex items-center justify-center hover:bg-primary-container/90 transition-colors font-headline-md text-[12px] md:text-sm" type="submit">
+                        <span class="material-symbols-outlined mr-0 md:mr-2">send</span> <span class="hidden md:inline">Enviar</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/config.js"></script>
+<script src="/shared/protocol.js"></script>
+<script src="webrtc.js"></script>
+<script src="peer.js"></script>
+</body>
+</html>
