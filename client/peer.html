@@ -169,14 +169,13 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #353340; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #5b403e; }
-        body { min-height: max(884px, 100dvh); }
     </style>
 </head>
-<body class="font-body-md text-body-md h-screen w-screen flex flex-col relative grid-bg">
+<body class="font-body-md text-body-md h-[100dvh] w-screen flex flex-col relative grid-bg">
 
 <!-- Screen 1: Entry / Login -->
-<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden" id="screen-entry">
-    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md">
+<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background px-margin-mobile view-hidden overflow-y-auto py-8" id="screen-entry">
+    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto">
         <div class="text-center mb-stack-sm flex flex-col items-center">
             <img src="/logo.svg" alt="NodeMap Logo" class="h-20 w-20 mb-4" style="filter: drop-shadow(0 0 10px rgba(255,179,173,0.5));">
             <h1 class="font-headline-lg text-headline-lg text-primary">NodeMap</h1>
@@ -191,7 +190,7 @@
 </div>
 
 <!-- Screen 2: Zone Selection -->
-<div class="absolute inset-0 z-40 bg-background flex flex-col view-hidden" id="screen-zone">
+<div class="absolute inset-0 z-40 bg-background flex flex-col view-hidden overflow-y-auto pb-8" id="screen-zone">
     <div class="p-margin-mobile flex-none text-center pt-[10vh]">
         <h2 class="font-headline-lg text-headline-lg text-primary">Elige una Zona</h2>
         <p class="font-label-mono text-label-mono text-on-surface-variant mt-2">HAZ CLIC PARA ENTRAR</p>
@@ -269,8 +268,8 @@
                     <span class="font-label-mono text-[10px] md:text-label-mono text-primary border border-primary px-3 py-1.5 rounded bg-surface/50" id="current-zone-display">ZONA A</span>
                 </div>
             </div>
-            <div class="flex-grow layer-1 layer-2 rounded-xl relative overflow-auto flex items-center justify-center">
-                <div class="absolute inset-4 min-w-[600px] min-h-[600px] z-0 blueprint-grid font-label-mono border-2 border-outline-variant rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
+            <div class="flex-grow layer-1 layer-2 rounded-xl relative overflow-auto p-2 md:p-4">
+                <div class="relative w-full h-full min-w-[600px] min-h-[600px] m-auto z-0 blueprint-grid font-label-mono border-2 border-outline-variant rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
                     <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none">
                         <div class="zone-left rounded-sm h-full w-full border-r border-primary/30 relative" style="grid-column: 1 / 3;">
                             <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona A</div>
