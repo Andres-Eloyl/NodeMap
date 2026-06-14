@@ -6,7 +6,7 @@
     <title>NodeMap - Mapa de Usuarios</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -61,12 +61,6 @@
                         "error-container": "#93000a",
                         "on-primary-fixed": "#410004"
                     },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
                     "spacing": {
                         "margin-page": "24px",
                         "gutter": "16px",
@@ -80,15 +74,18 @@
                         "stack-sm": "8px"
                     },
                     "fontFamily": {
-                        "headline-lg": ["Space Grotesk", "sans-serif"],
-                        "headline-md": ["Space Grotesk", "sans-serif"],
-                        "headline-sm": ["Space Grotesk", "sans-serif"],
-                        "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
-                        "body-lg": ["Manrope", "sans-serif"],
-                        "body-md": ["Manrope", "sans-serif"],
-                        "label-md": ["Manrope", "sans-serif"],
-                        "label-sm": ["Manrope", "sans-serif"],
-                        "label-mono": ["JetBrains Mono", "monospace"]
+                        "sans": ["Montserrat", "sans-serif"],
+                        "headline-lg": ["Montserrat", "sans-serif"],
+                        "headline-md": ["Montserrat", "sans-serif"],
+                        "headline-sm": ["Montserrat", "sans-serif"],
+                        "headline-lg-mobile": ["Montserrat", "sans-serif"],
+                        "body-lg": ["Montserrat", "sans-serif"],
+                        "body-md": ["Montserrat", "sans-serif"],
+                        "label-md": ["Montserrat", "sans-serif"],
+                        "label-sm": ["Montserrat", "sans-serif"],
+                        "label-mono": ["Montserrat", "sans-serif"],
+                        "logo": ["Space Grotesk", "sans-serif"],
+                        "profile": ["Montserrat", "sans-serif"]
                     },
                     "fontSize": {
                         "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
@@ -106,17 +103,19 @@
         }
     </script>
     <style>
-        @keyframes walk {
-            0% { transform: translate(-50%, -50%); }
-            25% { transform: translate(calc(-50% + 15px), calc(-50% + 5px)); }
-            50% { transform: translate(calc(-50% + 5px), calc(-50% + 20px)); }
-            75% { transform: translate(calc(-50% - 10px), calc(-50% + 10px)); }
-            100% { transform: translate(-50%, -50%); }
-        }
         @keyframes slide-bg {
             from { right: -25vw; }
             to { right: 125vw; }
         }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* --- Pathfinding transition for map nodes --- */
+        .node-walking {
+            transition: top 6s linear, left 6s linear;
+        }
+
         #animated-bg {
             position: absolute;
             inset: 0;
@@ -131,26 +130,40 @@
             position: absolute;
             transform: rotate(10deg);
             transform-origin: top right;
-            opacity: 0.6; /* Slight opacity so it's not overpowering */
+            opacity: 0.6;
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
-        .animate-walk { animation: walk 12s linear infinite; }
-        .animate-walk-slow { animation: walk 18s linear infinite reverse; }
-        .animate-walk-fast { animation: walk 8s linear infinite alternate; }
 
         body {
-            background-color: #15141f;
+            background-color: #13121d;
             color: #e5e0f0;
             margin: 0;
             overflow: hidden;
         }
-        .layer-1 { background-color: #1f1e2a; }
-        .layer-2 { border: 1px solid #353340; }
+
+        /* --- Glass card system --- */
+        .glass-card {
+            background: rgba(21, 20, 31, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(91, 64, 62, 0.35);
+        }
+        .glass-card-solid {
+            background: rgba(24, 23, 34, 0.95);
+            border: 1px solid rgba(91, 64, 62, 0.3);
+        }
+
         .map-zone-glow { box-shadow: 0 0 15px 3px rgba(255, 84, 81, 0.3); }
         .grid-bg {
             background-image: 
                 linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
             background-size: 20px 20px;
+        }
+        @media (max-width: 767px) {
+            .grid-bg { background-image: none; }
         }
         .blueprint-grid {
             display: grid;
@@ -159,7 +172,7 @@
             background-color: #0e0d18;
         }
         .blueprint-room {
-            border: 1px solid #5b403e;
+            border: 1px solid rgba(91, 64, 62, 0.6);
             background-color: rgba(31, 30, 42, 0.7);
             display: flex;
             align-items: center;
@@ -168,12 +181,12 @@
             padding: 8px;
             font-size: 11px;
             color: #e4beba;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             position: relative;
         }
         .blueprint-room:hover {
-            background-color: rgba(255, 84, 81, 0.1);
-            border-color: #ffb3ad;
+            background-color: rgba(255, 84, 81, 0.08);
+            border-color: rgba(255, 179, 173, 0.5);
         }
         .blueprint-pasillo {
             display: flex;
@@ -196,10 +209,118 @@
         .zone-center { background-color: rgba(68, 226, 205, 0.03); }
         .zone-right { background-color: rgba(255, 179, 173, 0.03); }
         .view-hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #353340; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(53, 51, 64, 0.8); border-radius: 999px; }
         ::-webkit-scrollbar-thumb:hover { background: #5b403e; }
+
+        /* --- Button base --- */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff5451 0%, #d63b38 100%);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+            box-shadow: 0 4px 20px rgba(255, 84, 81, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(91, 64, 62, 0.5);
+            color: #e5e0f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-ghost:hover {
+            background: rgba(53, 51, 64, 0.5);
+            border-color: rgba(255, 179, 173, 0.4);
+        }
+
+        /* --- Input field --- */
+        .input-field {
+            width: 100%;
+            background: #0c0b15 !important;
+            border: 1px solid rgba(91, 64, 62, 0.45);
+            color: #f0ece6;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .input-field::placeholder {
+            color: rgba(171, 137, 134, 0.45);
+        }
+        .input-field:focus {
+            border-color: rgba(255, 84, 81, 0.6);
+            box-shadow: 0 0 0 3px rgba(255, 84, 81, 0.08);
+            background: #0e0d18 !important;
+        }
+
+        /* --- Nav tab active indicator --- */
+        .nav-tab-item {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .nav-tab-item.active {
+            color: #ffb3ad;
+            background: rgba(255, 84, 81, 0.12);
+        }
+        .nav-tab-item:not(.active):hover {
+            background: rgba(53, 51, 64, 0.4);
+        }
+
+        /* --- Zone card hover --- */
+        .zone-card {
+            transition: all 0.3s ease;
+        }
+        .zone-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Badge chip --- */
+        .badge-chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            border: 1px solid rgba(255, 179, 173, 0.3);
+            color: #ffb3ad;
+            background: rgba(255, 84, 81, 0.08);
+        }
+
+        /* --- Chat bubble refinement --- */
+        .chat-bubble {
+            font-family: 'Manrope', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* --- Fade in animation --- */
+        .animate-fade-in {
+            animation: fade-in 0.4s ease-out;
+        }
     </style>
 </head>
 <body class="font-body-md text-body-md h-[100dvh] w-screen flex flex-col relative grid-bg">
@@ -209,69 +330,98 @@
     </div>
 
 <!-- Screen 1: Entry / Login -->
-<div class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent px-margin-mobile view-hidden overflow-y-auto py-8" id="screen-entry">
+<div class="absolute inset-0 z-50 flex flex-col items-center bg-transparent px-5 view-hidden overflow-y-auto py-8" id="screen-entry">
 
-    <div class="layer-1 layer-2 rounded-xl p-stack-lg w-full max-w-sm flex flex-col gap-stack-md my-auto relative z-10">
-        <div class="text-center mb-stack-sm flex flex-col items-center">
-            <img src="/logo.svg" alt="NodeMap Logo" class="h-20 w-20 mb-4" style="filter: drop-shadow(0 0 10px rgba(255,179,173,0.5));">
-            <h1 class="font-headline-lg text-headline-lg text-primary">NodeMap</h1>
-            <p class="font-body-md text-body-md text-on-surface-variant">Entrar a la red P2P</p>
+    <div class="glass-card rounded-2xl p-8 w-full max-w-[380px] flex flex-col gap-6 mt-[15vh] relative z-10 shadow-2xl animate-fade-in">
+        <!-- Logo & Title -->
+        <div class="text-center flex flex-col items-center gap-3">
+            <img src="/logo.svg" alt="NodeMap Logo" class="h-16 w-16" style="filter: drop-shadow(0 0 12px rgba(255,179,173,0.4));">
+            <div>
+                <h1 class="font-logo text-[28px] font-bold text-primary tracking-tight">NodeMap</h1>
+                <p class="font-body-md text-[13px] text-on-surface-variant/70 mt-1">Red de comunicación P2P</p>
+            </div>
         </div>
+
+        <!-- Divider -->
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-outline-variant/50 to-transparent"></div>
+
+        <!-- Form -->
         <div class="flex flex-col gap-2">
-            <label class="font-label-mono text-label-mono text-on-surface-variant" for="nickname">TU NOMBRE</label>
-            <input autocomplete="off" class="w-full bg-[#1b1a26] border border-outline-variant focus:border-primary-container text-on-surface rounded-DEFAULT px-3 py-3 h-[48px] outline-none font-label-mono text-label-mono" id="nickname" placeholder="Escribe tu nombre (min 2 letras)" type="text"/>
+            <label class="font-label-mono text-[11px] tracking-[0.08em] text-on-surface-variant/80 uppercase" for="nickname">Nombre o Alias</label>
+            <input autocomplete="off" class="input-field rounded-xl px-4 py-3 h-[48px]" id="nickname" placeholder="Introduce tu nombre o alias (min. 3 letras)" type="text"/>
         </div>
-        <button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-DEFAULT h-[48px] flex items-center justify-center mt-stack-sm transition-colors hover:bg-primary-container/90 disabled:opacity-50 disabled:cursor-not-allowed" id="btn-enter">Conectar a la Red</button>
+        <button class="btn-primary w-full rounded-xl h-[48px] flex items-center justify-center gap-2" id="btn-enter" disabled>
+            <span class="material-symbols-outlined text-[18px]">login</span>
+            Conectar a la Red
+        </button>
     </div>
 
-    <div class="mt-8 flex flex-col items-center gap-3 w-full max-w-sm mb-4 relative z-10">
-        <span class="font-label-mono text-[10px] text-on-surface-variant/50 tracking-widest uppercase">Equipo Desarrollador</span>
-        <div class="flex flex-wrap justify-center gap-3">
-            <a href="https://github.com/Andres-Eloyl" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full layer-1 layer-2 text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors text-xs font-label-mono">
-                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                Andrés
+    <!-- Team Credits -->
+    <div class="mt-6 flex flex-col items-center gap-4 w-full max-w-[380px] mb-4 relative z-10 animate-fade-in" style="animation-delay: 0.15s;">
+        <p class="font-label-mono text-[10px] text-white/60 tracking-[0.12em] uppercase">Proyecto desarrollado por:</p>
+        <div class="w-full flex flex-col">
+            <a href="https://github.com/Andres-Eloyl" target="_blank" class="flex items-center gap-3 py-2.5 px-1 text-white/70 hover:text-primary transition-colors duration-200">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <span class="font-profile text-[13px] font-medium">Andrés López</span>
             </a>
-            <a href="https://github.com/ErasmoAlvarado" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full layer-1 layer-2 text-on-surface-variant hover:text-secondary hover:border-secondary/50 transition-colors text-xs font-label-mono">
-                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                Erasmo
+            <div class="w-full h-px bg-outline-variant/20"></div>
+            <a href="https://github.com/ErasmoAlvarado" target="_blank" class="flex items-center gap-3 py-2.5 px-1 text-white/70 hover:text-secondary transition-colors duration-200">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <span class="font-profile text-[13px] font-medium">Erasmo Alvarado</span>
             </a>
-            <a href="https://github.com/mariagtovarp" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full layer-1 layer-2 text-on-surface-variant hover:text-tertiary hover:border-tertiary/50 transition-colors text-xs font-label-mono">
-                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                María
+            <div class="w-full h-px bg-outline-variant/20"></div>
+            <a href="https://github.com/mariagtovarp" target="_blank" class="flex items-center gap-3 py-2.5 px-1 text-white/70 hover:text-tertiary transition-colors duration-200">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <span class="font-profile text-[13px] font-medium">María Tovar</span>
+            </a>
+            <div class="w-full h-px bg-outline-variant/20"></div>
+            <a href="https://github.com" target="_blank" class="flex items-center gap-3 py-2.5 px-1 text-white/70 hover:text-primary transition-colors duration-200">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <span class="font-profile text-[13px] font-medium">Jesús Rivas</span>
             </a>
         </div>
+        <button id="btn-toggle-bg" class="flex items-center gap-1.5 px-4 py-2 rounded-xl glass-card text-white/50 hover:text-primary hover:border-primary/40 transition-all duration-200 text-[11px] font-label-mono mt-2" title="Modo simple (Desactivar fondo animado)">
+            <span class="material-symbols-outlined text-[14px]">energy_savings_leaf</span>
+            <span>Modo simple</span>
+        </button>
     </div>
 </div>
 
 <!-- Screen 2: Zone Selection -->
 <div class="absolute inset-0 z-40 bg-transparent flex flex-col view-hidden overflow-y-auto pb-8" id="screen-zone">
-    <div class="p-margin-mobile flex-none text-center pt-[10vh]">
-        <h2 class="font-headline-lg text-headline-lg text-primary">Elige una Zona</h2>
-        <p class="font-label-mono text-label-mono text-on-surface-variant mt-2">HAZ CLIC PARA ENTRAR</p>
+    <div class="px-5 flex-none text-center pt-[10vh]">
+        <h2 class="font-headline-lg text-[28px] font-bold text-primary tracking-tight">Elige tu zona</h2>
+        <p class="font-body-md text-[13px] text-on-surface-variant/60 mt-2">Selecciona dónde te encuentras</p>
     </div>
-    <div class="flex-grow p-margin-mobile flex flex-col md:flex-row gap-stack-md justify-center items-center max-w-4xl mx-auto w-full">
-        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona A">
-            <div class="absolute inset-0 bg-primary-container/10 group-hover:bg-primary-container/20 transition-colors"></div>
-            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                <span class="material-symbols-outlined text-primary mb-2 text-4xl">share</span>
-                <span class="font-headline-md text-headline-md text-on-surface">Zona A</span>
-                <span class="font-label-mono text-label-mono text-tertiary mt-1">Aulas</span>
+    <div class="flex-grow px-5 flex flex-col md:flex-row gap-4 justify-center items-center max-w-4xl mx-auto w-full py-8">
+        <button class="zone-btn zone-card w-full md:w-1/3 h-44 glass-card rounded-2xl relative overflow-hidden group" data-zone="Zona A">
+            <div class="absolute inset-0 bg-primary-container/5 group-hover:bg-primary-container/12 transition-colors duration-300"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                <div class="w-14 h-14 rounded-2xl bg-primary-container/10 flex items-center justify-center mb-1 group-hover:bg-primary-container/20 transition-colors duration-300">
+                    <span class="material-symbols-outlined text-primary text-3xl">school</span>
+                </div>
+                <span class="font-headline-md text-lg font-semibold text-on-surface">Zona A</span>
+                <span class="font-label-mono text-[11px] tracking-[0.08em] text-white/60 uppercase">Aulas</span>
             </div>
         </button>
-        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona B">
-            <div class="absolute inset-0 bg-secondary-container/10 group-hover:bg-secondary-container/20 transition-colors"></div>
-            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                <span class="material-symbols-outlined text-secondary mb-2 text-4xl">lan</span>
-                <span class="font-headline-md text-headline-md text-on-surface">Zona B</span>
-                <span class="font-label-mono text-label-mono text-secondary mt-1">Laboratorios</span>
+        <button class="zone-btn zone-card w-full md:w-1/3 h-44 glass-card rounded-2xl relative overflow-hidden group" data-zone="Zona B">
+            <div class="absolute inset-0 bg-secondary-container/5 group-hover:bg-secondary-container/12 transition-colors duration-300"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                <div class="w-14 h-14 rounded-2xl bg-secondary-container/10 flex items-center justify-center mb-1 group-hover:bg-secondary-container/20 transition-colors duration-300">
+                    <span class="material-symbols-outlined text-secondary text-3xl">science</span>
+                </div>
+                <span class="font-headline-md text-lg font-semibold text-on-surface">Zona B</span>
+                <span class="font-label-mono text-[11px] tracking-[0.08em] text-white/60 uppercase">Laboratorios</span>
             </div>
         </button>
-        <button class="zone-btn w-full md:w-1/3 h-48 layer-1 layer-2 rounded-xl relative overflow-hidden group hover:map-zone-glow transition-all" data-zone="Zona C">
-            <div class="absolute inset-0 bg-tertiary-container/10 group-hover:bg-tertiary-container/20 transition-colors"></div>
-            <div class="relative z-10 flex flex-col items-center justify-center h-full">
-                <span class="material-symbols-outlined text-tertiary mb-2 text-4xl">route</span>
-                <span class="font-headline-md text-headline-md text-on-surface">Zona C</span>
-                <span class="font-label-mono text-label-mono text-tertiary mt-1">Oficinas</span>
+        <button class="zone-btn zone-card w-full md:w-1/3 h-44 glass-card rounded-2xl relative overflow-hidden group" data-zone="Zona C">
+            <div class="absolute inset-0 bg-tertiary-container/5 group-hover:bg-tertiary-container/12 transition-colors duration-300"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                <div class="w-14 h-14 rounded-2xl bg-tertiary-container/10 flex items-center justify-center mb-1 group-hover:bg-tertiary-container/20 transition-colors duration-300">
+                    <span class="material-symbols-outlined text-tertiary text-3xl">work</span>
+                </div>
+                <span class="font-headline-md text-lg font-semibold text-on-surface">Zona C</span>
+                <span class="font-label-mono text-[11px] tracking-[0.08em] text-white/60 uppercase">Oficinas</span>
             </div>
         </button>
     </div>
@@ -281,39 +431,46 @@
 <div class="absolute inset-0 z-30 flex flex-col md:flex-row bg-transparent view-hidden" id="screen-main">
     
     <!-- Mobile Header -->
-    <header class="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-outline-variant flex-none z-50 order-first w-full shadow-md">
-        <div class="flex items-center gap-2">
-            <img src="/logo.svg" alt="Logo" class="w-6 h-6" style="filter: drop-shadow(0 0 5px rgba(255,179,173,0.3));">
-            <span class="font-headline-md text-base text-primary tracking-tighter">NodeMap</span>
+    <header class="md:hidden flex items-center justify-between px-4 py-3 bg-surface/95 backdrop-blur-md border-b border-outline-variant/40 flex-none z-50 order-first w-full">
+        <div class="flex items-center gap-2.5">
+            <img src="/logo.svg" alt="Logo" class="w-5 h-5" style="filter: drop-shadow(0 0 5px rgba(255,179,173,0.3));">
+            <span class="font-logo text-[15px] font-semibold text-primary tracking-tight">NodeMap</span>
         </div>
+        <button id="btn-toggle-bg-mobile" class="text-on-surface-variant/60 p-2 rounded-xl hover:bg-surface-variant/30 transition-all duration-200 flex items-center justify-center" title="Modo simple">
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">energy_savings_leaf</span>
+        </button>
     </header>
 
     <!-- Sidebar / Bottom Nav (Mobile) -->
-    <aside class="w-full md:w-64 bg-surface dark:bg-surface border-t md:border-t-0 md:border-r border-outline-variant flex md:flex-col z-50 flex-none order-last md:order-first">
-        <header class="hidden md:flex p-stack-lg justify-center items-center border-b border-outline-variant">
-            <div class="flex items-center gap-2">
-                <img src="/logo.svg" alt="Logo" class="w-8 h-8">
-                <span class="font-headline-lg text-headline-lg text-primary dark:text-primary tracking-tighter">NodeMap</span>
+    <aside class="w-full md:w-60 bg-surface/95 md:bg-surface/80 md:backdrop-blur-md border-t md:border-t-0 md:border-r border-outline-variant/40 flex md:flex-col z-50 flex-none order-last md:order-first">
+        <header class="hidden md:flex p-6 justify-center items-center border-b border-outline-variant/30">
+            <div class="flex items-center gap-2.5">
+                <img src="/logo.svg" alt="Logo" class="w-7 h-7" style="filter: drop-shadow(0 0 6px rgba(255,179,173,0.3));">
+                <span class="font-logo text-[22px] font-bold text-primary tracking-tight">NodeMap</span>
             </div>
         </header>
-        <nav class="flex-grow md:py-8 px-2 md:px-4 flex flex-row md:flex-col gap-2 justify-around md:justify-start">
-            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-primary bg-primary-container/20 transition-colors w-full text-center md:text-left active" data-target="tab-map">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
-                <span class="font-headline-md text-[10px] md:text-sm">Mapa</span>
+        <nav class="flex-grow md:py-6 px-2 md:px-3 flex flex-row md:flex-col gap-1 justify-around md:justify-start">
+            <button class="nav-tab nav-tab-item flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:px-4 md:py-3 rounded-xl w-full text-center md:text-left active" data-target="tab-map">
+                <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">map</span>
+                <span class="font-headline-md text-[10px] md:text-[13px] font-semibold">Mapa</span>
             </button>
-            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors w-full text-center md:text-left" data-target="tab-nodes">
-                <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 0;'>group</span>
-                <span class="font-headline-md text-[10px] md:text-sm">Usuarios</span>
+            <button class="nav-tab nav-tab-item flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:px-4 md:py-3 rounded-xl text-on-surface-variant/70 w-full text-center md:text-left" data-target="tab-nodes">
+                <span class="material-symbols-outlined text-[22px]" style='font-variation-settings: "FILL" 0;'>group</span>
+                <span class="font-headline-md text-[10px] md:text-[13px] font-semibold">Usuarios</span>
             </button>
-            <button class="nav-tab flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:p-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors w-full text-center md:text-left" data-target="tab-chat">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">chat</span>
-                <span class="font-headline-md text-[10px] md:text-sm">Chat</span>
+            <button class="nav-tab nav-tab-item flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 p-2 md:px-4 md:py-3 rounded-xl text-on-surface-variant/70 w-full text-center md:text-left" data-target="tab-chat">
+                <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 0;">chat</span>
+                <span class="font-headline-md text-[10px] md:text-[13px] font-semibold">Chat</span>
             </button>
         </nav>
-        <div class="hidden md:block p-4 border-t border-outline-variant">
-            <button class="w-full text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200 p-3 rounded-lg flex items-center gap-3" id="btn-logout">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">logout</span>
-                <span class="font-headline-md text-sm">Salir</span>
+        <div class="hidden md:flex flex-col gap-1 p-3 border-t border-outline-variant/30">
+            <button class="w-full text-on-surface-variant/60 hover:bg-surface-variant/30 transition-all duration-200 px-4 py-2.5 rounded-xl flex items-center gap-3" id="btn-toggle-bg-sidebar" title="Modo simple">
+                <span class="material-symbols-outlined text-[20px]">energy_savings_leaf</span>
+                <span class="font-headline-md text-[13px] font-medium">Modo simple</span>
+            </button>
+            <button class="w-full text-on-surface-variant/60 hover:bg-surface-variant/30 transition-all duration-200 px-4 py-2.5 rounded-xl flex items-center gap-3" id="btn-logout">
+                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">logout</span>
+                <span class="font-headline-md text-[13px] font-medium">Salir</span>
             </button>
         </div>
     </aside>
@@ -321,30 +478,30 @@
     <!-- Main Content Area -->
     <main class="flex-grow relative overflow-hidden bg-transparent">
         <!-- Tab: Map -->
-        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col" id="tab-map">
-            <div class="flex justify-between items-center mb-stack-md md:mb-stack-lg flex-none z-20">
-                <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface">Mapa</h2>
+        <div class="absolute inset-0 p-4 md:p-8 flex flex-col" id="tab-map">
+            <div class="flex justify-between items-center mb-4 md:mb-6 flex-none z-20">
+                <h2 class="font-headline-lg text-xl md:text-[24px] font-bold text-on-surface tracking-tight">Mapa</h2>
                 <div class="flex items-center gap-2">
-                    <button class="layer-1 layer-2 px-3 py-1.5 rounded-DEFAULT font-label-mono text-label-mono text-on-surface flex items-center gap-1 hover:bg-surface-variant transition-colors" id="btn-change-zone">
-                        <span class="material-symbols-outlined text-sm">swap_horiz</span> ZONA
+                    <button class="bg-[#0c0b15] border border-outline-variant/30 hover:border-primary/50 hover:text-primary text-white/70 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-200 shadow-sm" id="btn-change-zone">
+                        <span class="material-symbols-outlined text-[16px]">swap_horiz</span> Cambiar
                     </button>
-                    <span class="font-label-mono text-[10px] md:text-label-mono text-primary border border-primary px-3 py-1.5 rounded bg-surface/50" id="current-zone-display">ZONA A</span>
+                    <span class="badge-chip px-3 py-1.5 rounded-lg" id="current-zone-display">ZONA A</span>
                 </div>
             </div>
-            <div class="flex-grow layer-1 layer-2 rounded-xl relative overflow-auto p-2 md:p-4">
-                <div class="relative w-full h-full min-w-[600px] min-h-[600px] m-auto z-0 blueprint-grid font-label-mono border-2 border-outline-variant rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
+            <div class="flex-grow glass-card-solid rounded-2xl relative overflow-auto p-2 md:p-4">
+                <div class="relative w-full h-full min-w-[600px] min-h-[600px] m-auto z-0 blueprint-grid font-label-mono border border-outline-variant/40 rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
                     <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none">
-                        <div class="zone-left rounded-sm h-full w-full border-r border-primary/30 relative" style="grid-column: 1 / 3;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona A</div>
+                        <div class="zone-left rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona A</div>
                         </div>
-                        <div class="zone-center rounded-sm h-full w-full border-r border-primary/30 relative" style="grid-column: 3 / 4;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona B</div>
+                        <div class="zone-center rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona B</div>
                         </div>
                         <div class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/60 tracking-widest uppercase font-bold">Zona C</div>
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona C</div>
                         </div>
                     </div>
-                    <!-- Blueprint layout... -->
+                    <!-- Blueprint layout -->
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 1 / 3 / 2;">Aula 6</div>
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 1 / 5 / 2;">Aula 5</div>
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 1 / 7 / 2;">Aula 4</div>
@@ -371,7 +528,7 @@
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 5 / 11 / 6;">Laboratorio</div>
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 5 / 13 / 6;">Laboratorio</div>
                     <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 5 / 17 / 6;">Oficinas</div>
-                    <div class="flex items-center justify-center text-outline font-label-mono text-label-mono pb-2 pt-1 uppercase tracking-widest z-10" style="grid-area: 17 / 1 / 18 / 6; border-top: 1px dashed #5b403e;">
+                    <div class="flex items-center justify-center text-outline/60 font-label-mono text-[11px] pb-2 pt-1 uppercase tracking-[0.12em] z-10" style="grid-area: 17 / 1 / 18 / 6; border-top: 1px dashed rgba(91,64,62,0.4);">
                         Entrada
                     </div>
                     <!-- Map Nodes Layer -->
@@ -385,29 +542,26 @@
         </div>
         
         <!-- Tab: Nodes -->
-        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col overflow-y-auto view-hidden" id="tab-nodes">
-            <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface mb-stack-md md:mb-stack-lg flex-none">Usuarios en mi Zona</h2>
-            <div class="flex flex-col gap-stack-md max-w-3xl" id="nodes-list">
+        <div class="absolute inset-0 p-4 md:p-8 flex flex-col overflow-y-auto view-hidden" id="tab-nodes">
+            <h2 class="font-headline-lg text-xl md:text-[24px] font-bold text-on-surface tracking-tight mb-4 md:mb-6 flex-none">Usuarios en mi Zona</h2>
+            <div class="flex flex-col gap-3 max-w-3xl" id="nodes-list">
                 <!-- Generado por JS -->
             </div>
         </div>
         
         <!-- Tab: Chat -->
-        <div class="absolute inset-0 p-4 md:p-margin-desktop flex flex-col view-hidden" id="tab-chat">
-            <div class="flex justify-between items-center mb-stack-md flex-none border-b border-outline-variant pb-4">
-                <h2 class="font-headline-lg text-xl md:text-headline-lg text-on-surface">Chat P2P</h2>
-                <span class="font-label-mono text-[10px] md:text-label-mono text-primary flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>ENCRIPTADO
-                </span>
+        <div class="absolute inset-0 p-4 md:p-8 flex flex-col view-hidden" id="tab-chat">
+            <div class="flex justify-between items-center mb-4 flex-none border-b border-outline-variant/30 pb-4">
+                <h2 class="font-headline-lg text-xl md:text-[24px] font-bold text-on-surface tracking-tight">Chat P2P</h2>
             </div>
-            <div class="flex-grow overflow-y-auto flex flex-col gap-4 py-4 pr-4 max-w-4xl" id="chat-messages" style="scroll-behavior: smooth;">
-                <div class="text-center font-label-mono text-label-mono text-on-surface-variant my-2 opacity-50">Sistema: Conectado a la Red WebRTC</div>
+            <div class="flex-grow overflow-y-auto flex flex-col gap-3 py-3 pr-2 max-w-4xl" id="chat-messages" style="scroll-behavior: smooth;">
+                <div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 my-2 tracking-wide">Sistema: Conectado a la Red WebRTC</div>
             </div>
-            <div class="flex-none pt-stack-md mt-4 max-w-4xl border-t border-outline-variant bg-background">
-                <form class="flex gap-2 md:gap-4 layer-2 bg-surface-container-low rounded-lg p-2" id="chat-form">
-                    <input autocomplete="off" class="flex-grow bg-transparent border-none text-on-surface font-body-lg focus:ring-0 px-2 md:px-4 h-[44px] md:min-h-[56px] outline-none" id="chat-input" placeholder="Mensaje..." type="text"/>
-                    <button class="bg-primary-container text-on-primary-container rounded-DEFAULT px-4 md:px-6 h-[44px] md:min-h-[56px] flex items-center justify-center hover:bg-primary-container/90 transition-colors font-headline-md text-[12px] md:text-sm" type="submit">
-                        <span class="material-symbols-outlined mr-0 md:mr-2">send</span> <span class="hidden md:inline">Enviar</span>
+            <div class="flex-none pt-4 mt-2 max-w-4xl border-t border-outline-variant/30">
+                <form class="flex gap-2 md:gap-3 glass-card-solid rounded-2xl p-2" id="chat-form">
+                    <input autocomplete="off" class="input-field flex-grow bg-transparent border-none rounded-xl px-3 md:px-4 h-[44px] md:h-[48px] text-[14px] focus:shadow-none focus:ring-0" id="chat-input" placeholder="Escribe un mensaje..." type="text"/>
+                    <button class="btn-primary rounded-xl px-5 md:px-6 h-[44px] md:h-[48px] flex items-center justify-center gap-1.5 text-[13px]" type="submit">
+                        <span class="material-symbols-outlined text-[18px]">send</span> <span class="hidden md:inline">Enviar</span>
                     </button>
                 </form>
             </div>
@@ -422,29 +576,81 @@
 <script src="webrtc.js"></script>
 <script src="peer.js"></script>
 <script>
-    // Generate Dynamic Background
+    // Generate and control Dynamic Background with Mobile Optimizations
     document.addEventListener('DOMContentLoaded', () => {
         const bgContainer = document.getElementById('animated-bg');
-        if (bgContainer) {
-            const length = 25;
+        
+        function updateBackground() {
+            if (!bgContainer) return;
+            
+            // Clear existing elements
+            bgContainer.innerHTML = '';
+            
+            const disabled = localStorage.getItem('bg-animations-disabled') === 'true';
+            
+            // Toggle grid background visibility based on disabled status
+            if (disabled) {
+                document.body.classList.remove('grid-bg');
+            } else {
+                document.body.classList.add('grid-bg');
+            }
+            
+            // Sync all battery saver/toggle buttons UI
+            const buttons = [
+                document.getElementById('btn-toggle-bg'),
+                document.getElementById('btn-toggle-bg-mobile'),
+                document.getElementById('btn-toggle-bg-sidebar')
+            ];
+            
+            buttons.forEach(btn => {
+                if (!btn) return;
+                const icon = btn.querySelector('.material-symbols-outlined');
+                const label = btn.querySelector('span:not(.material-symbols-outlined)');
+                
+                if (disabled) {
+                    btn.classList.add('text-primary', 'border-primary/30');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+                    if (label) label.textContent = btn.id === 'btn-toggle-bg' ? 'Fondo Desactivado' : 'Fondo Desactivado';
+                } else {
+                    btn.classList.remove('text-primary', 'border-primary/30');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+                    if (label) label.textContent = btn.id === 'btn-toggle-bg' ? 'Modo simple' : 'Modo simple';
+                }
+            });
+            
+            if (disabled) return;
+            
+            // Detect if running on a mobile browser or screen width
+            const isMobile = window.innerWidth < 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+            
+            // Mobile: 5 lines for smooth 60fps rendering, Desktop: 25 lines
+            const length = isMobile ? 5 : 25;
             const animationTime = 45;
-            // Primary, Secondary, Tertiary tailwind config colors
             const baseColors = ['#ffb3ad', '#e3bdba', '#69d8d4']; 
             
             for (let i = 1; i <= length; i++) {
                 const div = document.createElement('div');
                 div.className = 'rainbow-line';
                 
-                // Shuffle colors randomly for each line
                 const colors = [...baseColors].sort(() => Math.random() - 0.5);
                 
-                div.style.boxShadow = `
-                    -130px 0 80px 40px #13121d, 
-                    -50px 0 50px 25px ${colors[0]},
-                    0 0 50px 25px ${colors[1]}, 
-                    50px 0 50px 25px ${colors[2]},
-                    130px 0 80px 40px #13121d
-                `;
+                if (isMobile) {
+                    div.style.boxShadow = `
+                        -45px 0 20px 8px #13121d, 
+                        -15px 0 12px 4px ${colors[0]},
+                        0 0 12px 4px ${colors[1]}, 
+                        15px 0 12px 4px ${colors[2]},
+                        45px 0 20px 8px #13121d
+                    `;
+                } else {
+                    div.style.boxShadow = `
+                        -130px 0 80px 40px #13121d, 
+                        -50px 0 50px 25px ${colors[0]},
+                        0 0 50px 25px ${colors[1]}, 
+                        50px 0 50px 25px ${colors[2]},
+                        130px 0 80px 40px #13121d
+                    `;
+                }
                 
                 const duration = animationTime - (animationTime / length / 2 * i);
                 const delay = -(i / length * animationTime);
@@ -452,10 +658,24 @@
                 div.style.animation = `slide-bg ${duration}s linear infinite`;
                 div.style.animationDelay = `${delay}s`;
                 
-                // Append before the masks
-                bgContainer.insertBefore(div, bgContainer.firstChild);
+                bgContainer.appendChild(div);
             }
         }
+        
+        // Setup toggle event handler
+        const toggleBgFunc = () => {
+            const current = localStorage.getItem('bg-animations-disabled') === 'true';
+            localStorage.setItem('bg-animations-disabled', !current);
+            updateBackground();
+        };
+        
+        ['btn-toggle-bg', 'btn-toggle-bg-mobile', 'btn-toggle-bg-sidebar'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', toggleBgFunc);
+        });
+        
+        // Initialize background
+        updateBackground();
     });
 </script>
 </body>
