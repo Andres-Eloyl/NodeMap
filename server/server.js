@@ -46,7 +46,7 @@ function getLocalIP() {
 
 httpServer.listen(CONFIG.PORT, () => {
   const ip = getLocalIP();
-  console.log(`\n🚀 Servidor de señalización listo\n`);
+  console.log(`\n Servidor de señalización listo\n`);
   console.log(`   Local:    http://localhost:${CONFIG.PORT}`);
   console.log(`   Red:      http://${ip}:${CONFIG.PORT}`);
   console.log(`   Métricas: http://${ip}:${CONFIG.PORT}${CONFIG.METRICS_PATH}`);

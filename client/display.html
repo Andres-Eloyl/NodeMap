@@ -9,7 +9,7 @@
         content="Dashboard interactivo y mapa en tiempo real de nodos P2P conectados mediante WebRTC en la feria universitaria.">
     <!-- Favicon inline SVG rocket -->
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
 
     <!-- 1. Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,7 @@
                     <span>Peers: <span id="header-peer-count">0</span></span>
                 </div>
                 <div class="indicator-badge">
-                    <span>⚡ Mensajes: <span id="header-message-count">0</span></span>
+                    <span>Mensajes: <span id="header-message-count">0</span></span>
                 </div>
                 <div class="indicator-badge" id="network-activity">
                     <div class="health-rings" id="health-rings">
@@ -90,35 +90,35 @@
                 </div>
                 <div id="tech-panel">
                     <div class="stat-card" id="stat-peers">
-                        <div class="stat-icon">📡</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-info">
                             <span class="stat-label">Nodos Activos</span>
                             <span class="stat-value" id="peer-count">0</span>
                         </div>
                     </div>
                     <div class="stat-card" id="stat-messages">
-                        <div class="stat-icon">✉️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-info">
                             <span class="stat-label">Tráfico de Red</span>
                             <span class="stat-value" id="message-count">0</span>
                         </div>
                     </div>
                     <div class="stat-card" id="stat-uptime">
-                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-info">
                             <span class="stat-label">Tiempo de Actividad</span>
                             <span class="stat-value" id="uptime-display">00:00:00</span>
                         </div>
                     </div>
                     <div class="stat-card" id="stat-latency">
-                        <div class="stat-icon">📶</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-info">
                             <span class="stat-label">Latencia Promedio</span>
                             <span class="stat-value"><span id="latency-display">0</span> ms</span>
                         </div>
                     </div>
                     <div class="stat-card" id="stat-zones">
-                        <div class="stat-icon">🗺️</div>
+                        <div class="stat-icon"></div>
                         <div class="stat-info">
                             <span class="stat-label">Zonas Activas</span>
                             <span class="stat-value" id="zones-display">0</span>
@@ -145,7 +145,7 @@
     </div>
 
 
-    <script src="mock-webrtc.js"></script>
+    <!-- <script src="mock-webrtc.js"></script> -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/shared/config.js"></script>
