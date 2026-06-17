@@ -335,6 +335,10 @@ function desconectar() {
   myNombre = null;
 }
 
+function getMyId() {
+  return myId;
+}
+
 const WebRTCEngine = {
   conectar,
   desconectar,
@@ -343,6 +347,7 @@ const WebRTCEngine = {
   onMessage,
   getPeers,
   getLatency,
+  getMyId,
 };
 
 window.WebRTCEngine = WebRTCEngine;

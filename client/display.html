@@ -35,7 +35,11 @@
                 </div>
             </div>
             <div class="live-indicators">
-                <div id="mode-badge" style="display: flex; align-items: center;"></div>
+                <div id="mode-badge" style="display: flex; align-items: center; gap: 12px;">
+                    <button id="toggle-heatmap-btn" class="heatmap-btn">
+                        🔥 Modo Heatmap
+                    </button>
+                </div>
                 <div class="indicator-badge">
                     <div class="status-dot"></div>
                     <span>Peers: <span id="header-peer-count">0</span></span>
@@ -72,6 +76,14 @@
                         <div class="loading-dots"><span></span><span></span><span></span></div>
                     </div>
                     <svg id="graph-svg"></svg>
+                    
+                    <!-- LEADERBOARD HEATMAP (Hidden by default) -->
+                    <div id="heatmap-leaderboard" class="hidden">
+                        <div class="leaderboard-title">🔥 Zonas Más Concurridas</div>
+                        <div class="leaderboard-list" id="leaderboard-list">
+                            <!-- Se llena por JS -->
+                        </div>
+                    </div>
                 </div>
 
                 <!-- PANEL TÉCNICO INFERIOR -->

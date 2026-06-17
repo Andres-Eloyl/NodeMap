@@ -429,3 +429,125 @@ body::before {
     50% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.9)); transform: scale(1.1); stroke-width: 3px; stroke: #fff;}
     100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); transform: scale(1); stroke-width: 1.5px; stroke: #fff;}
 }
+
+/* =========================================
+   HEATMAP STYLES
+========================================= */
+.heatmap-btn {
+    background: linear-gradient(135deg, rgba(255, 60, 60, 0.2), rgba(255, 120, 0, 0.2));
+    border: 1px solid rgba(255, 100, 50, 0.4);
+    color: #ff9a76;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.heatmap-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 60, 60, 0.4), rgba(255, 120, 0, 0.4));
+    border-color: rgba(255, 100, 50, 0.8);
+    box-shadow: 0 0 15px rgba(255, 100, 50, 0.4);
+    transform: translateY(-1px);
+}
+
+.heatmap-btn.active {
+    background: linear-gradient(135deg, rgba(255, 60, 60, 0.8), rgba(255, 120, 0, 0.8));
+    color: white;
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(255, 80, 50, 0.6);
+}
+
+/* Modo Heatmap Activo: Desvanece los nodos y enlaces */
+body.heatmap-mode #nodes-layer {
+    opacity: 0.15;
+    transition: opacity 0.8s ease;
+}
+
+body.heatmap-mode #links-layer {
+    opacity: 0.05;
+    transition: opacity 0.8s ease;
+}
+
+body.heatmap-mode #zone-counters {
+    opacity: 0.2;
+    transition: opacity 0.8s ease;
+}
+
+#nodes-layer, #links-layer, #zone-counters {
+    transition: opacity 0.8s ease;
+}
+
+/* Leaderboard de Heatmap */
+#heatmap-leaderboard {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(15, 20, 35, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    width: 280px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#heatmap-leaderboard.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-20px);
+}
+
+.leaderboard-title {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 12px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.leaderboard-rank {
+    font-weight: 800;
+    width: 24px;
+}
+
+.leaderboard-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.leaderboard-score {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+}

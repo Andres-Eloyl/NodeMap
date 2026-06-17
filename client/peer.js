@@ -17,11 +17,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatMessages = document.getElementById('chat-messages');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
+    
+    const btnToggleHeatmap = document.getElementById('btn-toggle-heatmap');
+    const heatmapLeaderboard = document.getElementById('heatmap-leaderboard');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    const blueprintContainer = document.getElementById('blueprint-container');
 
     // --- State ---
     let myNombre = "";
     let myZone = "";
     let latencyInterval = null;
+    let isHeatmapMode = false;
+    let heatmapUIInterval = null;
 
     // --- Navigation Logic ---
     function showScreen(screenEl) {
@@ -64,10 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
         showScreen(screenMain);
         switchTab('tab-map');
 
-        // Setup latencies
+        // Setup latencies and Heatmap CRDT
         if (latencyInterval) clearInterval(latencyInterval);
         latencyInterval = setInterval(updateUI, 2000);
         updateUI();
+        startHeatmapCRDT();
     }
 
     function updateUI() {
@@ -275,6 +283,120 @@ document.addEventListener("DOMContentLoaded", () => {
         appendMessage(data.nombre || 'Desconocido', data.text, false);
     });
 
+    // --- Heatmap CRDT Logic ---
+    window.heatmapCRDT = {};
+    let heatmapLocalInterval = null;
+    let heatmapSyncInterval = null;
+
+    function startHeatmapCRDT() {
+        if (heatmapLocalInterval) clearInterval(heatmapLocalInterval);
+        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
+
+        // Cada segundo, el peer incrementa su tiempo en la zona actual
+        heatmapLocalInterval = setInterval(() => {
+            const myId = WebRTCEngine.getMyId();
+            if (!myId || !myZone) return;
+            
+            if (!window.heatmapCRDT[myId]) {
+                window.heatmapCRDT[myId] = {};
+            }
+            window.heatmapCRDT[myId][myZone] = (window.heatmapCRDT[myId][myZone] || 0) + 1;
+        }, 1000);
+
+        // Cada 5 segundos, hace gossip enviando su estado CRDT completo a todos los peers conectados
+        heatmapSyncInterval = setInterval(() => {
+            if (!WebRTCEngine.getMyId()) return;
+            WebRTCEngine.broadcast(PROTOCOL.HEATMAP_SYNC, window.heatmapCRDT);
+        }, 5000);
+    }
+
+    function stopHeatmapCRDT() {
+        if (heatmapLocalInterval) clearInterval(heatmapLocalInterval);
+        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
+    }
+
+    WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, (data) => {
+        // Fusionar el CRDT recibido guardando siempre el valor máximo
+        for (const peerId in data) {
+            if (!window.heatmapCRDT[peerId]) {
+                window.heatmapCRDT[peerId] = {};
+            }
+            for (const zone in data[peerId]) {
+                const localScore = window.heatmapCRDT[peerId][zone] || 0;
+                const remoteScore = data[peerId][zone];
+                window.heatmapCRDT[peerId][zone] = Math.max(localScore, remoteScore);
+            }
+        }
+        if (isHeatmapMode) renderHeatmap();
+    });
+
+    function calculateGlobalHeatmap() {
+        const totals = {};
+        for (const peerId in window.heatmapCRDT) {
+            for (const zone in window.heatmapCRDT[peerId]) {
+                totals[zone] = (totals[zone] || 0) + window.heatmapCRDT[peerId][zone];
+            }
+        }
+        return totals;
+    }
+
+    function renderHeatmap() {
+        if (!isHeatmapMode) {
+            // Reset visuals
+            ['zona-a-bg', 'zona-b-bg', 'zona-c-bg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.backgroundColor = '';
+                    el.style.boxShadow = '';
+                }
+            });
+            return;
+        }
+
+        const totals = calculateGlobalHeatmap();
+        let maxScore = 0;
+        for (const z in totals) {
+            if (totals[z] > maxScore) maxScore = totals[z];
+        }
+
+        const zoneMap = { 'Zona A': { id: 'zona-a-bg', color: '255, 179, 173' }, 'Zona B': { id: 'zona-b-bg', color: '68, 226, 205' }, 'Zona C': { id: 'zona-c-bg', color: '255, 84, 81' } };
+        
+        for (const zName in zoneMap) {
+            const score = totals[zName] || 0;
+            const intensity = maxScore > 0 ? score / maxScore : 0;
+            const el = document.getElementById(zoneMap[zName].id);
+            if (el) {
+                if (intensity > 0) {
+                    const c = zoneMap[zName].color;
+                    el.style.backgroundColor = `rgba(${c}, ${0.05 + intensity * 0.25})`;
+                    el.style.boxShadow = intensity > 0.2 ? `inset 0 0 ${intensity * 40}px rgba(${c}, ${intensity * 0.5})` : 'none';
+                } else {
+                    el.style.backgroundColor = '';
+                    el.style.boxShadow = '';
+                }
+            }
+        }
+
+        // Leaderboard Update
+        const sortedZones = Object.keys(totals).map(z => ({ name: z, score: totals[z] })).sort((a,b) => b.score - a.score);
+        if (sortedZones.length === 0) {
+            leaderboardList.innerHTML = `<div class="text-center text-on-surface-variant/40 text-[11px] font-label-mono mt-2">Sin datos aún</div>`;
+        } else {
+            leaderboardList.innerHTML = sortedZones.slice(0, 5).map((z, idx) => {
+                const color = idx === 0 ? '#fbbf24' : idx === 1 ? '#9ca3af' : idx === 2 ? '#b45309' : '#6b7280';
+                return `
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface/40 border border-outline-variant/20">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-[12px]" style="color: ${color}">#${idx + 1}</span>
+                            <span class="font-headline-md text-[13px] text-on-surface">${z.name}</span>
+                        </div>
+                        <span class="font-label-mono text-[11px] text-white/60 bg-black/30 px-1.5 py-0.5 rounded">${Math.floor(z.score)}s</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
     // --- UI Event Listeners ---
     inputNickname.addEventListener('input', (e) => {
         btnEnter.disabled = e.target.value.trim().length < 3;
@@ -298,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(confirm('¿Salir de NodeMap?')) {
             WebRTCEngine.desconectar();
             if(latencyInterval) clearInterval(latencyInterval);
+            stopHeatmapCRDT();
             myNombre = "";
             myZone = "";
             inputNickname.value = '';
@@ -307,8 +430,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnChangeZone.addEventListener('click', () => {
         WebRTCEngine.desconectar();
+        stopHeatmapCRDT();
         showScreen(screenZone);
     });
+
+    // --- Heatmap Toggle ---
+    if (btnToggleHeatmap) {
+        btnToggleHeatmap.addEventListener('click', () => {
+            isHeatmapMode = !isHeatmapMode;
+            if (isHeatmapMode) {
+                btnToggleHeatmap.classList.add('bg-primary/20', 'border-primary/50', 'text-primary');
+                btnToggleHeatmap.classList.remove('bg-[#0c0b15]', 'text-white/70');
+                blueprintContainer.classList.add('heatmap-active');
+                heatmapLeaderboard.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                renderHeatmap();
+                if (heatmapUIInterval) clearInterval(heatmapUIInterval);
+                heatmapUIInterval = setInterval(renderHeatmap, 2000);
+            } else {
+                btnToggleHeatmap.classList.remove('bg-primary/20', 'border-primary/50', 'text-primary');
+                btnToggleHeatmap.classList.add('bg-[#0c0b15]', 'text-white/70');
+                blueprintContainer.classList.remove('heatmap-active');
+                heatmapLeaderboard.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                renderHeatmap();
+                if (heatmapUIInterval) clearInterval(heatmapUIInterval);
+            }
+        });
+    }
 
     navTabs.forEach(tab => {
         tab.addEventListener('click', () => {

@@ -321,6 +321,17 @@
         .animate-fade-in {
             animation: fade-in 0.4s ease-out;
         }
+
+        /* --- Heatmap UI --- */
+        .heatmap-active .node-walking {
+            opacity: 0.15 !important;
+            filter: saturate(0);
+            transition: opacity 0.8s ease, filter 0.8s ease, top 6s linear, left 6s linear;
+        }
+        .heatmap-active .blueprint-room, .heatmap-active .blueprint-pasillo {
+            opacity: 0.2;
+            transition: opacity 0.8s ease;
+        }
     </style>
 </head>
 <body class="font-body-md text-body-md h-[100dvh] w-screen flex flex-col relative grid-bg">
@@ -482,23 +493,34 @@
             <div class="flex justify-between items-center mb-4 md:mb-6 flex-none z-20">
                 <h2 class="font-headline-lg text-xl md:text-[24px] font-bold text-on-surface tracking-tight">Mapa</h2>
                 <div class="flex items-center gap-2">
-                    <button class="bg-[#0c0b15] border border-outline-variant/30 hover:border-primary/50 hover:text-primary text-white/70 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-200 shadow-sm" id="btn-change-zone">
-                        <span class="material-symbols-outlined text-[16px]">swap_horiz</span> Cambiar
+                    <button class="bg-[#0c0b15] border border-outline-variant/30 hover:border-primary/50 hover:text-primary text-white/70 px-2 py-1.5 md:px-3 rounded-lg flex items-center gap-1 transition-all duration-200 shadow-sm" id="btn-toggle-heatmap">
+                        <span class="material-symbols-outlined text-[16px]">local_fire_department</span> <span class="hidden md:inline">Heatmap</span>
                     </button>
-                    <span class="badge-chip px-3 py-1.5 rounded-lg" id="current-zone-display">ZONA A</span>
+                    <button class="bg-[#0c0b15] border border-outline-variant/30 hover:border-primary/50 hover:text-primary text-white/70 px-2 py-1.5 md:px-3 rounded-lg flex items-center gap-1 transition-all duration-200 shadow-sm" id="btn-change-zone">
+                        <span class="material-symbols-outlined text-[16px]">swap_horiz</span> <span class="hidden md:inline">Cambiar</span>
+                    </button>
+                    <span class="badge-chip px-2 py-1.5 md:px-3 rounded-lg" id="current-zone-display">ZONA A</span>
                 </div>
             </div>
             <div class="flex-grow glass-card-solid rounded-2xl relative overflow-auto p-2 md:p-4">
+                <!-- Heatmap Leaderboard -->
+                <div id="heatmap-leaderboard" class="absolute top-4 right-4 md:right-8 w-[220px] md:w-[260px] glass-card-solid rounded-xl p-3 shadow-2xl z-30 transition-all duration-500 opacity-0 pointer-events-none translate-y-4">
+                    <h3 class="font-headline-sm text-primary mb-2 flex items-center gap-2 border-b border-outline-variant/30 pb-2 text-[13px]"><span class="material-symbols-outlined text-[16px]">leaderboard</span> Top Zonas</h3>
+                    <div id="leaderboard-list" class="flex flex-col gap-1.5">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
                 <div class="relative w-full h-full min-w-[600px] min-h-[600px] m-auto z-0 blueprint-grid font-label-mono border border-outline-variant/40 rounded-xl shadow-lg gap-1 p-2" id="blueprint-container">
                     <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none">
-                        <div class="zone-left rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona A</div>
+                        <div id="zona-a-bg" class="zone-left rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3; transition: all 0.8s ease;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona A</div>
                         </div>
-                        <div class="zone-center rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona B</div>
+                        <div id="zona-b-bg" class="zone-center rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4; transition: all 0.8s ease;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona B</div>
                         </div>
-                        <div class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6;">
-                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold">Zona C</div>
+                        <div id="zona-c-bg" class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6; transition: all 0.8s ease;">
+                            <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona C</div>
                         </div>
                     </div>
                     <!-- Blueprint layout -->

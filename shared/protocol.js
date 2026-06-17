@@ -10,6 +10,7 @@ const PROTOCOL = {
   POSITION: "position",
   PING: "ping",
   PONG: "pong",
+  HEATMAP_SYNC: "heatmap-sync",
 };
 
 if (typeof module !== 'undefined' && module.exports) {
