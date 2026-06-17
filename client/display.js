@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, () => recordActivity());
     WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, () => recordActivity());
 
-    // Periodically update active node count
+    // Periodically update active node count and network quality
     setInterval(() => {
         const peers = WebRTCEngine.getPeers();
         const count = peers.length;
@@ -42,6 +42,49 @@ document.addEventListener("DOMContentLoaded", () => {
         if (count > peakConnections) {
             peakConnections = count;
             kpiPeak.textContent = peakConnections;
+        }
+
+        // Calculate Average Latency
+        let totalLatency = 0;
+        let latencyCount = 0;
+        for (const peer of peers) {
+            const lat = WebRTCEngine.getLatency(peer.id);
+            if (lat !== null && !isNaN(lat)) {
+                totalLatency += lat;
+                latencyCount++;
+            }
+        }
+        
+        const avgLatency = latencyCount > 0 ? Math.round(totalLatency / latencyCount) : 0;
+        const kpiLatency = document.getElementById("kpi-latency");
+        const kpiLatencyIcon = document.getElementById("kpi-latency-icon");
+        const kpiLatencyGlow = document.getElementById("kpi-latency-glow");
+        
+        if (kpiLatency) {
+            kpiLatency.innerHTML = `${avgLatency}<span class="text-xl text-white/50">ms</span>`;
+            
+            // Remove previous colors
+            kpiLatencyIcon.className = "material-symbols-outlined text-4xl transition-colors";
+            kpiLatencyGlow.className = "absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150";
+            
+            if (avgLatency === 0) {
+                // No peers or no latency measured yet
+                kpiLatencyIcon.classList.add("text-gray-400/80");
+                kpiLatencyGlow.classList.add("bg-gray-500/10");
+                kpiLatencyIcon.textContent = "wifi_off";
+            } else if (avgLatency < 50) {
+                kpiLatencyIcon.classList.add("text-green-400/80");
+                kpiLatencyGlow.classList.add("bg-green-500/10");
+                kpiLatencyIcon.textContent = "wifi";
+            } else if (avgLatency <= 150) {
+                kpiLatencyIcon.classList.add("text-yellow-400/80");
+                kpiLatencyGlow.classList.add("bg-yellow-500/10");
+                kpiLatencyIcon.textContent = "network_wifi_2_bar";
+            } else {
+                kpiLatencyIcon.classList.add("text-red-400/80");
+                kpiLatencyGlow.classList.add("bg-red-500/10");
+                kpiLatencyIcon.textContent = "network_wifi_1_bar";
+            }
         }
     }, 1000);
 
