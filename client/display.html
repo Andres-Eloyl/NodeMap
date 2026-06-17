@@ -1,170 +1,110 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html class="dark" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NodeMap — Visualización P2P en Tiempo Real</title>
-    <meta name="description"
-        content="Dashboard interactivo y mapa en tiempo real de nodos P2P conectados mediante WebRTC en la feria universitaria.">
-    <!-- Favicon inline SVG rocket -->
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
-
-    <!-- 1. Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-
-    <!-- 2. D3.js v7 CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-
-    <!-- 3. CSS Propio -->
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>NodeMap - Live Network Stats</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#ffb3ad", secondary: "#44e2cd", background: "#13121d", surface: "#1f1e2a" },
+                    fontFamily: { sans: ["Montserrat", "sans-serif"], logo: ["Space Grotesk", "sans-serif"], mono: ["JetBrains Mono", "monospace"] }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="display.css">
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
+<body class="h-screen w-screen flex flex-col bg-background text-white p-4 md:p-8 overflow-hidden relative">
+    
+    <!-- Background grid & glow -->
+    <div class="absolute inset-0 z-0 pointer-events-none opacity-20" style="background-image: radial-gradient(circle at 50% 50%, rgba(255, 179, 173, 0.1) 0%, transparent 50%);"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
 
-<body>
-    <div id="layout-root">
+    <div class="relative z-10 flex-grow flex flex-col max-w-[1400px] w-full mx-auto">
         <!-- HEADER -->
-        <header id="app-header">
-            <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
-                <img src="/logo.svg" alt="NodeMap Logo" style="height: 40px; width: 40px; filter: drop-shadow(0 0 8px rgba(255,179,173,0.3));">
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(255,179,173,0.3)]">
+                    <span class="material-symbols-outlined text-primary text-3xl">hub</span>
+                </div>
                 <div>
-                    <h1 style="margin: 0; font-size: 1.5rem;">NodeMap</h1>
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Red P2P en Tiempo Real</p>
+                    <h1 class="font-logo text-3xl font-bold tracking-tight text-white uppercase">NodeMap <span class="text-primary">Pulse</span></h1>
+                    <p class="text-white/60 text-sm font-medium tracking-widest uppercase">Estadísticas P2P en Vivo</p>
                 </div>
             </div>
-            <div class="live-indicators">
-                <div id="mode-badge" style="display: flex; align-items: center; gap: 12px;">
-                    <button id="toggle-heatmap-btn" class="heatmap-btn">
-                        🔥 Modo Heatmap
-                    </button>
-                </div>
-                <div class="indicator-badge">
-                    <div class="status-dot"></div>
-                    <span>Peers: <span id="header-peer-count">0</span></span>
-                </div>
-                <div class="indicator-badge">
-                    <span>Mensajes: <span id="header-message-count">0</span></span>
-                </div>
-                <div class="indicator-badge" id="network-activity">
-                    <div class="health-rings" id="health-rings">
-                        <div class="ring ring-1"></div>
-                        <div class="ring ring-2"></div>
-                        <div class="ring ring-3"></div>
-                    </div>
-                    <span>Red</span>
-                </div>
-                <!-- Uptime con fondo diferente -->
-                <div class="indicator-badge"
-                    style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
-                    <span>◷ <span id="header-uptime">00:00:00</span></span>
-                </div>
+            <div class="flex items-center gap-3 bg-surface/50 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+                <div class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+                <span class="font-mono text-sm text-green-400 font-medium tracking-wide">MESH ACTIVA</span>
             </div>
         </header>
 
-        <!-- CONTENIDO PRINCIPAL -->
-        <main id="content-row">
-            <!-- COLUMNA CENTRAL (Grafo + Panel Técnico) -->
-            <section id="center-column">
-
-                <!-- ÁREA DEL GRAFO SVG -->
-                <div id="graph-container">
-                    <div id="empty-state" class="empty-state">
-                        <div class="empty-title">Esperando conexiones...</div>
-                        <div class="empty-sub">Escanea el QR para unirte a la red</div>
-                        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <!-- KPIS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- KPI 1 -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+                <div class="relative z-10 flex items-start justify-between">
+                    <div>
+                        <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Nodos Activos</p>
+                        <h2 id="kpi-nodes" class="font-logo text-5xl font-bold text-white">0</h2>
                     </div>
-                    <svg id="graph-svg"></svg>
-                    
-                    <!-- LEADERBOARD HEATMAP (Hidden by default) -->
-                    <div id="heatmap-leaderboard" class="hidden">
-                        <div class="leaderboard-title">🔥 Zonas Más Concurridas</div>
-                        <div class="leaderboard-list" id="leaderboard-list">
-                            <!-- Se llena por JS -->
-                        </div>
-                    </div>
+                    <span class="material-symbols-outlined text-primary/80 text-4xl">share_windows</span>
                 </div>
-
-                <!-- PANEL TÉCNICO INFERIOR -->
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
-                    <div
-                        style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px;">
-                        Métricas del Nodo Central</div>
-                    <div id="server-status"
-                        style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 8px;">
-                        <div id="server-dot"
-                            style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 8px var(--color-danger); transition: all 0.3s ease;">
-                        </div>
-                        <span id="server-text">Servidor no disponible</span>
+            </div>
+            <!-- KPI 2 -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+                <div class="relative z-10 flex items-start justify-between">
+                    <div>
+                        <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Peak Simultáneo</p>
+                        <h2 id="kpi-peak" class="font-logo text-5xl font-bold text-white">0</h2>
                     </div>
+                    <span class="material-symbols-outlined text-secondary/80 text-4xl">trending_up</span>
                 </div>
-                <div id="tech-panel">
-                    <div class="stat-card" id="stat-peers">
-                        <div class="stat-icon"></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Nodos Activos</span>
-                            <span class="stat-value" id="peer-count">0</span>
-                        </div>
+            </div>
+            <!-- KPI 3 -->
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+                <div class="relative z-10 flex items-start justify-between">
+                    <div>
+                        <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Tráfico Total (Msjs)</p>
+                        <h2 id="kpi-messages" class="font-logo text-5xl font-bold text-white">0</h2>
                     </div>
-                    <div class="stat-card" id="stat-messages">
-                        <div class="stat-icon"></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Tráfico de Red</span>
-                            <span class="stat-value" id="message-count">0</span>
-                        </div>
-                    </div>
-                    <div class="stat-card" id="stat-uptime">
-                        <div class="stat-icon"></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Tiempo de Actividad</span>
-                            <span class="stat-value" id="uptime-display">00:00:00</span>
-                        </div>
-                    </div>
-                    <div class="stat-card" id="stat-latency">
-                        <div class="stat-icon"></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Latencia Promedio</span>
-                            <span class="stat-value"><span id="latency-display">0</span> ms</span>
-                        </div>
-                    </div>
-                    <div class="stat-card" id="stat-zones">
-                        <div class="stat-icon"></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Zonas Activas</span>
-                            <span class="stat-value" id="zones-display">0</span>
-                        </div>
-                    </div>
+                    <span class="material-symbols-outlined text-purple-400/80 text-4xl">swap_calls</span>
                 </div>
+            </div>
+        </div>
 
-            </section>
-
-            <!-- PANEL LATERAL: HISTORIAL DE EVENTOS -->
-            <aside id="event-log">
-                <div class="log-header">Historial de Eventos</div>
-                <div class="log-entries" id="log-entries-container">
-                    <!-- Las entradas se generarán dinámicamente desde display.js -->
-                    <!-- Ejemplo de estructura de entrada:
-                    <div class="log-entry type-join">
-                        <div class="log-time">10:45:01</div>
-                        <div class="log-content"><strong>Visitante 1</strong> se unió a la red</div>
-                    </div>
-                    -->
-                </div>
-            </aside>
-        </main>
+        <!-- D3 CHART CONTAINER -->
+        <div class="flex-grow glass-card rounded-3xl p-6 relative flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg tracking-wide flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">bar_chart</span>
+                    Flujo de Mensajes por Segundo
+                </h3>
+                <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
+            </div>
+            <div id="chart-container" class="flex-grow w-full relative">
+                <!-- D3 SVG will be injected here -->
+            </div>
+        </div>
     </div>
 
-
-    <!-- <script src="mock-webrtc.js"></script> -->
-
+    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/shared/config.js"></script>
     <script src="/shared/protocol.js"></script>
     <script src="webrtc.js"></script>
-
     <script src="display.js"></script>
 </body>
-
 </html>
