@@ -322,6 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 modal.classList.remove('opacity-100', 'pointer-events-auto');
             modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.style.pointerEvents = ''; // Clear inline style so the class pointer-events-none works again
             modal.style.pointerEvents = 'none'; // Explicit pointer-events
                 content.classList.remove('scale-100');
                 content.classList.add('scale-95');
