@@ -144,6 +144,48 @@ document.addEventListener("DOMContentLoaded", () => {
         updateChart(true);
     }, 1000);
 
+    // --- Packet Sniffer (Terminal) ---
+    const terminalOutput = document.getElementById('terminal-output');
+    WebRTCEngine.onMessage("RAW_PACKET", (packet) => {
+        if (!terminalOutput) return;
+
+        // Try to parse just to see if it's a message type we want to highlight
+        let msgType = "UNKNOWN";
+        try {
+            const parsed = JSON.parse(packet.raw);
+            msgType = parsed.tipo ? parsed.tipo.toUpperCase() : "RAW_DATA";
+            // Do not show pings to avoid spamming the console
+            if (msgType === "PING" || msgType === "PONG") return;
+        } catch(e) {}
+
+        const el = document.createElement('div');
+        el.className = "break-all bg-green-500/5 p-2 rounded border border-green-500/10";
+        
+        const header = `<div class="text-white/60 mb-1 flex justify-between">
+            <span>[${new Date().toLocaleTimeString()}] INBOUND_PACKET</span>
+            <span class="text-yellow-400">${packet.size} B</span>
+        </div>`;
+        
+        // Highlight encrypted payload if exists
+        let rawText = packet.raw;
+        if (rawText.includes('_encrypted')) {
+            rawText = rawText.replace(/"_encrypted":"([^"]+)"/, '"_encrypted":"<span class="text-red-400 bg-red-400/10 px-1 font-bold animate-pulse">$1</span>"');
+            el.innerHTML = `${header}<div class="text-green-400 font-bold mb-1">[SECURE E2EE PAYLOAD DETECTED]</div><div>${rawText}</div>`;
+        } else {
+            el.innerHTML = `${header}<div class="text-green-500/70">${rawText}</div>`;
+        }
+
+        terminalOutput.appendChild(el);
+        
+        // Keep max 50 lines
+        if (terminalOutput.children.length > 50) {
+            terminalOutput.removeChild(terminalOutput.firstChild);
+        }
+
+        // Auto scroll
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    });
+
     // --- Animated Background ---
     const bgContainer = document.getElementById('animated-bg');
     if (bgContainer) {

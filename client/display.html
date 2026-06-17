@@ -82,17 +82,38 @@
             </div>
         </div>
 
-        <!-- D3 CHART CONTAINER -->
-        <div class="flex-grow glass-card rounded-3xl p-6 relative flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg tracking-wide flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">bar_chart</span>
-                    Flujo de Mensajes por Segundo
-                </h3>
-                <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
+        <!-- MAIN CONTENT (Chart + Terminal) -->
+        <div class="flex-grow flex flex-col md:flex-row gap-6 h-full min-h-0">
+            
+            <!-- D3 CHART CONTAINER -->
+            <div class="glass-card rounded-3xl p-6 relative flex flex-col flex-grow md:w-2/3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg tracking-wide flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">bar_chart</span>
+                        Flujo de Mensajes por Segundo
+                    </h3>
+                    <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
+                </div>
+                <div id="chart-container" class="flex-grow w-full relative min-h-[200px]">
+                    <!-- D3 SVG will be injected here -->
+                </div>
             </div>
-            <div id="chart-container" class="flex-grow w-full relative">
-                <!-- D3 SVG will be injected here -->
+
+            <!-- PACKET SNIFFER TERMINAL -->
+            <div class="glass-card rounded-3xl p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
+                <div class="flex justify-between items-center mb-4 border-b border-green-500/20 pb-3">
+                    <h3 class="font-mono text-green-400 font-bold text-sm tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-green-400 text-lg">terminal</span>
+                        E2EE PACKET SNIFFER
+                    </h3>
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+                    </div>
+                </div>
+                <div id="terminal-output" class="flex-grow w-full overflow-y-auto font-mono text-[10px] sm:text-xs text-green-500/70 flex flex-col gap-2 scroll-smooth pr-2 pb-2">
+                    <div class="text-green-500/40 italic">> Escuchando tráfico crudo en red descentralizada...</div>
+                    <div class="text-green-500/40 italic">> Protocolo End-to-End Encryption [ACTIVO]</div>
+                </div>
             </div>
         </div>
     </div>

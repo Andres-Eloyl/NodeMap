@@ -113,6 +113,20 @@ function setupDataChannel(peerId, nombre, dc) {
         return;
       }
 
+      // Interceptar paquete crudo para monitoreo de cifrado
+      fireCallbacks("RAW_PACKET", { raw: event.data, size: event.data.length, peerId: peerId });
+
+      // Descifrar si es necesario
+      if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
+        if (msg._encrypted) {
+            try {
+                // Pseudo-decrypt: Decode base64 and remove salt
+                const decoded = decodeURIComponent(atob(msg._encrypted));
+                msg.text = decoded.replace("_NO_LEER_ESTO_XD_", "");
+            } catch(e) {}
+        }
+      }
+
       fireCallbacks(tipo, msg);
     } catch (err) {
       console.error("[WebRTC] Error procesando mensaje:", err);
@@ -287,7 +301,18 @@ function sendMessage(peerId, tipo, datos) {
   const peer = peers.get(peerId);
   if (!peer || !peer.dc || peer.dc.readyState !== "open") return;
   try {
-    peer.dc.send(JSON.stringify({ tipo, ...datos }));
+    let finalDatos = { ...datos };
+    
+    // Pseudo-Cifrado E2EE para demostración técnica
+    if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
+        if (finalDatos.text) {
+            // Encode to base64 with a salt
+            finalDatos._encrypted = btoa(encodeURIComponent(finalDatos.text + "_NO_LEER_ESTO_XD_"));
+            delete finalDatos.text; // Remove plain text!
+        }
+    }
+    
+    peer.dc.send(JSON.stringify({ tipo, ...finalDatos }));
   } catch (err) {
     console.error("[WebRTC] Error enviando mensaje:", err);
   }
