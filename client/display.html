@@ -24,7 +24,7 @@
     <!-- D3.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
-<body class="h-screen w-screen flex flex-col bg-background text-white p-4 md:p-8 overflow-hidden relative">
+<body class="min-h-screen w-full flex flex-col bg-background text-white p-4 md:p-8 overflow-y-auto overflow-x-hidden relative">
     
     <!-- Background grid & glow -->
     <div id="animated-bg"></div>
@@ -83,7 +83,7 @@
         </div>
 
         <!-- MAIN CONTENT (Chart + Terminal) -->
-        <div class="flex-grow flex flex-col md:flex-row gap-6 h-full min-h-0">
+        <div class="flex-grow flex flex-col md:flex-row gap-6 min-h-[400px]">
             
             <!-- D3 CHART CONTAINER -->
             <div class="glass-card rounded-3xl p-6 relative flex flex-col flex-grow md:w-2/3">
