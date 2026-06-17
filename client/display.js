@@ -143,4 +143,35 @@ document.addEventListener("DOMContentLoaded", () => {
         
         updateChart(true);
     }, 1000);
+
+    // --- Animated Background ---
+    const bgContainer = document.getElementById('animated-bg');
+    if (bgContainer) {
+        const length = 25;
+        const animationTime = 45;
+        const baseColors = ['#ffb3ad', '#e3bdba', '#69d8d4']; 
+        
+        for (let i = 1; i <= length; i++) {
+            const div = document.createElement('div');
+            div.className = 'rainbow-line';
+            
+            const colors = [...baseColors].sort(() => Math.random() - 0.5);
+            
+            div.style.boxShadow = `
+                -130px 0 80px 40px #13121d, 
+                -50px 0 50px 25px ${colors[0]},
+                0 0 50px 25px ${colors[1]}, 
+                50px 0 50px 25px ${colors[2]},
+                130px 0 80px 40px #13121d
+            `;
+            
+            const duration = animationTime - (animationTime / length / 2 * i);
+            const delay = -(i / length * animationTime);
+            
+            div.style.animation = `slide-bg ${duration}s linear infinite`;
+            div.style.animationDelay = `${delay}s`;
+            
+            bgContainer.appendChild(div);
+        }
+    }
 });

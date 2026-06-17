@@ -32,3 +32,30 @@
     fill: url(#bar-gradient);
     rx: 4; /* rounded corners */
 }
+
+/* --- Animated Background --- */
+@keyframes slide-bg {
+    from { right: -25vw; }
+    to { right: 125vw; }
+}
+
+#animated-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.rainbow-line {
+    height: 100vh;
+    width: 0;
+    top: 0;
+    position: absolute;
+    transform: rotate(10deg);
+    transform-origin: top right;
+    opacity: 0.6;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
