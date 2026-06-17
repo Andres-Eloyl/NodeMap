@@ -430,7 +430,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = inputNickname.value.trim();
         if(name.length >= 3) {
             myNombre = name;
-            showScreen(screenZone);
+            
+            // Auto-select zone if provided in URL (Dynamic QR)
+            const urlParams = new URLSearchParams(window.location.search);
+            const preselectedZone = urlParams.get('zona');
+            
+            let isValidZone = false;
+            if (preselectedZone) {
+                zoneButtons.forEach(btn => {
+                    if (btn.dataset.zone === preselectedZone) isValidZone = true;
+                });
+            }
+
+            if (isValidZone) {
+                connectToNetwork(myNombre, preselectedZone);
+            } else {
+                showScreen(screenZone);
+            }
         }
     });
 
