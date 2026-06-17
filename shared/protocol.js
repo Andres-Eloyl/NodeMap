@@ -11,6 +11,7 @@ const PROTOCOL = {
   PING: "ping",
   PONG: "pong",
   HEATMAP_SYNC: "heatmap-sync",
+  ORGANIZER_BROADCAST: "organizer-broadcast",
 };
 
 if (typeof module !== 'undefined' && module.exports) {

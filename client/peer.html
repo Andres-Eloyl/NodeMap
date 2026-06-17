@@ -340,6 +340,22 @@
         <!-- JS will populate lines here -->
     </div>
 
+    <!-- Organizer Broadcast Modal -->
+    <div id="broadcast-modal" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-red-900/60 backdrop-blur-md"></div>
+        <div id="broadcast-content" class="relative z-10 glass-card-solid border-red-500/50 shadow-[0_0_50px_rgba(255,0,0,0.4)] rounded-2xl p-6 md:p-10 m-4 max-w-[600px] w-full transform scale-95 transition-transform duration-300 text-center">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
+                    <span class="material-symbols-outlined text-red-400 text-4xl">campaign</span>
+                </div>
+            </div>
+            <h2 class="font-headline-lg text-2xl md:text-3xl font-bold text-white tracking-tight mb-2 uppercase tracking-widest text-red-400">Mensaje del Organizador</h2>
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent my-4"></div>
+            <p id="broadcast-text" class="font-body-lg text-lg md:text-xl text-white font-medium leading-relaxed my-6"></p>
+            <p class="font-label-mono text-[11px] text-white/50 tracking-[0.15em] uppercase mt-4">Mensaje Global - P2P Network</p>
+        </div>
+    </div>
+
 <!-- Screen 1: Entry / Login -->
 <div class="absolute inset-0 z-50 flex flex-col items-center bg-transparent px-5 view-hidden overflow-y-auto py-8" id="screen-entry">
 

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>NodeMap - Panel de Organizador</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#ffb3ad", background: "#13121d" },
+                    fontFamily: { sans: ["Montserrat", "sans-serif"], logo: ["Space Grotesk", "sans-serif"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #13121d; color: #e5e0f0; margin: 0; }
+        .glass-card { background: rgba(21, 20, 31, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255, 84, 81, 0.35); }
+        .input-field { background: #0c0b15 !important; border: 1px solid rgba(255, 84, 81, 0.45); color: #f0ece6; outline: none; transition: all 0.25s ease; }
+        .input-field:focus { border-color: rgba(255, 84, 81, 0.8); box-shadow: 0 0 0 3px rgba(255, 84, 81, 0.15); }
+        .btn-primary { background: linear-gradient(135deg, #ff5451 0%, #d63b38 100%); color: #fff; font-weight: 600; transition: all 0.25s ease; }
+        .btn-primary:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(255, 84, 81, 0.5); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-center relative p-4">
+    <!-- Animated background simple -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="glass-card rounded-3xl p-8 md:p-10 w-full max-w-[500px] relative z-10 shadow-2xl">
+        <div class="text-center flex flex-col items-center gap-3 mb-8">
+            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-4xl">admin_panel_settings</span>
+            </div>
+            <div>
+                <h1 class="font-logo text-[28px] font-bold text-primary tracking-tight uppercase">Control de Red</h1>
+                <p class="text-sm text-white/60 mt-1">Modo Organizador - Broadcast P2P</p>
+            </div>
+        </div>
+
+        <!-- Connection Status -->
+        <div id="status-box" class="mb-6 p-4 rounded-xl border border-white/10 bg-black/20 flex items-center justify-between">
+            <span class="text-sm font-medium">Estado WebRTC:</span>
+            <span id="status-text" class="text-xs font-mono px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">CONECTANDO...</span>
+        </div>
+
+        <!-- Broadcast Form -->
+        <form id="broadcast-form" class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="text-xs tracking-widest text-white/70 uppercase font-medium" for="message">Mensaje de Alerta Global</label>
+                <textarea id="message" rows="4" class="input-field rounded-xl p-4 resize-none font-medium" placeholder="Escribe el anuncio para todos los celulares..."></textarea>
+            </div>
+            <button id="btn-send" class="btn-primary w-full rounded-xl h-[56px] flex items-center justify-center gap-2 mt-2" disabled type="submit">
+                <span class="material-symbols-outlined text-[22px]">campaign</span>
+                EMITIR BROADCAST
+            </button>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/shared/config.js"></script>
+    <script src="/shared/protocol.js"></script>
+    <script src="webrtc.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('broadcast-form');
+            const messageInput = document.getElementById('message');
+            const btnSend = document.getElementById('btn-send');
+            const statusText = document.getElementById('status-text');
+
+            // Connect as Organizer (no specific zone)
+            WebRTCEngine.conectar("ORGANIZADOR", "Control");
+
+            // Simple polling to check connection state (since Mock/WebRTC connects almost instantly)
+            setInterval(() => {
+                const peers = WebRTCEngine.getPeers();
+                if (peers.length > 0) {
+                    statusText.textContent = `CONECTADO (${peers.length} PEERS)`;
+                    statusText.className = "text-xs font-mono px-2 py-1 rounded bg-green-500/20 text-green-400 border border-green-500/30";
+                    if (messageInput.value.trim().length > 0) {
+                        btnSend.disabled = false;
+                    }
+                } else {
+                    statusText.textContent = "ESPERANDO PEERS...";
+                    statusText.className = "text-xs font-mono px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+                    btnSend.disabled = true;
+                }
+            }, 1000);
+
+            messageInput.addEventListener('input', (e) => {
+                const peers = WebRTCEngine.getPeers();
+                btnSend.disabled = e.target.value.trim().length === 0 || peers.length === 0;
+            });
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = messageInput.value.trim();
+                if (text) {
+                    // Send to all peers via P2P
+                    WebRTCEngine.broadcast(PROTOCOL.ORGANIZER_BROADCAST, { text: text });
+                    messageInput.value = '';
+                    btnSend.disabled = true;
+                    
+                    // Visual feedback
+                    const originalText = btnSend.innerHTML;
+                    btnSend.innerHTML = '<span class="material-symbols-outlined">check_circle</span> ¡EMITIDO!';
+                    btnSend.classList.add('bg-green-600');
+                    setTimeout(() => {
+                        btnSend.innerHTML = originalText;
+                        btnSend.classList.remove('bg-green-600');
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

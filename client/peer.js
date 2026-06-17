@@ -283,6 +283,30 @@ document.addEventListener("DOMContentLoaded", () => {
         appendMessage(data.nombre || 'Desconocido', data.text, false);
     });
 
+    WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, (data) => {
+        const modal = document.getElementById('broadcast-modal');
+        const content = document.getElementById('broadcast-content');
+        const textEl = document.getElementById('broadcast-text');
+
+        if (modal && content && textEl && data.text) {
+            textEl.textContent = data.text;
+            
+            // Show modal
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                modal.classList.remove('opacity-100', 'pointer-events-auto');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }, 8000);
+        }
+    });
+
     // --- Heatmap CRDT Logic ---
     window.heatmapCRDT = {};
     let heatmapLocalInterval = null;
