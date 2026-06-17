@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateUI() {
         if (!myNombre) return;
-        const peers = WebRTCEngine.getPeers();
+        const peers = WebRTCEngine.getPeers().filter(p => p.nombre !== "Dashboard" && p.nombre !== "Organizador");
         
         // Update Nodes List
         if (peers.length === 0) {
