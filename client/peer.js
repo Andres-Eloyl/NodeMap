@@ -67,11 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return hash;
     };
 
-    let selectedColor = null;
-    let selectedEmoji = null;
-
-    
-
     function connectToNetwork(name, zone) {
         myNombre = name;
         myZone = zone;
@@ -602,7 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     }
 
-    initAvatarPickers();
     showScreen(screenEntry);
 
     window.privateChats = {}; 
