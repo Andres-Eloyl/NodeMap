@@ -46,10 +46,11 @@ function getLocalIP() {
 
 httpServer.listen(CONFIG.PORT, () => {
   const ip = getLocalIP();
-  console.log(`\n Servidor de señalización listo\n`);
-  console.log(`   Local:    http://localhost:${CONFIG.PORT}`);
-  console.log(`   Red:      http://${ip}:${CONFIG.PORT}`);
-  console.log(`   Métricas: http://${ip}:${CONFIG.PORT}${CONFIG.METRICS_PATH}`);
-  console.log(`   Test:     http://${ip}:${CONFIG.PORT}/test-signaling.html`);
-  console.log(`\n   Para celulares: conéctense a http://${ip}:${CONFIG.PORT}\n`);
+  console.log(`\n 🚀 Servidor NodeMap listo y escuchando en el puerto ${CONFIG.PORT}\n`);
+  console.log(`   📱 Teléfonos (Mapa):     http://${ip}:${CONFIG.PORT}`);
+  console.log(`   🖥️  Dashboard (Pantalla): http://${ip}:${CONFIG.PORT}/display.html`);
+  console.log(`   🎛️  Panel Organizador:    http://${ip}:${CONFIG.PORT}/organizer.html`);
+  console.log(`   🛠️  Técnico / Test:       http://${ip}:${CONFIG.PORT}/test-signaling.html`);
+  console.log(`   📊 Métricas Crudas:      http://${ip}:${CONFIG.PORT}${CONFIG.METRICS_PATH}\n`);
+  console.log(`   (Acceso Local:           http://localhost:${CONFIG.PORT})\n`);
 });
