@@ -88,7 +88,7 @@ function setupDataChannel(peerId, nombre, dc) {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     reconnecting.delete(peerId);
-    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre });
+    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida" });
     if (!pingInterval) startPingCycle();
   };
 

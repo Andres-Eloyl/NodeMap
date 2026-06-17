@@ -307,6 +307,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
+        if (data.zona === myZone && data.nombre) {
+            // Vibrate using native API (100ms on, 50ms off, 100ms on)
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            
+            showToast(`<span class="font-bold">${data.nombre}</span> acaba de llegar a tu zona`);
+        }
+    });
+
+    // --- Toast System ---
+    function showToast(messageHtml) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = 'glass-card-solid bg-surface/90 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto border-secondary/30 transform transition-all duration-300 translate-y-[-20px] opacity-0';
+        
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-secondary text-sm">waving_hand</span>
+            </div>
+            <div class="font-body-md text-[13px] leading-tight flex-grow">${messageHtml}</div>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+        });
+        
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
     // --- Heatmap CRDT Logic ---
     window.heatmapCRDT = {};
     let heatmapLocalInterval = null;
