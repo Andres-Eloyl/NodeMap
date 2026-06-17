@@ -20,7 +20,21 @@ document.addEventListener("DOMContentLoaded", () => {
     WebRTCEngine.onMessage(PROTOCOL.CHAT, () => recordActivity());
     WebRTCEngine.onMessage(PROTOCOL.POSITION, () => recordActivity());
     WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, () => recordActivity());
-    WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, () => recordActivity());
+    WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, () => recordActivity());
+    WebRTCEngine.onMessage(PROTOCOL.REACTION, (data) => {
+        recordActivity();
+        spawnReaction(data.emoji);
+    });
+
+    function spawnReaction(emoji) {
+        const el = document.createElement('div');
+        el.className = 'absolute text-4xl pointer-events-none z-50 animate-float-up';
+        el.innerText = emoji;
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.bottom = '-50px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
     setInterval(() => {
         const peers = WebRTCEngine.getPeers();
         const count = peers.length;
@@ -292,10 +306,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (replayNodesState[peer.id]) return;
 
             const node = document.createElement('div');
-            node.className = "absolute w-8 h-8 rounded-xl border border-secondary/40 bg-surface-container-high/90 backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
+            node.className = "absolute w-8 h-8 rounded-xl border backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
+            node.style.borderColor = peer.color || '#ffb3ad';
+            node.style.backgroundColor = `${peer.color || '#ffb3ad'}20`;
             node.style.transform = 'translate(-50%, -50%)'; 
             node.innerHTML = `
-                <span class="material-symbols-outlined text-secondary text-[14px]">person</span>
+                <span class="text-[14px]">${peer.avatar || '👤'}</span>
                 <div class="absolute -bottom-4 whitespace-nowrap font-mono text-[8px] text-white/70 bg-black/50 px-1 rounded">${peer.nombre}</div>
             `;
             replayCanvas.appendChild(node);

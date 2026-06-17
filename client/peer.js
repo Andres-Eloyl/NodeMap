@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const blueprintContainer = document.getElementById('blueprint-container');
     let myNombre = "";
     let myZone = "";
+    let myColor = "#ffb3ad";
+    let myAvatar = "👤";
     let latencyInterval = null;
     let isHeatmapMode = false;
     let heatmapUIInterval = null;
@@ -50,15 +52,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if(targetId === 'tab-chat') scrollToBottomChat();
-    }
+    }
+    const AVATAR_COLORS = ['#ffb3ad', '#44e2cd', '#69d8d4', '#e4beba', '#ffdad6', '#87f4f0', '#62fae3', '#ab8986'];
+    const AVATAR_EMOJIS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵'];
+
+    String.prototype.hashCode = function() {
+        var hash = 0, i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+          chr   = this.charCodeAt(i);
+          hash  = ((hash << 5) - hash) + chr;
+          hash |= 0;
+        }
+        return hash;
+    };
+
+    function generateAvatar(name) {
+        let hash = name.hashCode();
+        const color = AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+        const avatar = AVATAR_EMOJIS[Math.abs(hash) % AVATAR_EMOJIS.length];
+        return { color, avatar };
+    }
+
     function connectToNetwork(name, zone) {
         myNombre = name;
         myZone = zone;
-        currentZoneDisplay.textContent = zone.toUpperCase();
-        WebRTCEngine.conectar(name, zone);
+        const av = generateAvatar(name);
+        myColor = av.color;
+        myAvatar = av.avatar;
+        currentZoneDisplay.textContent = zone.toUpperCase();
+        WebRTCEngine.conectar(name, zone, myColor, myAvatar);
         chatMessages.innerHTML = `<div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 my-2 tracking-wide">Sistema: Conectado a ${zone}</div>`;
         showScreen(screenMain);
-        switchTab('tab-map');
+        switchTab('tab-map');
         if (latencyInterval) clearInterval(latencyInterval);
         latencyInterval = setInterval(updateUI, 2000);
         updateUI();
@@ -131,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         if (!window.peerNodesState) window.peerNodesState = {};
 
-        const allNodesData = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true }];
+        const allNodesData = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true, color: myColor, avatar: myAvatar }];
         const activeIds = new Set(allNodesData.map(p => p.id));
         Object.keys(window.peerNodesState).forEach(id => {
             if (!activeIds.has(id)) {
@@ -147,10 +173,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (window.peerNodesState[peer.id].domNode) window.peerNodesState[peer.id].domNode.remove();
                 }
                 const node = document.createElement('div');
-                node.className = `absolute w-9 h-9 rounded-xl border ${peer.isSelf ? 'border-primary/60 bg-primary/80' : 'border-secondary/40 bg-surface-container-high/90'} backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
+                node.className = `absolute w-9 h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
+                node.style.borderColor = peer.color || '#ffb3ad';
+                node.style.backgroundColor = peer.isSelf ? peer.color : `${peer.color || '#ffb3ad'}20`;
                 node.style.transform = 'translate(-50%, -50%)';
                 node.innerHTML = `
-                    <span class="material-symbols-outlined ${peer.isSelf ? 'text-white' : 'text-secondary'} text-[16px]">person</span>
+                    <span class="text-[16px]">${peer.avatar || '👤'}</span>
                     <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[9px] text-on-surface-variant/70 bg-surface/70 backdrop-blur-sm px-1.5 py-0.5 rounded-md">${peer.nombre}</div>
                 `;
                 mapCanvas.appendChild(node);
@@ -207,19 +235,42 @@ document.addEventListener("DOMContentLoaded", () => {
         return hash;
     };
 
-    function appendMessage(sender, text, isSelf) {
+    window.startPrivateChat = function(id, nombre) {
+        switchTab('tab-chat');
+        chatInput.value = '';
+        chatInput.placeholder = `Susurrando a ${nombre}...`;
+        chatInput.dataset.privateTarget = id;
+        chatInput.focus();
+    };
+
+    function appendMessage(sender, text, isSelf, isPrivate = false) {
         const alignClass = isSelf ? 'self-end' : 'self-start';
-        const bgClass = isSelf
-            ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
-            : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md';
-        const senderClass = isSelf ? 'hidden' : 'font-label-mono text-[10px] text-on-surface-variant/50 mb-1 ml-1 tracking-wide';
+        let bgClass = '';
+        let labelPrivate = '';
+
+        if (isPrivate) {
+            bgClass = isSelf
+                ? 'bg-gradient-to-br from-[#9c27b0] to-[#7b1fa2] text-white rounded-2xl rounded-br-md border border-[#e1bee7]/30 shadow-[0_0_15px_rgba(156,39,176,0.4)]'
+                : 'glass-card-solid bg-[#f3e5f5]/10 border border-[#ab47bc]/40 text-[#ce93d8] rounded-2xl rounded-bl-md shadow-[0_0_15px_rgba(171,71,188,0.2)]';
+            labelPrivate = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded">Privado</span>`;
+        } else {
+            bgClass = isSelf
+                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
+                : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md';
+        }
+
+        const senderClass = isSelf ? 'hidden' : 'font-label-mono text-[10px] text-on-surface-variant/50 mb-1 ml-1 tracking-wide flex items-center';
         
         const msgEl = document.createElement('div');
-        msgEl.className = `flex flex-col max-w-[75%] ${alignClass}`;
+        msgEl.className = `flex flex-col max-w-[75%] ${alignClass} mb-2`;
         msgEl.innerHTML = `
-            <span class="${senderClass}">${sender}</span>
-            <div class="chat-bubble px-4 py-2.5 ${bgClass}">
+            <div class="${senderClass}">
+                <span>${sender}</span>
+                ${isPrivate && !isSelf ? labelPrivate : ''}
+            </div>
+            <div class="chat-bubble px-4 py-2.5 ${bgClass} ${isPrivate ? 'text-[14px] italic' : ''}">
                 ${text}
+                ${isPrivate && isSelf ? labelPrivate : ''}
             </div>
         `;
         chatMessages.appendChild(msgEl);
@@ -230,7 +281,11 @@ document.addEventListener("DOMContentLoaded", () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
-        appendMessage(data.nombre || 'Desconocido', data.text, false);
+        if (data.isPrivate) {
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            showToast(`<span class="font-bold text-[#ce93d8]">${data.nombre || 'Desconocido'}</span> te ha susurrado.`);
+        }
+        appendMessage(data.nombre || 'Desconocido', data.text, false, data.isPrivate);
     });
 
     WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, (data) => {
@@ -465,14 +520,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    window.startPrivateChat = (peerId, name) => {
+        chatInput.dataset.privateTarget = peerId;
+        chatInput.placeholder = `Respondiendo a ${name}...`;
+        chatInput.focus();
+        switchTab('chat');
+    };
+
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const msg = chatInput.value.trim();
         if(msg) {
-            appendMessage(myNombre, msg, true);
-            chatInput.value = '';
-            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
+            const targetId = chatInput.dataset.privateTarget;
+            if (targetId) {
+                appendMessage(myNombre, msg, true, true);
+                WebRTCEngine.sendToPeer(targetId, PROTOCOL.CHAT, { text: msg, nombre: myNombre, isPrivate: true });
+                chatInput.placeholder = "Escribe un mensaje...";
+                delete chatInput.dataset.privateTarget;
+            } else {
+                appendMessage(myNombre, msg, true, false);
+                WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
+            }
+            chatInput.value = '';
         }
-    });
+    });
+
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const emoji = btn.dataset.emoji;
+            WebRTCEngine.broadcast(PROTOCOL.REACTION, { emoji, nombre: myNombre });
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // local feedback
+            btn.classList.add('scale-150');
+            setTimeout(() => btn.classList.remove('scale-150'), 150);
+        });
+    });
     showScreen(screenEntry);
 });

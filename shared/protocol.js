@@ -7,6 +7,7 @@ const PROTOCOL = {
   ANSWER: "answer",
   ICE_CANDIDATE: "ice-candidate",
   CHAT: "chat",
+  REACTION: "reaction",
   POSITION: "position",
   PING: "ping",
   PONG: "pong",

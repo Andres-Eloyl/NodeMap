@@ -38,7 +38,9 @@ const initSignaling = function(io) {
     const id = generarId();
     const nombre = socket.handshake.query.nombre || "Anónimo";
     const zona = socket.handshake.query.zona || "Zona A";
-    const peer = { id, socket, nombre, zona };
+    const color = socket.handshake.query.color || "#ffb3ad";
+    const avatar = socket.handshake.query.avatar || "👤";
+    const peer = { id, socket, nombre, zona, color, avatar };
 
     peers.set(id, peer);
     socket.peerId = id;
@@ -46,14 +48,14 @@ const initSignaling = function(io) {
     const listaPeers = [];
     peers.forEach((p, peerId) => {
       if (peerId !== id) {
-        listaPeers.push({ id: p.id, nombre: p.nombre, zona: p.zona });
+        listaPeers.push({ id: p.id, nombre: p.nombre, zona: p.zona, color: p.color, avatar: p.avatar });
       }
     });
 
     socket.emit(PROTOCOL.PEER_LIST, { miId: id, peers: listaPeers });
-    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona });
+    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona, color, avatar });
     if (nombre !== "Dashboard" && nombre !== "Organizador") {
-      sessionEvents.push({ timestamp: Date.now(), type: 'JOIN', peer: { id, nombre, zona } });
+      sessionEvents.push({ timestamp: Date.now(), type: 'JOIN', peer: { id, nombre, zona, color, avatar } });
     }
 
     addToLog(`${nombre} entró a la red`);
