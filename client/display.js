@@ -28,12 +28,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function spawnReaction(emoji) {
         const el = document.createElement('div');
-        el.className = 'absolute text-4xl pointer-events-none z-50 animate-float-up';
+        el.className = 'fixed pointer-events-none z-[9999]';
+        el.style.fontSize = '8rem'; // Bigger for dashboard
         el.innerText = emoji;
         el.style.left = Math.random() * 80 + 10 + '%';
-        el.style.bottom = '-50px';
+        el.style.bottom = '-100px';
+        const animName = 'floatUpDash' + Date.now();
+        const style = document.createElement('style');
+        style.innerText = `
+            @keyframes ${animName} {
+                0% { transform: translateY(0) scale(0.8); opacity: 0; }
+                10% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+                20% { transform: translateY(-100px) scale(1); opacity: 1; }
+                80% { transform: translateY(-600px) scale(1); opacity: 0.8; }
+                100% { transform: translateY(-800px) scale(0.8); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        el.style.animation = `${animName} 4s ease-out forwards`;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 4000);
+        setTimeout(() => {
+            el.remove();
+            style.remove();
+        }, 4000);
     }
     setInterval(() => {
         const peers = WebRTCEngine.getPeers();

@@ -392,6 +392,20 @@
             <label class="font-label-mono text-[11px] tracking-[0.08em] text-on-surface-variant/80 uppercase" for="nickname">Nombre o Alias</label>
             <input autocomplete="off" class="input-field rounded-xl px-4 py-3 h-[48px]" id="nickname" placeholder="Introduce tu nombre o alias (min. 3 letras)" type="text"/>
         </div>
+
+        <div class="flex flex-col gap-3">
+            <label class="font-label-mono text-[11px] tracking-[0.08em] text-on-surface-variant/80 uppercase">Elige tu Avatar</label>
+            
+            <!-- Emoji Picker -->
+            <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="emoji-picker">
+                <!-- Emojis will be injected here via JS -->
+            </div>
+            
+            <!-- Color Picker -->
+            <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="color-picker">
+                <!-- Colors will be injected here via JS -->
+            </div>
+        </div>
         <button class="btn-primary w-full rounded-xl h-[48px] flex items-center justify-center gap-2" id="btn-enter" disabled>
             <span class="material-symbols-outlined text-[18px]">login</span>
             Conectar a la Red
