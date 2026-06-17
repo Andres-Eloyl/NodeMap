@@ -637,6 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const modal = document.getElementById('private-chat-modal');
             modal.classList.remove('opacity-100', 'pointer-events-auto');
             modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.style.pointerEvents = 'none';
             document.getElementById('private-chat-content').classList.remove('scale-100');
             document.getElementById('private-chat-content').classList.add('scale-95');
         });
