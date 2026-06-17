@@ -74,3 +74,54 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(34, 197, 94, 0.6);
 }
+
+/* --- Blueprint Grid (Heatmap Replay) --- */
+.map-zone-glow { box-shadow: 0 0 15px 3px rgba(255, 84, 81, 0.3); }
+.grid-bg {
+    background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+@media (max-width: 767px) {
+    .grid-bg { background-image: none; }
+}
+.blueprint-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.5fr 2fr 0.5fr 1fr;
+    grid-template-rows: repeat(17, 1fr);
+    background-color: #0e0d18;
+}
+.blueprint-room {
+    border: 1px solid rgba(91, 64, 62, 0.6);
+    background-color: rgba(31, 30, 42, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    color: #e4beba;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.blueprint-pasillo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ab8986;
+    letter-spacing: 0.1em;
+    font-size: 10px;
+}
+.blueprint-stairs {
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 4px,
+        rgba(255, 179, 173, 0.15) 4px,
+        rgba(255, 179, 173, 0.15) 6px
+    );
+}
+.zone-left { background-color: rgba(105, 216, 212, 0.03); }
+.zone-center { background-color: rgba(68, 226, 205, 0.03); }
+.zone-right { background-color: rgba(255, 179, 173, 0.03); }

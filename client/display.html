@@ -149,13 +149,48 @@
         </div>
         
         <div class="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0e0d18] rounded-3xl border border-primary/30 overflow-hidden shadow-[0_0_50px_rgba(255,84,81,0.15)]">
+            <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none blueprint-grid font-mono">
+                <div id="zona-a-bg" class="zone-left rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3;">
+                    <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona A</div>
+                </div>
+                <div id="zona-b-bg" class="zone-center rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4;">
+                    <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona B</div>
+                </div>
+                <div id="zona-c-bg" class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6;">
+                    <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona C</div>
+                </div>
+            </div>
             
-            <div class="absolute inset-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] grid-rows-[repeat(17,1fr)] opacity-50" style="background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;">
-                <div class="row-start-2 row-end-7 col-start-1 col-end-2 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona A</span></div>
-                <div class="row-start-[12] row-end-[17] col-start-1 col-end-2 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona A</span></div>
-                <div class="row-start-3 row-end-[16] col-start-3 col-end-4 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-2xl">Zona B</span></div>
-                <div class="row-start-2 row-end-7 col-start-5 col-end-6 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona C</span></div>
-                <div class="row-start-[12] row-end-[17] col-start-5 col-end-6 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona C</span></div>
+            <div class="absolute inset-0 z-0 blueprint-grid font-mono gap-1 p-2 pointer-events-none opacity-80" style="background: transparent;">
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 1 / 3 / 2;">Aula 6</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 1 / 5 / 2;">Aula 5</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 1 / 7 / 2;">Aula 4</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 1 / 9 / 2;">Aula 3</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 1 / 11 / 2;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 1 / 13 / 2;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 1 / 15 / 2;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 15 / 1 / 17 / 2;">Almacen</div>
+                <div class="blueprint-pasillo z-10" style="grid-area: 1 / 2 / 17 / 3; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 3 / 3 / 4;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 3 / 5 / 4;">Servicio Comunitario</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 3 / 7 / 4;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 3 / 9 / 4;">Laboratorio</div>
+                <div class="flex gap-1 z-10" style="grid-area: 9 / 3 / 11 / 4;">
+                    <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 rounded">Escaleras</span></div>
+                    <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 rounded">Escaleras</span></div>
+                </div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 3 / 14 / 4;">Laboratorio de Computación</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 14 / 3 / 17 / 4;">Laboratorio de Robótica</div>
+                <div class="blueprint-pasillo z-10" style="grid-area: 1 / 4 / 17 / 5; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 5 / 4 / 6;">Telecomunicaciones</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 4 / 5 / 6 / 6;">Baños</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 6 / 5 / 9 / 6;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 5 / 11 / 6;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 5 / 13 / 6;">Laboratorio</div>
+                <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 5 / 17 / 6;">Oficinas</div>
+                <div class="flex items-center justify-center text-white/40 font-mono text-[11px] pb-2 pt-1 uppercase tracking-[0.12em] z-10" style="grid-area: 17 / 1 / 18 / 6; border-top: 1px dashed rgba(255,255,255,0.1);">
+                    Entrada
+                </div>
             </div>
             
             <div class="absolute inset-0 z-10 pointer-events-none" id="replay-canvas">
