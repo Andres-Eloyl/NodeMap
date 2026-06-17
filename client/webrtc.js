@@ -36,7 +36,7 @@ function getChannelLabel() {
   return (typeof CONFIG !== "undefined" && CONFIG.DATA_CHANNEL_LABEL) || "data";
 }
 
-function initConnection(peerId, nombre, zona) {
+function initConnection(peerId, nombre, zona, color, avatar) {
   if (peers.has(peerId)) return;
 
   const pc = new RTCPeerConnection(getIceConfig());
@@ -62,7 +62,7 @@ function initConnection(peerId, nombre, zona) {
     setupDataChannel(peerId, nombre, event.channel);
   };
 
-  const peerEntry = { id: peerId, nombre, zona, pc, dc: null };
+  const peerEntry = { id: peerId, nombre, zona, color, avatar, pc, dc: null };
 
   if (shouldIOffer(peerId)) {
     const dc = pc.createDataChannel(getChannelLabel());
@@ -88,7 +88,7 @@ function setupDataChannel(peerId, nombre, dc) {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     reconnecting.delete(peerId);
-    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida" });
+    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer ? peer.avatar : "👤" });
     if (!pingInterval) startPingCycle();
   };
 
@@ -122,6 +122,13 @@ function setupDataChannel(peerId, nombre, dc) {
         }
       }
 
+      if (tipo === PROTOCOL.PROFILE_UPDATE) {
+        const peer = peers.get(peerId);
+        if (peer) {
+            if (msg.color) peer.color = msg.color;
+            if (msg.avatar) peer.avatar = msg.avatar;
+        }
+      }
       fireCallbacks(tipo, msg);
     } catch (err) {
       console.error("[WebRTC] Error procesando mensaje:", err);
@@ -129,24 +136,24 @@ function setupDataChannel(peerId, nombre, dc) {
   };
 }
 
-function conectar(nombre, zona) {
+function conectar(nombre, zona, color, avatar) {
   myNombre = nombre;
 
   const serverUrl = (typeof CONFIG !== "undefined" && CONFIG.PORT)
     ? `http://${window.location.hostname}:${CONFIG.PORT}`
     : window.location.origin;
 
-  socket = io(serverUrl, { query: { nombre, zona } });
+  socket = io(serverUrl, { query: { nombre, zona, color, avatar } });
 
   socket.on(PROTOCOL.PEER_LIST, (data) => {
     myId = data.miId;
     for (const peer of data.peers) {
-      initConnection(peer.id, peer.nombre, peer.zona);
+      initConnection(peer.id, peer.nombre, peer.zona, peer.color, peer.avatar);
     }
   });
 
   socket.on(PROTOCOL.PEER_JOIN, (data) => {
-    initConnection(data.id, data.nombre, data.zona);
+    initConnection(data.id, data.nombre, data.zona, data.color, data.avatar);
   });
 
   socket.on(PROTOCOL.REPLAY_DATA, (data) => {
@@ -370,6 +377,7 @@ const WebRTCEngine = {
   conectar,
   desconectar,
   sendMessage,
+  sendToPeer: sendMessage,
   broadcast,
   onMessage,
   getPeers,

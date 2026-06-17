@@ -83,6 +83,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 Array.from(colorPicker.children).forEach(c => c.style.borderColor = 'transparent');
                 btn.style.borderColor = '#fff';
                 selectedColor = color;
+                if (WebRTCEngine.getMyId()) {
+                    myColor = color;
+                    WebRTCEngine.broadcast(PROTOCOL.PROFILE_UPDATE, { color: myColor, avatar: myAvatar });
+                    updateUI();
+                }
             };
             colorPicker.appendChild(btn);
         });
@@ -95,6 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 Array.from(emojiPicker.children).forEach(c => c.style.borderColor = 'transparent');
                 btn.style.borderColor = '#fff';
                 selectedEmoji = emoji;
+                if (WebRTCEngine.getMyId()) {
+                    myAvatar = emoji;
+                    WebRTCEngine.broadcast(PROTOCOL.PROFILE_UPDATE, { color: myColor, avatar: myAvatar });
+                    updateUI();
+                }
             };
             emojiPicker.appendChild(btn);
         });
@@ -570,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chatInput.dataset.privateTarget = peerId;
         chatInput.placeholder = `Respondiendo a ${name}...`;
         chatInput.focus();
-        switchTab('chat');
+        switchTab('tab-chat');
     };
 
     chatForm.addEventListener('submit', (e) => {

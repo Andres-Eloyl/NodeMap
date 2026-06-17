@@ -393,19 +393,7 @@
             <input autocomplete="off" class="input-field rounded-xl px-4 py-3 h-[48px]" id="nickname" placeholder="Introduce tu nombre o alias (min. 3 letras)" type="text"/>
         </div>
 
-        <div class="flex flex-col gap-3">
-            <label class="font-label-mono text-[11px] tracking-[0.08em] text-on-surface-variant/80 uppercase">Elige tu Avatar</label>
-            
-            <!-- Emoji Picker -->
-            <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="emoji-picker">
-                <!-- Emojis will be injected here via JS -->
-            </div>
-            
-            <!-- Color Picker -->
-            <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="color-picker">
-                <!-- Colors will be injected here via JS -->
-            </div>
-        </div>
+        
         <button class="btn-primary w-full rounded-xl h-[48px] flex items-center justify-center gap-2" id="btn-enter" disabled>
             <span class="material-symbols-outlined text-[18px]">login</span>
             Conectar a la Red
@@ -604,6 +592,13 @@
 
         <div class="absolute inset-0 p-4 md:p-8 flex flex-col overflow-y-auto view-hidden" id="tab-nodes">
             <h2 class="font-headline-lg text-xl md:text-[24px] font-bold text-on-surface tracking-tight mb-4 md:mb-6 flex-none">Usuarios en mi Zona</h2>
+            <div class="mb-6 glass-card-solid p-4 rounded-2xl border border-primary/20 bg-surface-variant/20 max-w-3xl">
+                <h3 class="font-label-mono text-[11px] tracking-[0.08em] text-on-surface-variant/80 uppercase mb-3">Personaliza tu perfil</h3>
+                <div class="flex flex-col gap-3">
+                    <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="emoji-picker"></div>
+                    <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar" id="color-picker"></div>
+                </div>
+            </div>
             <div class="flex flex-col gap-3 max-w-3xl" id="nodes-list">
                 
             </div>
