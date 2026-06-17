@@ -321,7 +321,8 @@ document.addEventListener("DOMContentLoaded", () => {
             content.classList.add('scale-100');
             setTimeout(() => {
                 modal.classList.remove('opacity-100', 'pointer-events-auto');
-                modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.style.pointerEvents = 'none'; // Explicit pointer-events
                 content.classList.remove('scale-100');
                 content.classList.add('scale-95');
             }, 8000);
@@ -540,6 +541,63 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    
+
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if(msg) {
+            
+                appendMessage(myNombre, msg, true, false);
+            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
+            chatInput.value = '';
+        }
+    });
+
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const emoji = btn.dataset.emoji;
+            WebRTCEngine.broadcast(PROTOCOL.REACTION, { emoji, nombre: myNombre });
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // local feedback
+            btn.classList.add('scale-150');
+            setTimeout(() => btn.classList.remove('scale-150'), 150);
+            spawnLocalReaction(emoji);
+        });
+    });
+
+    function spawnLocalReaction(emoji) {
+        const el = document.createElement('div');
+        el.className = 'fixed text-4xl pointer-events-none z-[9999]';
+        el.innerText = emoji;
+        el.style.left = Math.random() * 80 + 10 + '%';
+        el.style.bottom = '-50px';
+        const animName = 'floatUp' + Date.now();
+        const style = document.createElement('style');
+        style.innerText = `
+            @keyframes ${animName} {
+                0% { transform: translateY(0) scale(0.8); opacity: 0; }
+                10% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+                20% { transform: translateY(-40px) scale(1); opacity: 1; }
+                80% { transform: translateY(-350px) scale(1); opacity: 0.8; }
+                100% { transform: translateY(-400px) scale(0.8); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        el.style.animation = `${animName} 3s ease-out forwards`;
+        document.body.appendChild(el);
+        setTimeout(() => {
+            el.remove();
+            style.remove();
+        }, 3000);
+    }
+
+    showScreen(screenEntry);
+
+    window.privateChats = {}; 
+    window.activePrivateChatId = null;
+
     window.startPrivateChat = (peerId, name) => {
         window.activePrivateChatId = peerId;
         const modal = document.getElementById('private-chat-modal');
@@ -561,11 +619,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         modal.classList.remove('opacity-0', 'pointer-events-none');
         modal.classList.add('opacity-100');
-        modal.style.pointerEvents = 'auto'; // Explicitly set pointer-events
+        modal.style.pointerEvents = 'auto'; // Explicit pointer-events
         document.getElementById('private-chat-content').classList.remove('scale-95');
         document.getElementById('private-chat-content').classList.add('scale-100');
         
-        // Force focus on input so keyboard opens immediately
         setTimeout(() => {
             const input = document.getElementById('private-chat-input');
             if (input) input.focus();
@@ -579,7 +636,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const modal = document.getElementById('private-chat-modal');
             modal.classList.remove('opacity-100', 'pointer-events-auto');
             modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.style.pointerEvents = 'none'; // Explicitly set pointer-events
             document.getElementById('private-chat-content').classList.remove('scale-100');
             document.getElementById('private-chat-content').classList.add('scale-95');
         });
