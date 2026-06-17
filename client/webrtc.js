@@ -122,13 +122,8 @@ function setupDataChannel(peerId, nombre, dc) {
         }
       }
 
-      if (tipo === PROTOCOL.PROFILE_UPDATE) {
-        const peer = peers.get(peerId);
-        if (peer) {
-            if (msg.color) peer.color = msg.color;
-            if (msg.avatar) peer.avatar = msg.avatar;
-        }
-      }
+      
+      msg.senderId = peerId;
       fireCallbacks(tipo, msg);
     } catch (err) {
       console.error("[WebRTC] Error procesando mensaje:", err);

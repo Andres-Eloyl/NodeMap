@@ -70,57 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedColor = null;
     let selectedEmoji = null;
 
-    function initAvatarPickers() {
-        const colorPicker = document.getElementById('color-picker');
-        const emojiPicker = document.getElementById('emoji-picker');
-        if(!colorPicker || !emojiPicker) return;
-
-        AVATAR_COLORS.forEach(color => {
-            const btn = document.createElement('button');
-            btn.className = `w-8 h-8 rounded-full flex-shrink-0 border-2 border-transparent transition-all hover:scale-110`;
-            btn.style.backgroundColor = color;
-            btn.onclick = () => {
-                Array.from(colorPicker.children).forEach(c => c.style.borderColor = 'transparent');
-                btn.style.borderColor = '#fff';
-                selectedColor = color;
-                if (WebRTCEngine.getMyId()) {
-                    myColor = color;
-                    WebRTCEngine.broadcast(PROTOCOL.PROFILE_UPDATE, { color: myColor, avatar: myAvatar });
-                    updateUI();
-                }
-            };
-            colorPicker.appendChild(btn);
-        });
-
-        AVATAR_EMOJIS.forEach(emoji => {
-            const btn = document.createElement('button');
-            btn.className = `w-8 h-8 rounded-full flex-shrink-0 bg-surface-variant/30 flex items-center justify-center text-lg transition-all hover:scale-110 hover:bg-surface-variant/50 border-2 border-transparent`;
-            btn.innerText = emoji;
-            btn.onclick = () => {
-                Array.from(emojiPicker.children).forEach(c => c.style.borderColor = 'transparent');
-                btn.style.borderColor = '#fff';
-                selectedEmoji = emoji;
-                if (WebRTCEngine.getMyId()) {
-                    myAvatar = emoji;
-                    WebRTCEngine.broadcast(PROTOCOL.PROFILE_UPDATE, { color: myColor, avatar: myAvatar });
-                    updateUI();
-                }
-            };
-            emojiPicker.appendChild(btn);
-        });
-    }
+    
 
     function connectToNetwork(name, zone) {
         myNombre = name;
         myZone = zone;
-        if (!selectedColor || !selectedEmoji) {
-            let hash = name.hashCode();
-            myColor = selectedColor || AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-            myAvatar = selectedEmoji || AVATAR_EMOJIS[Math.abs(hash) % AVATAR_EMOJIS.length];
-        } else {
-            myColor = selectedColor;
-            myAvatar = selectedEmoji;
-        }
+        myColor = '#ffb3ad';
+        myAvatar = name.charAt(0).toUpperCase();
         currentZoneDisplay.textContent = zone.toUpperCase();
         WebRTCEngine.conectar(name, zone, myColor, myAvatar);
         chatMessages.innerHTML = `<div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 my-2 tracking-wide">Sistema: Conectado a ${zone}</div>`;
@@ -339,9 +295,22 @@ document.addEventListener("DOMContentLoaded", () => {
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
         if (data.isPrivate) {
             if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-            showToast(`<span class="font-bold text-[#ce93d8]">${data.nombre || 'Desconocido'}</span> te ha susurrado.`);
+            
+            const peerId = data.senderId;
+            if (peerId) {
+                if (!window.privateChats) window.privateChats = {};
+                if (!window.privateChats[peerId]) window.privateChats[peerId] = [];
+                window.privateChats[peerId].push({ sender: data.nombre, text: data.text, isSelf: false });
+                
+                if (window.activePrivateChatId === peerId) {
+                    window.renderPrivateMessages(peerId);
+                } else {
+                    showToast(`<span class="font-bold text-[#ce93d8]">${data.nombre || 'Desconocido'}</span> te ha susurrado.`);
+                }
+            }
+        } else {
+            appendMessage(data.nombre || 'Desconocido', data.text, false, false);
         }
-        appendMessage(data.nombre || 'Desconocido', data.text, false, data.isPrivate);
     });
 
     WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, (data) => {
@@ -587,16 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const msg = chatInput.value.trim();
         if(msg) {
-            const targetId = chatInput.dataset.privateTarget;
-            if (targetId) {
-                appendMessage(myNombre, msg, true, true);
-                WebRTCEngine.sendToPeer(targetId, PROTOCOL.CHAT, { text: msg, nombre: myNombre, isPrivate: true });
-                chatInput.placeholder = "Escribe un mensaje...";
-                delete chatInput.dataset.privateTarget;
-            } else {
+            
                 appendMessage(myNombre, msg, true, false);
-                WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
-            }
+            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
             chatInput.value = '';
         }
     });
@@ -642,4 +604,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initAvatarPickers();
     showScreen(screenEntry);
+
+    window.privateChats = {}; 
+    window.activePrivateChatId = null;
+
+    window.startPrivateChat = (peerId, name) => {
+        window.activePrivateChatId = peerId;
+        const modal = document.getElementById('private-chat-modal');
+        const title = document.getElementById('private-chat-title');
+        const avatar = document.getElementById('private-chat-avatar');
+        
+        const peer = WebRTCEngine.getPeers().find(p => p.id === peerId);
+        if (peer) {
+            title.textContent = peer.nombre;
+            avatar.textContent = peer.avatar || peer.nombre.charAt(0).toUpperCase();
+            avatar.style.backgroundColor = peer.color ? peer.color + '20' : 'rgba(255,179,173,0.2)';
+            avatar.style.color = peer.color || '#ffb3ad';
+        } else {
+            title.textContent = name;
+            avatar.textContent = name.charAt(0).toUpperCase();
+        }
+        
+        window.renderPrivateMessages(peerId);
+        
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100', 'pointer-events-auto');
+        document.getElementById('private-chat-content').classList.remove('scale-95');
+        document.getElementById('private-chat-content').classList.add('scale-100');
+    };
+
+    const closeBtn = document.getElementById('private-chat-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            window.activePrivateChatId = null;
+            const modal = document.getElementById('private-chat-modal');
+            modal.classList.remove('opacity-100', 'pointer-events-auto');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('private-chat-content').classList.remove('scale-100');
+            document.getElementById('private-chat-content').classList.add('scale-95');
+        });
+    }
+
+    const privateChatForm = document.getElementById('private-chat-form');
+    if (privateChatForm) {
+        privateChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('private-chat-input');
+            const msg = input.value.trim();
+            if (msg && window.activePrivateChatId) {
+                if (!window.privateChats[window.activePrivateChatId]) window.privateChats[window.activePrivateChatId] = [];
+                window.privateChats[window.activePrivateChatId].push({ sender: myNombre, text: msg, isSelf: true });
+                
+                WebRTCEngine.sendToPeer(window.activePrivateChatId, PROTOCOL.CHAT, { text: msg, nombre: myNombre, isPrivate: true });
+                window.renderPrivateMessages(window.activePrivateChatId);
+                input.value = '';
+            }
+        });
+    }
+
+    window.renderPrivateMessages = function(peerId) {
+        const container = document.getElementById('private-chat-messages');
+        if (!container) return;
+        const messages = window.privateChats[peerId] || [];
+        container.innerHTML = messages.map(m => {
+            const bgClass = m.isSelf ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md' : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md border border-outline-variant/30';
+            const alignClass = m.isSelf ? 'items-end self-end' : 'items-start self-start';
+            const senderClass = m.isSelf ? 'hidden' : 'font-label-mono text-[10px] text-on-surface-variant/50 mb-1 ml-1 tracking-wide flex items-center';
+            return `<div class="flex flex-col max-w-[85%] ${alignClass}">
+                    <div class="${senderClass}"><span>${m.sender}</span></div>
+                    <div class="chat-bubble px-4 py-2.5 ${bgClass}">${m.text}</div>
+                </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    };
+
 });

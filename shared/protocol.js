@@ -15,8 +15,7 @@ const PROTOCOL = {
   ORGANIZER_BROADCAST: "organizer-broadcast",
   GET_REPLAY: "get-replay",
   REPLAY_DATA: "replay-data",
-  PROFILE_UPDATE: "profile-update",
-};
+  };
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PROTOCOL;
