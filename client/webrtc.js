@@ -84,12 +84,17 @@ function initConnection(peerId, nombre, zona, color, avatar) {
 }
 
 function setupDataChannel(peerId, nombre, dc) {
-  dc.onopen = () => {
+  const onOpenHandler = () => {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     reconnecting.delete(peerId);
     fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer ? peer.avatar : "👤" });
     if (!pingInterval) startPingCycle();
+  };
+
+  dc.onopen = onOpenHandler;
+  if (dc.readyState === 'open') {
+    onOpenHandler();
   };
 
   dc.onclose = () => {
