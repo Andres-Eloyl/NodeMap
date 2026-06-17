@@ -259,4 +259,178 @@ document.addEventListener("DOMContentLoaded", () => {
             bgContainer.appendChild(div);
         }
     }
+
+    // --- Session Replay Logic ---
+    const btnReplay = document.getElementById("btn-replay");
+    const btnCloseReplay = document.getElementById("btn-close-replay");
+    const replaySpeedSelect = document.getElementById("replay-speed");
+    const replayModal = document.getElementById("replay-modal");
+    const replayCanvas = document.getElementById("replay-canvas");
+    const replayStatus = document.getElementById("replay-status");
+
+    let isReplaying = false;
+    let replayInterval = null;
+    let replayNodesState = {};
+
+    const waypoints = {
+        'Zona A': [
+            { id: 'p1', t: 10, l: 25, edges: ['p2', 'r1'] },
+            { id: 'p2', t: 30, l: 25, edges: ['p1', 'p3', 'r2'] },
+            { id: 'p3', t: 50, l: 25, edges: ['p2', 'p4', 'r3'] },
+            { id: 'p4', t: 70, l: 25, edges: ['p3', 'p5', 'r4'] },
+            { id: 'p5', t: 90, l: 25, edges: ['p4', 'r5'] },
+            { id: 'r1', t: 15, l: 12, edges: ['p1'] },
+            { id: 'r2', t: 35, l: 12, edges: ['p2'] },
+            { id: 'r3', t: 55, l: 12, edges: ['p3'] },
+            { id: 'r4', t: 75, l: 12, edges: ['p4'] },
+            { id: 'r5', t: 85, l: 12, edges: ['p5'] },
+        ],
+        'Zona B': [
+            { id: 'c1', t: 15, l: 50, edges: ['c2', 'c6'] },
+            { id: 'c2', t: 35, l: 50, edges: ['c1', 'c3', 'c7'] },
+            { id: 'c3', t: 55, l: 50, edges: ['c2', 'c4'] },
+            { id: 'c4', t: 75, l: 50, edges: ['c3', 'c5'] },
+            { id: 'c5', t: 85, l: 50, edges: ['c4'] },
+            { id: 'c6', t: 15, l: 38, edges: ['c1'] },
+            { id: 'c7', t: 35, l: 62, edges: ['c2'] },
+            { id: 'c8', t: 65, l: 38, edges: ['c3'] },
+            { id: 'c9', t: 85, l: 62, edges: ['c5'] },
+        ],
+        'Zona C': [
+            { id: 'p1', t: 10, l: 75, edges: ['p2', 'r1'] },
+            { id: 'p2', t: 30, l: 75, edges: ['p1', 'p3', 'r2'] },
+            { id: 'p3', t: 50, l: 75, edges: ['p2', 'p4', 'r3'] },
+            { id: 'p4', t: 70, l: 75, edges: ['p3', 'p5', 'r4'] },
+            { id: 'p5', t: 90, l: 75, edges: ['p4', 'r5'] },
+            { id: 'r1', t: 15, l: 88, edges: ['p1'] },
+            { id: 'r2', t: 35, l: 88, edges: ['p2'] },
+            { id: 'r3', t: 55, l: 88, edges: ['p3'] },
+            { id: 'r4', t: 75, l: 88, edges: ['p4'] },
+            { id: 'r5', t: 85, l: 88, edges: ['p5'] },
+        ]
+    };
+
+    btnReplay.addEventListener("click", () => {
+        if (isReplaying) return;
+        WebRTCEngine.requestReplay();
+        btnReplay.disabled = true;
+        btnReplay.querySelector("#replay-text").textContent = "Cargando...";
+    });
+
+    btnCloseReplay.addEventListener("click", () => {
+        stopReplay();
+    });
+
+    function stopReplay() {
+        isReplaying = false;
+        clearTimeout(replayInterval);
+        replayModal.classList.add("hidden");
+        btnReplay.disabled = false;
+        btnReplay.querySelector("#replay-text").textContent = "Replay del Día";
+        
+        // Cleanup DOM nodes
+        Object.values(replayNodesState).forEach(st => st.domNode.remove());
+        replayNodesState = {};
+    }
+
+    WebRTCEngine.onMessage("REPLAY_DATA", (events) => {
+        if (!events || events.length === 0) {
+            alert("No hay suficientes eventos guardados para reproducir.");
+            stopReplay();
+            return;
+        }
+
+        // Initialize UI
+        isReplaying = true;
+        replayModal.classList.remove("hidden");
+        events.sort((a, b) => a.timestamp - b.timestamp);
+
+        const speed = parseInt(replaySpeedSelect.value, 10);
+        let currentIndex = 0;
+        
+        function addNode(peer) {
+            if (replayNodesState[peer.id]) return; // already exists
+
+            const node = document.createElement('div');
+            node.className = "absolute w-8 h-8 rounded-xl border border-secondary/40 bg-surface-container-high/90 backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
+            node.style.transform = 'translate(-50%, -50%)'; 
+            node.innerHTML = `
+                <span class="material-symbols-outlined text-secondary text-[14px]">person</span>
+                <div class="absolute -bottom-4 whitespace-nowrap font-mono text-[8px] text-white/70 bg-black/50 px-1 rounded">${peer.nombre}</div>
+            `;
+            replayCanvas.appendChild(node);
+
+            const zonePoints = waypoints[peer.zona] || waypoints['Zona A'];
+            const startPt = zonePoints[Math.floor(Math.random() * zonePoints.length)];
+            
+            node.style.top = `${startPt.t}%`;
+            node.style.left = `${startPt.l}%`;
+
+            replayNodesState[peer.id] = { domNode: node, zona: peer.zona, wpId: startPt.id };
+        }
+
+        function removeNode(peerId) {
+            if (replayNodesState[peerId]) {
+                replayNodesState[peerId].domNode.remove();
+                delete replayNodesState[peerId];
+            }
+        }
+
+        function playNextEvent() {
+            if (!isReplaying) return;
+            if (currentIndex >= events.length) {
+                replayStatus.textContent = "Replay Finalizado.";
+                return;
+            }
+
+            const event = events[currentIndex];
+            
+            if (event.type === 'JOIN') {
+                addNode(event.peer);
+            } else if (event.type === 'LEAVE') {
+                removeNode(event.peerId);
+            }
+
+            currentIndex++;
+            if (currentIndex < events.length) {
+                const nextEvent = events[currentIndex];
+                const timeDiff = nextEvent.timestamp - event.timestamp;
+                const waitTime = Math.max(0, timeDiff / speed);
+                
+                replayStatus.textContent = `Reproduciendo... Evento ${currentIndex}/${events.length} (${speed}x)`;
+                replayInterval = setTimeout(playNextEvent, waitTime);
+            } else {
+                replayStatus.textContent = "Replay Finalizado.";
+            }
+        }
+
+        // Start playback
+        replayStatus.textContent = "Iniciando Time-Lapse...";
+        playNextEvent();
+
+        // Wandering loop
+        const wanderInterval = setInterval(() => {
+            if (!isReplaying) {
+                clearInterval(wanderInterval);
+                return;
+            }
+            Object.values(replayNodesState).forEach(st => {
+                const points = waypoints[st.zona] || waypoints['Zona A'];
+                const currentPt = points.find(p => p.id === st.wpId);
+                
+                if (currentPt && currentPt.edges && currentPt.edges.length > 0) {
+                    const nextId = currentPt.edges[Math.floor(Math.random() * currentPt.edges.length)];
+                    const nextPt = points.find(p => p.id === nextId);
+                    
+                    if (nextPt) {
+                        st.wpId = nextId;
+                        const rT = nextPt.t + (Math.random() * 6 - 3);
+                        const rL = nextPt.l + (Math.random() * 4 - 2);
+                        st.domNode.style.top = `${rT}%`;
+                        st.domNode.style.left = `${rL}%`;
+                    }
+                }
+            });
+        }, 500);
+    });
 });

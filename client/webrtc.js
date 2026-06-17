@@ -154,6 +154,10 @@ function conectar(nombre, zona) {
     initConnection(data.id, data.nombre, data.zona);
   });
 
+  socket.on(PROTOCOL.REPLAY_DATA, (data) => {
+    fireCallbacks("REPLAY_DATA", data);
+  });
+
   socket.on(PROTOCOL.OFFER, async (data) => {
     const peerId = data.origen;
     if (!peerId) return;
@@ -364,6 +368,12 @@ function getMyId() {
   return myId;
 }
 
+function requestReplay() {
+  if (socket) {
+    socket.emit(PROTOCOL.GET_REPLAY);
+  }
+}
+
 const WebRTCEngine = {
   conectar,
   desconectar,
@@ -373,6 +383,7 @@ const WebRTCEngine = {
   getPeers,
   getLatency,
   getMyId,
+  requestReplay,
 };
 
 window.WebRTCEngine = WebRTCEngine;

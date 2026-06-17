@@ -2,6 +2,7 @@ const PROTOCOL = require("../shared/protocol");
 const CONFIG = require("../shared/config");
 
 const peers = new Map();
+const sessionEvents = []; // For session replay (Time-Lapse)
 
 const metricas = {
   peers: peers,
@@ -51,6 +52,11 @@ const initSignaling = function(io) {
 
     socket.emit(PROTOCOL.PEER_LIST, { miId: id, peers: listaPeers });
     socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona });
+
+    // Track for replay
+    if (nombre !== "Dashboard" && nombre !== "Organizador") {
+      sessionEvents.push({ timestamp: Date.now(), type: 'JOIN', peer: { id, nombre, zona } });
+    }
 
     addToLog(`${nombre} entró a la red`);
     console.log(`Peer conectado: ${nombre} (${id}) — Total: ${peers.size}`);
@@ -117,6 +123,10 @@ const initSignaling = function(io) {
 
       socket.broadcast.emit(PROTOCOL.PEER_EXIT, { id: socket.peerId, nombre: peerNombre });
 
+      if (peerNombre !== "Dashboard" && peerNombre !== "Organizador") {
+        sessionEvents.push({ timestamp: Date.now(), type: 'LEAVE', peerId: socket.peerId });
+      }
+
       addToLog(`${peerNombre} salió de la red`);
       console.log(`Peer salió voluntariamente: ${peerNombre} (${socket.peerId}) — Total: ${peers.size}`);
 
@@ -132,8 +142,16 @@ const initSignaling = function(io) {
 
       socket.broadcast.emit(PROTOCOL.PEER_LEAVE, { id: socket.peerId });
 
+      if (peerNombre !== "Dashboard" && peerNombre !== "Organizador") {
+        sessionEvents.push({ timestamp: Date.now(), type: 'LEAVE', peerId: socket.peerId });
+      }
+
       addToLog(`${peerNombre} se desconectó`);
       console.log(`Peer desconectado: ${peerNombre} (${socket.peerId}) — Total: ${peers.size}`);
+    });
+
+    socket.on(PROTOCOL.GET_REPLAY, () => {
+      socket.emit(PROTOCOL.REPLAY_DATA, sessionEvents);
     });
 
   });

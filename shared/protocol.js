@@ -12,6 +12,8 @@ const PROTOCOL = {
   PONG: "pong",
   HEATMAP_SYNC: "heatmap-sync",
   ORGANIZER_BROADCAST: "organizer-broadcast",
+  GET_REPLAY: "get-replay",
+  REPLAY_DATA: "replay-data",
 };
 
 if (typeof module !== 'undefined' && module.exports) {
