@@ -38,14 +38,12 @@
     const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const getDynamicPeers = () => peers.filter(p => !originalPeers.find(op => op.id === p.id));
 
-    
     const triggerEvent = (tipo, datos) => {
         if (callbacks[tipo]) {
             callbacks[tipo].forEach(cb => cb(datos));
         }
     };
 
-    
     const setRandomTimer = (name, minMs, maxMs, action) => {
         if (!isRunning) return;
         const delay = getRandomInt(minMs, maxMs);
@@ -82,7 +80,7 @@
             nuevaZona = getRandomElement(zonasPosibles);
         }
         
-        peer.zona = nuevaZona; // Actualizar el estado interno
+        peer.zona = nuevaZona;
         triggerEvent("position", {
             id: peer.id,
             nombre: peer.nombre,
@@ -133,7 +131,6 @@
             return JSON.parse(JSON.stringify(peers));
         },
 
-        
         onMessage: function(tipo, callback) {
             if (!callbacks[tipo]) {
                 callbacks[tipo] = [];
@@ -141,24 +138,20 @@
             callbacks[tipo].push(callback);
         },
 
-        
         broadcast: function(tipo, datos) {
             console.log(`[MockWebRTC] broadcast(${tipo})`, datos);
         },
 
-        
         sendMessage: function(peerId, tipo, datos) {
             console.log(`[MockWebRTC] sendMessage a ${peerId} (${tipo})`, datos);
         },
 
-        
         getLatency: function(peerId) {
             const existe = peers.some(p => p.id === peerId);
             if (!existe) return null;
             return getRandomInt(5, 45);
         },
 
-        
         start: function() {
             if (isRunning) return;
             isRunning = true;
@@ -170,7 +163,6 @@
             setRandomTimer("exit", 25000, 35000, simularPeerExit);
         },
 
-        
         stop: function() {
             if (!isRunning) return;
             isRunning = false;

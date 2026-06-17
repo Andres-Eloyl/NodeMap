@@ -4,9 +4,9 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>NodeMap - Live Network Stats</title>
-    <!-- Tailwind CSS -->
+    
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Fonts & Icons -->
+    
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
     <script>
@@ -21,18 +21,17 @@
         }
     </script>
     <link rel="stylesheet" href="display.css">
-    <!-- D3.js -->
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
 <body class="min-h-screen w-full flex flex-col bg-background text-white p-4 md:p-8 overflow-y-auto overflow-x-hidden relative">
-    
-    <!-- Background grid & glow -->
+
     <div id="animated-bg"></div>
     <div class="absolute inset-0 z-0 pointer-events-none opacity-20" style="background-image: radial-gradient(circle at 50% 50%, rgba(255, 179, 173, 0.1) 0%, transparent 50%);"></div>
     <div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
 
     <div class="relative z-10 flex-grow flex flex-col max-w-[1400px] w-full mx-auto">
-        <!-- HEADER -->
+        
         <header class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(255,179,173,0.3)]">
@@ -44,7 +43,6 @@
                 </div>
             </div>
 
-            <!-- Replay Controls -->
             <div class="flex items-center gap-3 bg-black/20 p-2 rounded-xl border border-white/5">
                 <select id="replay-speed" class="bg-transparent border-none text-white/80 text-xs font-mono outline-none cursor-pointer">
                     <option value="10">10x Speed</option>
@@ -59,9 +57,8 @@
             </div>
         </header>
 
-        <!-- KPIS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <!-- KPI 1 -->
+            
             <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
@@ -72,7 +69,7 @@
                     <span class="material-symbols-outlined text-primary/80 text-4xl">share_windows</span>
                 </div>
             </div>
-            <!-- KPI 2 -->
+            
             <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
@@ -83,7 +80,7 @@
                     <span class="material-symbols-outlined text-secondary/80 text-4xl">trending_up</span>
                 </div>
             </div>
-            <!-- KPI 3 -->
+            
             <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
@@ -94,7 +91,7 @@
                     <span class="material-symbols-outlined text-purple-400/80 text-4xl">swap_calls</span>
                 </div>
             </div>
-            <!-- KPI 4 -->
+            
             <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
                 <div id="kpi-latency-glow" class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
@@ -107,10 +104,8 @@
             </div>
         </div>
 
-        <!-- MAIN CONTENT (Chart + Terminal) -->
         <div class="flex-grow flex flex-col md:flex-row gap-6 min-h-[400px]">
-            
-            <!-- D3 CHART CONTAINER -->
+
             <div class="glass-card rounded-3xl p-6 relative flex flex-col flex-grow md:w-2/3">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg tracking-wide flex items-center gap-2">
@@ -120,11 +115,10 @@
                     <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
                 </div>
                 <div id="chart-container" class="flex-grow w-full relative min-h-[200px]">
-                    <!-- D3 SVG will be injected here -->
+                    
                 </div>
             </div>
 
-            <!-- PACKET SNIFFER TERMINAL -->
             <div class="glass-card rounded-3xl p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
                 <div class="flex justify-between items-center mb-4 border-b border-green-500/20 pb-3">
                     <h3 class="font-mono text-green-400 font-bold text-sm tracking-widest flex items-center gap-2">
@@ -143,7 +137,6 @@
         </div>
     </div>
 
-    <!-- REPLAY MODAL (HEATMAP) -->
     <div id="replay-modal" class="hidden fixed inset-0 z-50 bg-[#13121d]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8">
         <div class="flex justify-between items-center w-full max-w-5xl mb-6">
             <div>
@@ -156,7 +149,7 @@
         </div>
         
         <div class="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0e0d18] rounded-3xl border border-primary/30 overflow-hidden shadow-[0_0_50px_rgba(255,84,81,0.15)]">
-            <!-- Heatmap / Blueprint Grid -->
+            
             <div class="absolute inset-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] grid-rows-[repeat(17,1fr)] opacity-50" style="background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;">
                 <div class="row-start-2 row-end-7 col-start-1 col-end-2 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona A</span></div>
                 <div class="row-start-[12] row-end-[17] col-start-1 col-end-2 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona A</span></div>
@@ -164,7 +157,7 @@
                 <div class="row-start-2 row-end-7 col-start-5 col-end-6 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona C</span></div>
                 <div class="row-start-[12] row-end-[17] col-start-5 col-end-6 border border-[#5b403e]/60 bg-[#1f1e2a]/70 flex items-center justify-center m-1 rounded-lg"><span class="text-white/20 font-bold uppercase tracking-widest text-xs rotate-[-90deg]">Zona C</span></div>
             </div>
-            <!-- Canvas for Nodes -->
+            
             <div class="absolute inset-0 z-10 pointer-events-none" id="replay-canvas">
                 <div class="absolute w-16 h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(255,84,81,0.3)]" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
                     <span class="material-symbols-outlined text-primary text-2xl">router</span>
@@ -173,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/shared/config.js"></script>
     <script src="/shared/protocol.js"></script>

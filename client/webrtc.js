@@ -111,16 +111,11 @@ function setupDataChannel(peerId, nombre, dc) {
         const latencia = (Date.now() - msg.timestamp) / 2;
         latencies.set(peerId, latencia);
         return;
-      }
-
-      // Interceptar paquete crudo para monitoreo de cifrado
-      fireCallbacks("RAW_PACKET", { raw: event.data, size: event.data.length, peerId: peerId });
-
-      // Descifrar si es necesario
+      }
+      fireCallbacks("RAW_PACKET", { raw: event.data, size: event.data.length, peerId: peerId });
       if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
         if (msg._encrypted) {
-            try {
-                // Pseudo-decrypt: Decode base64 and remove salt
+            try {
                 const decoded = decodeURIComponent(atob(msg._encrypted));
                 msg.text = decoded.replace("_NO_LEER_ESTO_XD_", "");
             } catch(e) {}
@@ -305,14 +300,11 @@ function sendMessage(peerId, tipo, datos) {
   const peer = peers.get(peerId);
   if (!peer || !peer.dc || peer.dc.readyState !== "open") return;
   try {
-    let finalDatos = { ...datos };
-    
-    // Pseudo-Cifrado E2EE para demostración técnica
+    let finalDatos = { ...datos };
     if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
-        if (finalDatos.text) {
-            // Encode to base64 with a salt
+        if (finalDatos.text) {
             finalDatos._encrypted = btoa(encodeURIComponent(finalDatos.text + "_NO_LEER_ESTO_XD_"));
-            delete finalDatos.text; // Remove plain text!
+            delete finalDatos.text;
         }
     }
     

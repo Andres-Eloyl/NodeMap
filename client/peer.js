@@ -1,5 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // --- UI Elements ---
+document.addEventListener("DOMContentLoaded", () => {
     const screenEntry = document.getElementById('screen-entry');
     const screenZone = document.getElementById('screen-zone');
     const screenMain = document.getElementById('screen-main');
@@ -21,16 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnToggleHeatmap = document.getElementById('btn-toggle-heatmap');
     const heatmapLeaderboard = document.getElementById('heatmap-leaderboard');
     const leaderboardList = document.getElementById('leaderboard-list');
-    const blueprintContainer = document.getElementById('blueprint-container');
-
-    // --- State ---
+    const blueprintContainer = document.getElementById('blueprint-container');
     let myNombre = "";
     let myZone = "";
     let latencyInterval = null;
     let isHeatmapMode = false;
-    let heatmapUIInterval = null;
-
-    // --- Navigation Logic ---
+    let heatmapUIInterval = null;
     function showScreen(screenEl) {
         screenEntry.classList.add('view-hidden');
         screenZone.classList.add('view-hidden');
@@ -55,23 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if(targetId === 'tab-chat') scrollToBottomChat();
-    }
-
-    // --- WebRTC Logic ---
+    }
     function connectToNetwork(name, zone) {
         myNombre = name;
         myZone = zone;
-        currentZoneDisplay.textContent = zone.toUpperCase();
-        
-        // Connect WebRTC Engine
-        WebRTCEngine.conectar(name, zone);
-
-        // Update UI
+        currentZoneDisplay.textContent = zone.toUpperCase();
+        WebRTCEngine.conectar(name, zone);
         chatMessages.innerHTML = `<div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 my-2 tracking-wide">Sistema: Conectado a ${zone}</div>`;
         showScreen(screenMain);
-        switchTab('tab-map');
-
-        // Setup latencies and Heatmap CRDT
+        switchTab('tab-map');
         if (latencyInterval) clearInterval(latencyInterval);
         latencyInterval = setInterval(updateUI, 2000);
         updateUI();
@@ -80,9 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateUI() {
         if (!myNombre) return;
-        const peers = WebRTCEngine.getPeers().filter(p => p.nombre !== "Dashboard" && p.nombre !== "Organizador");
-        
-        // Update Nodes List
+        const peers = WebRTCEngine.getPeers().filter(p => p.nombre !== "Dashboard" && p.nombre !== "Organizador");
         if (peers.length === 0) {
             nodesList.innerHTML = `<div class="text-center text-on-surface-variant/50 mt-8 font-label-mono text-[12px] tracking-wide">Buscando usuarios en la red...</div>`;
         } else {
@@ -106,104 +91,75 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 `;
             }).join('');
-        }
-
-        // Update Map
+        }
         const mapCanvas = document.getElementById('map-canvas');
-        if (!mapCanvas) return;
-
-        // Waypoints definition for pathfinding (Human realistic movement)
+        if (!mapCanvas) return;
         const waypoints = {
-            'Zona A': [
-                // Pasillo Izquierdo
+            'Zona A': [
                 { id: 'p1', t: 10, l: 25, edges: ['p2', 'r1'] },
                 { id: 'p2', t: 30, l: 25, edges: ['p1', 'p3', 'r2'] },
                 { id: 'p3', t: 50, l: 25, edges: ['p2', 'p4', 'r3'] },
                 { id: 'p4', t: 70, l: 25, edges: ['p3', 'p5', 'r4'] },
-                { id: 'p5', t: 90, l: 25, edges: ['p4', 'r5'] },
-                // Aulas
+                { id: 'p5', t: 90, l: 25, edges: ['p4', 'r5'] },
                 { id: 'r1', t: 15, l: 12, edges: ['p1'] },
                 { id: 'r2', t: 35, l: 12, edges: ['p2'] },
                 { id: 'r3', t: 55, l: 12, edges: ['p3'] },
                 { id: 'r4', t: 75, l: 12, edges: ['p4'] },
                 { id: 'r5', t: 85, l: 12, edges: ['p5'] },
             ],
-            'Zona B': [
-                // Laboratorios Centro
+            'Zona B': [
                 { id: 'c1', t: 15, l: 50, edges: ['c2', 'c6'] },
                 { id: 'c2', t: 35, l: 50, edges: ['c1', 'c3', 'c7'] },
                 { id: 'c3', t: 55, l: 50, edges: ['c2', 'c4'] },
                 { id: 'c4', t: 75, l: 50, edges: ['c3', 'c5'] },
-                { id: 'c5', t: 85, l: 50, edges: ['c4'] },
-                // Lados
+                { id: 'c5', t: 85, l: 50, edges: ['c4'] },
                 { id: 'c6', t: 15, l: 38, edges: ['c1'] },
                 { id: 'c7', t: 35, l: 62, edges: ['c2'] },
             ],
-            'Zona C': [
-                // Pasillo Derecho
+            'Zona C': [
                 { id: 'pd1', t: 10, l: 75, edges: ['pd2', 'o1'] },
                 { id: 'pd2', t: 30, l: 75, edges: ['pd1', 'pd3', 'o2'] },
                 { id: 'pd3', t: 50, l: 75, edges: ['pd2', 'pd4', 'o3'] },
                 { id: 'pd4', t: 70, l: 75, edges: ['pd3', 'pd5', 'o4'] },
-                { id: 'pd5', t: 90, l: 75, edges: ['pd4', 'o5'] },
-                // Oficinas
+                { id: 'pd5', t: 90, l: 75, edges: ['pd4', 'o5'] },
                 { id: 'o1', t: 15, l: 88, edges: ['pd1'] },
                 { id: 'o2', t: 35, l: 88, edges: ['pd2'] },
                 { id: 'o3', t: 55, l: 88, edges: ['pd3'] },
                 { id: 'o4', t: 75, l: 88, edges: ['pd4'] },
                 { id: 'o5', t: 85, l: 88, edges: ['pd5'] },
             ]
-        };
-
-        // Initialize global state for nodes to keep them alive
+        };
         if (!window.peerNodesState) window.peerNodesState = {};
 
         const allNodesData = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true }];
-        const activeIds = new Set(allNodesData.map(p => p.id));
-
-        // 1. Remove disconnected nodes
+        const activeIds = new Set(allNodesData.map(p => p.id));
         Object.keys(window.peerNodesState).forEach(id => {
             if (!activeIds.has(id)) {
                 if (window.peerNodesState[id].interval) clearInterval(window.peerNodesState[id].interval);
                 if (window.peerNodesState[id].domNode) window.peerNodesState[id].domNode.remove();
                 delete window.peerNodesState[id];
             }
-        });
-
-        // 2. Add or Update nodes
-        allNodesData.forEach(peer => {
-            // If new peer OR peer changed zone, re-initialize their position
-            if (!window.peerNodesState[peer.id] || window.peerNodesState[peer.id].zona !== peer.zona) {
-                
-                // Cleanup old state if exists (happens on zone change)
+        });
+        allNodesData.forEach(peer => {
+            if (!window.peerNodesState[peer.id] || window.peerNodesState[peer.id].zona !== peer.zona) {
                 if (window.peerNodesState[peer.id]) {
                     if (window.peerNodesState[peer.id].interval) clearInterval(window.peerNodesState[peer.id].interval);
                     if (window.peerNodesState[peer.id].domNode) window.peerNodesState[peer.id].domNode.remove();
-                }
-
-                // Create new DOM Node
+                }
                 const node = document.createElement('div');
                 node.className = `absolute w-9 h-9 rounded-xl border ${peer.isSelf ? 'border-primary/60 bg-primary/80' : 'border-secondary/40 bg-surface-container-high/90'} backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
-                node.style.transform = 'translate(-50%, -50%)'; // Center properly
+                node.style.transform = 'translate(-50%, -50%)';
                 node.innerHTML = `
                     <span class="material-symbols-outlined ${peer.isSelf ? 'text-white' : 'text-secondary'} text-[16px]">person</span>
                     <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[9px] text-on-surface-variant/70 bg-surface/70 backdrop-blur-sm px-1.5 py-0.5 rounded-md">${peer.nombre}</div>
                 `;
-                mapCanvas.appendChild(node);
-
-                // Set initial position randomly in their zone
+                mapCanvas.appendChild(node);
                 const zonePoints = waypoints[peer.zona] || waypoints['Zona A'];
-                const startPt = zonePoints[Math.floor(Math.random() * zonePoints.length)];
-                
-                // Disable transition momentarily to snap to starting position instantly
+                const startPt = zonePoints[Math.floor(Math.random() * zonePoints.length)];
                 node.style.transition = 'none';
                 node.style.top = `${startPt.t}%`;
-                node.style.left = `${startPt.l}%`;
-                
-                // Re-enable smooth transition after snapping
-                setTimeout(() => { node.style.transition = 'top 6s linear, left 6s linear'; }, 50);
-
-                // Start human walking loop
+                node.style.left = `${startPt.l}%`;
+                setTimeout(() => { node.style.transition = 'top 6s linear, left 6s linear'; }, 50);
                 const interval = setInterval(() => {
                     const st = window.peerNodesState[peer.id];
                     if (!st) return;
@@ -211,27 +167,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     const points = waypoints[st.zona] || waypoints['Zona A'];
                     const currentPt = points.find(p => p.id === st.wpId);
                     
-                    if (currentPt && currentPt.edges && currentPt.edges.length > 0) {
-                        // Pick random connected waypoint
+                    if (currentPt && currentPt.edges && currentPt.edges.length > 0) {
                         const nextId = currentPt.edges[Math.floor(Math.random() * currentPt.edges.length)];
                         const nextPt = points.find(p => p.id === nextId);
                         
                         if (nextPt) {
-                            st.wpId = nextId;
-                            // Add slight randomness (offset) so users in the same spot don't stack perfectly
+                            st.wpId = nextId;
                             const rT = nextPt.t + (Math.random() * 4 - 2);
                             const rL = nextPt.l + (Math.random() * 2 - 1);
                             st.domNode.style.top = `${rT}%`;
                             st.domNode.style.left = `${rL}%`;
                         }
                     }
-                }, 6000 + Math.random() * 2000); // Move every 6-8s
+                }, 6000 + Math.random() * 2000);
 
                 window.peerNodesState[peer.id] = { domNode: node, wpId: startPt.id, zona: peer.zona, interval };
             }
-        });
-
-        // 3. Ensure the central stairs indicator stays at the bottom layer
+        });
         if (!document.getElementById('map-center-indicator')) {
             const stairsNode = document.createElement('div');
             stairsNode.id = 'map-center-indicator';
@@ -276,9 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function scrollToBottomChat() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // --- WebRTC Event Hooks ---
+    }
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
         appendMessage(data.nombre || 'Desconocido', data.text, false);
     });
@@ -289,15 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const textEl = document.getElementById('broadcast-text');
 
         if (modal && content && textEl && data.text) {
-            textEl.textContent = data.text;
-            
-            // Show modal
+            textEl.textContent = data.text;
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
             content.classList.remove('scale-95');
-            content.classList.add('scale-100');
-
-            // Auto-hide after 8 seconds
+            content.classList.add('scale-100');
             setTimeout(() => {
                 modal.classList.remove('opacity-100', 'pointer-events-auto');
                 modal.classList.add('opacity-0', 'pointer-events-none');
@@ -308,15 +254,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
-        if (data.zona === myZone && data.nombre) {
-            // Vibrate using native API (100ms on, 50ms off, 100ms on)
+        if (data.zona === myZone && data.nombre) {
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             
             showToast(`<span class="font-bold">${data.nombre}</span> acaba de llegar a tu zona`);
         }
-    });
-
-    // --- Toast System ---
+    });
     function showToast(messageHtml) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -331,9 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="font-body-md text-[13px] leading-tight flex-grow">${messageHtml}</div>
         `;
         
-        container.appendChild(toast);
-        
-        // Trigger animation
+        container.appendChild(toast);
         requestAnimationFrame(() => {
             toast.classList.remove('translate-y-[-20px]', 'opacity-0');
         });
@@ -342,18 +283,14 @@ document.addEventListener("DOMContentLoaded", () => {
             toast.classList.add('opacity-0', 'scale-95');
             setTimeout(() => toast.remove(), 300);
         }, 4000);
-    }
-
-    // --- Heatmap CRDT Logic ---
+    }
     window.heatmapCRDT = {};
     let heatmapLocalInterval = null;
     let heatmapSyncInterval = null;
 
     function startHeatmapCRDT() {
         if (heatmapLocalInterval) clearInterval(heatmapLocalInterval);
-        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
-
-        // Cada segundo, el peer incrementa su tiempo en la zona actual
+        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
         heatmapLocalInterval = setInterval(() => {
             const myId = WebRTCEngine.getMyId();
             if (!myId || !myZone) return;
@@ -362,9 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.heatmapCRDT[myId] = {};
             }
             window.heatmapCRDT[myId][myZone] = (window.heatmapCRDT[myId][myZone] || 0) + 1;
-        }, 1000);
-
-        // Cada 5 segundos, hace gossip enviando su estado CRDT completo a todos los peers conectados
+        }, 1000);
         heatmapSyncInterval = setInterval(() => {
             if (!WebRTCEngine.getMyId()) return;
             WebRTCEngine.broadcast(PROTOCOL.HEATMAP_SYNC, window.heatmapCRDT);
@@ -376,8 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
     }
 
-    WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, (data) => {
-        // Fusionar el CRDT recibido guardando siempre el valor máximo
+    WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, (data) => {
         for (const peerId in data) {
             if (!window.heatmapCRDT[peerId]) {
                 window.heatmapCRDT[peerId] = {};
@@ -402,8 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderHeatmap() {
-        if (!isHeatmapMode) {
-            // Reset visuals
+        if (!isHeatmapMode) {
             ['zona-a-bg', 'zona-b-bg', 'zona-c-bg'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -436,9 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     el.style.boxShadow = '';
                 }
             }
-        }
-
-        // Leaderboard Update
+        }
         const sortedZones = Object.keys(totals).map(z => ({ name: z, score: totals[z] })).sort((a,b) => b.score - a.score);
         if (sortedZones.length === 0) {
             leaderboardList.innerHTML = `<div class="text-center text-on-surface-variant/40 text-[11px] font-label-mono mt-2">Sin datos aún</div>`;
@@ -456,9 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
             }).join('');
         }
-    }
-
-    // --- UI Event Listeners ---
+    }
     inputNickname.addEventListener('input', (e) => {
         btnEnter.disabled = e.target.value.trim().length < 3;
     });
@@ -466,9 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnEnter.addEventListener('click', () => {
         const name = inputNickname.value.trim();
         if(name.length >= 3) {
-            myNombre = name;
-            
-            // Auto-select zone if provided in URL (Dynamic QR)
+            myNombre = name;
             const urlParams = new URLSearchParams(window.location.search);
             const preselectedZone = urlParams.get('zona');
             
@@ -509,9 +436,7 @@ document.addEventListener("DOMContentLoaded", () => {
         WebRTCEngine.desconectar();
         stopHeatmapCRDT();
         showScreen(screenZone);
-    });
-
-    // --- Heatmap Toggle ---
+    });
     if (btnToggleHeatmap) {
         btnToggleHeatmap.addEventListener('click', () => {
             isHeatmapMode = !isHeatmapMode;
@@ -545,12 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const msg = chatInput.value.trim();
         if(msg) {
             appendMessage(myNombre, msg, true);
-            chatInput.value = '';
-            // Send to all peers via P2P
+            chatInput.value = '';
             WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
         }
-    });
-
-    // Start
+    });
     showScreen(screenEntry);
 });

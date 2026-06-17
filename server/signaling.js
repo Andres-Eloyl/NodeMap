@@ -2,7 +2,7 @@ const PROTOCOL = require("../shared/protocol");
 const CONFIG = require("../shared/config");
 
 const peers = new Map();
-const sessionEvents = []; // For session replay (Time-Lapse)
+const sessionEvents = [];
 
 const metricas = {
   peers: peers,
@@ -51,9 +51,7 @@ const initSignaling = function(io) {
     });
 
     socket.emit(PROTOCOL.PEER_LIST, { miId: id, peers: listaPeers });
-    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona });
-
-    // Track for replay
+    socket.broadcast.emit(PROTOCOL.PEER_JOIN, { id, nombre, zona });
     if (nombre !== "Dashboard" && nombre !== "Organizador") {
       sessionEvents.push({ timestamp: Date.now(), type: 'JOIN', peer: { id, nombre, zona } });
     }

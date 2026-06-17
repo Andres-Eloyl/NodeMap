@@ -1,28 +1,16 @@
-/**
- * NodeMap Pulse - D3.js Live Dashboard
- */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // --- State ---
+
+document.addEventListener("DOMContentLoaded", () => {
     let totalMessages = 0;
-    let peakConnections = 0;
-    
-    // Data array for the bar chart (last 60 seconds)
-    // We will keep an array of 60 buckets, each representing a second.
+    let peakConnections = 0;
     const MAX_DATA_POINTS = 60;
     let chartData = Array.from({ length: MAX_DATA_POINTS }, (_, i) => ({ time: i, value: 0 }));
-    let currentSecondIndex = MAX_DATA_POINTS - 1;
-
-    // --- DOM Elements ---
+    let currentSecondIndex = MAX_DATA_POINTS - 1;
     const kpiNodes = document.getElementById("kpi-nodes");
     const kpiPeak = document.getElementById("kpi-peak");
     const kpiMessages = document.getElementById("kpi-messages");
-    const chartContainer = document.getElementById("chart-container");
-
-    // --- WebRTC Connection ---
-    WebRTCEngine.conectar("Dashboard", "Central");
-
-    // Hook to all possible network events to count traffic
+    const chartContainer = document.getElementById("chart-container");
+    WebRTCEngine.conectar("Dashboard", "Central");
     function recordActivity() {
         totalMessages++;
         kpiMessages.textContent = totalMessages;
@@ -32,9 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     WebRTCEngine.onMessage(PROTOCOL.CHAT, () => recordActivity());
     WebRTCEngine.onMessage(PROTOCOL.POSITION, () => recordActivity());
     WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, () => recordActivity());
-    WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, () => recordActivity());
-
-    // Periodically update active node count and network quality
+    WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, () => recordActivity());
     setInterval(() => {
         const peers = WebRTCEngine.getPeers();
         const count = peers.length;
@@ -42,9 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (count > peakConnections) {
             peakConnections = count;
             kpiPeak.textContent = peakConnections;
-        }
-
-        // Calculate Average Latency
+        }
         let totalLatency = 0;
         let latencyCount = 0;
         for (const peer of peers) {
@@ -61,14 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const kpiLatencyGlow = document.getElementById("kpi-latency-glow");
         
         if (kpiLatency) {
-            kpiLatency.innerHTML = `${avgLatency}<span class="text-xl text-white/50">ms</span>`;
-            
-            // Remove previous colors
+            kpiLatency.innerHTML = `${avgLatency}<span class="text-xl text-white/50">ms</span>`;
             kpiLatencyIcon.className = "material-symbols-outlined text-4xl transition-colors";
             kpiLatencyGlow.className = "absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150";
             
-            if (avgLatency === 0) {
-                // No peers or no latency measured yet
+            if (avgLatency === 0) {
                 kpiLatencyIcon.classList.add("text-gray-400/80");
                 kpiLatencyGlow.classList.add("bg-gray-500/10");
                 kpiLatencyIcon.textContent = "wifi_off";
@@ -86,19 +67,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 kpiLatencyIcon.textContent = "network_wifi_1_bar";
             }
         }
-    }, 1000);
-
-    // --- D3.js Setup ---
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
-    
-    // We append the SVG to the container
+    }, 1000);
+    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
     const svg = d3.select("#chart-container")
         .append("svg")
         .attr("class", "d3-chart")
         .style("width", "100%")
-        .style("height", "100%");
-
-    // Linear gradient for bars
+        .style("height", "100%");
     const defs = svg.append("defs");
     const gradient = defs.append("linearGradient")
         .attr("id", "bar-gradient")
@@ -132,32 +107,23 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateChart(animate = true) {
         if (width === 0 || height === 0) return;
 
-        x.domain(chartData.map(d => d.time));
-        
-        // Dynamically adjust Y scale max, minimum of 5 for aesthetics
+        x.domain(chartData.map(d => d.time));
         const maxVal = d3.max(chartData, d => d.value);
-        y.domain([0, Math.max(5, maxVal + 2)]);
-
-        // Axes
-        const xAxis = d3.axisBottom(x).tickFormat("").tickSize(0); // Hide x ticks labels
-        const yAxis = d3.axisLeft(y).ticks(5).tickSize(-width); // Grid lines
+        y.domain([0, Math.max(5, maxVal + 2)]);
+        const xAxis = d3.axisBottom(x).tickFormat("").tickSize(0);
+        const yAxis = d3.axisLeft(y).ticks(5).tickSize(-width);
 
         xAxisGroup.call(xAxis);
-        yAxisGroup.transition().duration(animate ? 500 : 0).call(yAxis);
-
-        // Bind data
+        yAxisGroup.transition().duration(animate ? 500 : 0).call(yAxis);
         const bars = chartGroup.selectAll(".bar")
-            .data(chartData, d => d.time); // Key by time index
-
-        // Enter
+            .data(chartData, d => d.time);
         bars.enter()
             .append("rect")
             .attr("class", "bar")
             .attr("x", d => x(d.time))
             .attr("y", height)
             .attr("width", x.bandwidth())
-            .attr("height", 0)
-            // Update
+            .attr("height", 0)
             .merge(bars)
             .transition()
             .duration(animate ? 400 : 0)
@@ -165,39 +131,27 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("x", d => x(d.time))
             .attr("y", d => y(d.value))
             .attr("width", x.bandwidth())
-            .attr("height", d => height - y(d.value));
-
-        // Exit
+            .attr("height", d => height - y(d.value));
         bars.exit().remove();
     }
 
-    window.addEventListener("resize", resizeChart);
-    // Initial size
-    setTimeout(resizeChart, 100);
-
-    // --- Ticker (Shift data every second) ---
-    setInterval(() => {
-        // Shift all data to the left
+    window.addEventListener("resize", resizeChart);
+    setTimeout(resizeChart, 100);
+    setInterval(() => {
         for (let i = 0; i < MAX_DATA_POINTS - 1; i++) {
             chartData[i].value = chartData[i + 1].value;
-        }
-        // Reset current second value
+        }
         chartData[MAX_DATA_POINTS - 1].value = 0;
         
         updateChart(true);
-    }, 1000);
-
-    // --- Packet Sniffer (Terminal) ---
+    }, 1000);
     const terminalOutput = document.getElementById('terminal-output');
     WebRTCEngine.onMessage("RAW_PACKET", (packet) => {
-        if (!terminalOutput) return;
-
-        // Try to parse just to see if it's a message type we want to highlight
+        if (!terminalOutput) return;
         let msgType = "UNKNOWN";
         try {
             const parsed = JSON.parse(packet.raw);
-            msgType = parsed.tipo ? parsed.tipo.toUpperCase() : "RAW_DATA";
-            // Do not show pings to avoid spamming the console
+            msgType = parsed.tipo ? parsed.tipo.toUpperCase() : "RAW_DATA";
             if (msgType === "PING" || msgType === "PONG") return;
         } catch(e) {}
 
@@ -207,9 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const header = `<div class="text-white/60 mb-1 flex justify-between">
             <span>[${new Date().toLocaleTimeString()}] INBOUND_PACKET</span>
             <span class="text-yellow-400">${packet.size} B</span>
-        </div>`;
-        
-        // Highlight encrypted payload if exists
+        </div>`;
         let rawText = packet.raw;
         if (rawText.includes('_encrypted')) {
             rawText = rawText.replace(/"_encrypted":"([^"]+)"/, '"_encrypted":"<span class="text-red-400 bg-red-400/10 px-1 font-bold animate-pulse">$1</span>"');
@@ -218,18 +170,12 @@ document.addEventListener("DOMContentLoaded", () => {
             el.innerHTML = `${header}<div class="text-green-500/70">${rawText}</div>`;
         }
 
-        terminalOutput.appendChild(el);
-        
-        // Keep max 50 lines
+        terminalOutput.appendChild(el);
         if (terminalOutput.children.length > 50) {
             terminalOutput.removeChild(terminalOutput.firstChild);
-        }
-
-        // Auto scroll
+        }
         terminalOutput.scrollTop = terminalOutput.scrollHeight;
-    });
-
-    // --- Animated Background ---
+    });
     const bgContainer = document.getElementById('animated-bg');
     if (bgContainer) {
         const length = 25;
@@ -258,9 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             bgContainer.appendChild(div);
         }
-    }
-
-    // --- Session Replay Logic ---
+    }
     const btnReplay = document.getElementById("btn-replay");
     const btnCloseReplay = document.getElementById("btn-close-replay");
     const replaySpeedSelect = document.getElementById("replay-speed");
@@ -326,9 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(replayInterval);
         replayModal.classList.add("hidden");
         btnReplay.disabled = false;
-        btnReplay.querySelector("#replay-text").textContent = "Replay del Día";
-        
-        // Cleanup DOM nodes
+        btnReplay.querySelector("#replay-text").textContent = "Replay del Día";
         Object.values(replayNodesState).forEach(st => st.domNode.remove());
         replayNodesState = {};
     }
@@ -338,9 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("No hay suficientes eventos guardados para reproducir.");
             stopReplay();
             return;
-        }
-
-        // Initialize UI
+        }
         isReplaying = true;
         replayModal.classList.remove("hidden");
         events.sort((a, b) => a.timestamp - b.timestamp);
@@ -349,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let currentIndex = 0;
         
         function addNode(peer) {
-            if (replayNodesState[peer.id]) return; // already exists
+            if (replayNodesState[peer.id]) return;
 
             const node = document.createElement('div');
             node.className = "absolute w-8 h-8 rounded-xl border border-secondary/40 bg-surface-container-high/90 backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
@@ -402,13 +342,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 replayStatus.textContent = "Replay Finalizado.";
             }
-        }
-
-        // Start playback
+        }
         replayStatus.textContent = "Iniciando Time-Lapse...";
-        playNextEvent();
-
-        // Wandering loop
+        playNextEvent();
         const wanderInterval = setInterval(() => {
             if (!isReplaying) {
                 clearInterval(wanderInterval);
