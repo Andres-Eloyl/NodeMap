@@ -16,7 +16,19 @@ const PROTOCOL = {
   GET_REPLAY: "get-replay",
   REPLAY_DATA: "replay-data",
   SET_LATENCY: "set-latency",
-  };
+  FORUM_MSG: "forum-msg",
+  FORUM_SYNC_REQ: "forum-sync-req",
+  FORUM_SYNC_RES: "forum-sync-res",
+  GAME_INVITE: "game-invite",
+  GAME_ACCEPT: "game-accept",
+  GAME_REJECT: "game-reject",
+  GAME_MOVE: "game-move",
+  REACTION_READY: "reaction-ready",
+  REACTION_GO: "reaction-go",
+  REACTION_TAP: "reaction-tap",
+  TRIVIA_START: "trivia-start",
+  TRIVIA_ANSWER: "trivia-answer",
+};
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PROTOCOL;

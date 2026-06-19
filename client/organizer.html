@@ -71,6 +71,21 @@
                 EMITIR BROADCAST
             </button>
         </form>
+        <div class="h-px bg-outline-variant/30 w-full my-4"></div>
+
+        <div class="flex flex-col gap-4">
+            <h2 class="text-white font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">lightbulb</span> Lanzar Trivia Rápida</h2>
+            <div class="flex flex-col gap-2">
+                <input id="trivia-q" class="input-field rounded-xl p-3 text-sm" placeholder="Ej: ¿Qué protocolo usa la web?" type="text" value="¿Qué significa QoS en redes?">
+                <input id="trivia-o1" class="input-field rounded-xl p-2 text-xs" placeholder="Opción 1" type="text" value="Quality of Service">
+                <input id="trivia-o2" class="input-field rounded-xl p-2 text-xs" placeholder="Opción 2" type="text" value="Quantity of Speed">
+                <input id="trivia-o3" class="input-field rounded-xl p-2 text-xs" placeholder="Opción 3" type="text" value="Query over Socket">
+                <input id="trivia-o4" class="input-field rounded-xl p-2 text-xs" placeholder="Opción 4" type="text" value="Quick Operating System">
+            </div>
+            <button id="btn-trivia" class="btn-primary w-full rounded-xl h-[48px] flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">rocket_launch</span> INICIAR TRIVIA GLOBAL
+            </button>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -136,6 +151,30 @@
                     document.querySelectorAll('.btn-qos').forEach(b => b.classList.remove('ring-2', 'ring-white'));
                     e.target.classList.add('ring-2', 'ring-white');
                 });
+            });
+
+            document.getElementById('btn-trivia').addEventListener('click', () => {
+                const q = document.getElementById('trivia-q').value.trim();
+                const o1 = document.getElementById('trivia-o1').value.trim();
+                const o2 = document.getElementById('trivia-o2').value.trim();
+                const o3 = document.getElementById('trivia-o3').value.trim();
+                const o4 = document.getElementById('trivia-o4').value.trim();
+                
+                if (q && o1 && o2 && o3 && o4) {
+                    WebRTCEngine.broadcast(PROTOCOL.TRIVIA_START, {
+                        question: q,
+                        options: [o1, o2, o3, o4]
+                    });
+                    
+                    const btn = document.getElementById('btn-trivia');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> TRIVIA ENVIADA';
+                    btn.classList.add('bg-green-600');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('bg-green-600');
+                    }, 2000);
+                }
             });
         });
     </script>

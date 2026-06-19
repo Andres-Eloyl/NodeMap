@@ -134,6 +134,50 @@
                     <div class="text-green-500/40 italic">> Protocolo End-to-End Encryption [ACTIVO]</div>
                 </div>
             </div>
+    </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 mb-4">
+            <div class="glass-card rounded-3xl p-6 relative flex flex-col">
+                <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-primary">forum</span>
+                    Foros Multicast
+                </h3>
+                <div class="flex flex-col gap-4" id="display-forum-counters">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/80 font-bold">Zona A</span>
+                        <span class="font-mono text-2xl text-primary font-bold" id="forum-count-a">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/80 font-bold">Zona B</span>
+                        <span class="font-mono text-2xl text-secondary font-bold" id="forum-count-b">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/80 font-bold">Zona C</span>
+                        <span class="font-mono text-2xl text-tertiary font-bold" id="forum-count-c">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 relative flex flex-col">
+                <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-secondary">sports_esports</span>
+                    Juegos en Vivo
+                </h3>
+                <div class="flex flex-col gap-3 overflow-y-auto max-h-[200px] custom-scrollbar pr-2" id="display-active-games">
+                    <p class="text-white/50 text-sm font-mono italic">Buscando partidas P2P...</p>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 relative flex flex-col border border-tertiary/20 shadow-[0_0_20px_rgba(105,216,212,0.1)]">
+                <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-tertiary">emoji_events</span>
+                    Top Trivia
+                </h3>
+                <div class="flex flex-col gap-3 overflow-y-auto max-h-[200px] custom-scrollbar pr-2" id="display-trivia-leaderboard">
+                    <p class="text-white/50 text-sm font-mono italic">A la espera de Trivia...</p>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function switchTab(targetId) {
-        ['tab-map', 'tab-nodes', 'tab-chat'].forEach(id => {
+        ['tab-map', 'tab-nodes', 'tab-chat', 'tab-forums', 'tab-games'].forEach(id => {
             document.getElementById(id).classList.add('view-hidden');
         });
         document.getElementById(targetId).classList.remove('view-hidden');
@@ -297,6 +297,63 @@ document.addEventListener("DOMContentLoaded", () => {
     function scrollToBottomChat() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+    WebRTCEngine.onMessage(PROTOCOL.FORUM_MSG, (data) => {
+        if (!data || !data.zona || !data.id) return;
+        if (!window.forums) window.forums = { 'Zona A': [], 'Zona B': [], 'Zona C': [] };
+        if (!window.forums[data.zona]) window.forums[data.zona] = [];
+        
+        // Evitar duplicados
+        const exists = window.forums[data.zona].find(m => m.id === data.id);
+        if (!exists) {
+            window.forums[data.zona].push(data);
+            window.forums[data.zona].sort((a,b) => a.timestamp - b.timestamp);
+            if (typeof renderForumMessages === 'function') renderForumMessages();
+            
+            // Notification if in different tab
+            const tabForums = document.getElementById('tab-forums');
+            if (tabForums && tabForums.classList.contains('view-hidden')) {
+                if (typeof showToast !== 'undefined') {
+                    showToast(`<span class="font-bold text-primary">${data.nombre}</span> publicó en el Foro ${data.zona}`, () => {
+                        switchTab('tab-forums');
+                        if (typeof switchForumSubtab === 'function') switchForumSubtab(data.zona, data.zona === 'Zona A' ? 'forum-tab-a' : data.zona === 'Zona B' ? 'forum-tab-b' : 'forum-tab-c');
+                    });
+                }
+            }
+        }
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
+        if (confirm(`¡${data.nombre} te ha retado a jugar ${data.gameType === 'reaction' ? 'Carrera de Reacción' : data.gameType}! ¿Aceptas?`)) {
+            WebRTCEngine.sendToPeer(data.senderId, PROTOCOL.GAME_ACCEPT, { gameType: data.gameType, nombre: myNombre });
+            window.startGameSession(data.senderId, data.nombre, data.gameType, false);
+        } else {
+            WebRTCEngine.sendToPeer(data.senderId, PROTOCOL.GAME_REJECT, { nombre: myNombre });
+        }
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.GAME_ACCEPT, (data) => {
+        if (typeof showToast !== 'undefined') showToast(`¡${data.nombre} aceptó el reto!`);
+        window.startGameSession(data.senderId, data.nombre, data.gameType, true);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.GAME_REJECT, (data) => {
+        alert(`${data.nombre} rechazó tu invitación.`);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.TRIVIA_START, (data) => {
+        if (window.showTriviaModal) window.showTriviaModal(data);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.REACTION_READY, (data) => {
+        if (window.reactionGameStart) window.reactionGameStart(data);
+    });
+    WebRTCEngine.onMessage(PROTOCOL.REACTION_GO, (data) => {
+        if (window.reactionGameGo) window.reactionGameGo(data);
+    });
+    WebRTCEngine.onMessage(PROTOCOL.REACTION_TAP, (data) => {
+        if (window.reactionGameTap) window.reactionGameTap(data);
+    });
+
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
         if (typeof AudioSystem !== "undefined") AudioSystem.play("chat");
         if (data.isPrivate) {
@@ -675,6 +732,307 @@ document.addEventListener("DOMContentLoaded", () => {
     if (subtabZona) subtabZona.addEventListener('click', () => switchChatSubtab('zona'));
     if (subtabGlobal) subtabGlobal.addEventListener('click', () => switchChatSubtab('global'));
     if (subtabPrivados) subtabPrivados.addEventListener('click', () => switchChatSubtab('privados'));
+
+    // === FORUMS LOGIC ===
+    window.forums = { 'Zona A': [], 'Zona B': [], 'Zona C': [] };
+    let currentForumZone = 'Zona A';
+    
+    function renderForumMessages() {
+        const container = document.getElementById('forum-messages');
+        if (!container) return;
+        const msgs = window.forums[currentForumZone] || [];
+        
+        let html = `<div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 my-2 tracking-wide">Mostrando mensajes de la ${currentForumZone}</div>`;
+        
+        msgs.forEach(m => {
+            const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            html += `
+                <div class="glass-card-solid p-3 rounded-2xl flex gap-3 shadow-sm border border-outline-variant/20 mb-2">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${m.color ? m.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${m.color || '#fff'}">
+                        <span class="text-[14px]">${m.avatar || '?'}</span>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-[13px]" style="color: ${m.color || '#fff'}">${m.nombre}</span>
+                            <span class="text-[10px] text-on-surface-variant/50 font-label-mono">${timeStr}</span>
+                        </div>
+                        <p class="text-[14px] text-on-surface-variant/90 leading-snug">${m.text}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function switchForumSubtab(zone, id) {
+        currentForumZone = zone;
+        ['forum-tab-a', 'forum-tab-b', 'forum-tab-c'].forEach(tabId => {
+            const btn = document.getElementById(tabId);
+            if (!btn) return;
+            if (tabId === id) {
+                btn.className = 'flex-1 py-2 font-bold text-primary border-b-2 border-primary transition-all text-[14px]';
+            } else {
+                btn.className = 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+            }
+        });
+        renderForumMessages();
+    }
+
+    const tabA = document.getElementById('forum-tab-a');
+    const tabB = document.getElementById('forum-tab-b');
+    const tabC = document.getElementById('forum-tab-c');
+    if (tabA) tabA.addEventListener('click', () => switchForumSubtab('Zona A', 'forum-tab-a'));
+    if (tabB) tabB.addEventListener('click', () => switchForumSubtab('Zona B', 'forum-tab-b'));
+    if (tabC) tabC.addEventListener('click', () => switchForumSubtab('Zona C', 'forum-tab-c'));
+
+    const forumForm = document.getElementById('forum-form');
+    const forumInput = document.getElementById('forum-input');
+    if (forumForm && forumInput) {
+        forumForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = forumInput.value.trim();
+            if (msg) {
+                const msgObj = {
+                    id: Date.now() + Math.random().toString(),
+                    zona: currentForumZone,
+                    nombre: myNombre,
+                    color: myColor,
+                    avatar: myAvatar,
+                    text: msg,
+                    timestamp: Date.now()
+                };
+                window.forums[currentForumZone].push(msgObj);
+                renderForumMessages();
+                forumInput.value = '';
+                
+                // Multicast to all peers (in this demo we broadcast and let them filter)
+                WebRTCEngine.broadcast(PROTOCOL.FORUM_MSG, msgObj);
+            }
+        });
+    }
+
+    // === GAMES LOGIC ===
+
+    window.startGameSession = function(opponentId, opponentName, gameType, isInitiator) {
+        window.activeGameSession = { opponentId, opponentName, isInitiator };
+        document.getElementById('game-lobby-view').classList.add('hidden');
+        document.getElementById('games-list-view').classList.add('hidden');
+        const activeView = document.getElementById('active-game-view');
+        activeView.classList.remove('hidden');
+        switchTab('tab-games');
+        
+        activeView.innerHTML = `
+            <div class="flex justify-between items-center mb-6">
+                <button class="text-primary text-[13px] font-bold flex items-center gap-1 hover:underline" onclick="window.closeGameLobby()"><span class="material-symbols-outlined text-[16px]">arrow_back</span> Salir</button>
+                <div class="text-[14px] font-bold text-on-surface">VS ${opponentName}</div>
+            </div>
+            <div id="game-canvas-area" class="flex-grow flex flex-col items-center justify-center"></div>
+        `;
+
+        if (gameType === 'reaction') {
+            initReactionGame(isInitiator);
+        } else {
+            document.getElementById('game-canvas-area').innerHTML = `<p class="text-on-surface-variant/50">Juego ${gameType} en desarrollo...</p>`;
+        }
+    };
+
+    function initReactionGame(isInitiator) {
+        const area = document.getElementById('game-canvas-area');
+        area.innerHTML = `
+            <div id="reaction-circle" class="w-40 h-40 rounded-full bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg cursor-pointer transition-colors duration-100 border-4 border-outline-variant/30 select-none">
+                <span class="font-bold text-lg pointer-events-none" id="reaction-text">Esperando...</span>
+            </div>
+            <div id="reaction-result" class="mt-8 text-center hidden">
+                <div class="font-headline-lg text-2xl text-primary mb-2" id="reaction-winner"></div>
+                <div class="font-label-mono text-[12px] text-on-surface-variant/80">Tu tiempo: <span id="reaction-my-time">--</span> ms</div>
+                <div class="font-label-mono text-[12px] text-on-surface-variant/80">Rival: <span id="reaction-op-time">--</span> ms</div>
+            </div>
+        `;
+
+        const circle = document.getElementById('reaction-circle');
+        const text = document.getElementById('reaction-text');
+        
+        let state = 'waiting'; // waiting, ready, go, done
+        let goTimestamp = 0;
+        let myTapTime = 0;
+        let opTapTime = 0;
+
+        window.reactionGameStart = (data) => {
+            state = 'ready';
+            text.textContent = '¡Prepárate!';
+            circle.className = "w-40 h-40 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(249,115,22,0.5)] cursor-pointer border-4 border-orange-400 select-none";
+        };
+
+        window.reactionGameGo = (data) => {
+            state = 'go';
+            goTimestamp = data.timestamp; // The actual time the signal was sent
+            text.textContent = '¡TOCA!';
+            circle.className = "w-40 h-40 rounded-full bg-green-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(34,197,94,0.7)] cursor-pointer border-4 border-green-400 select-none scale-105 transition-transform";
+        };
+
+        window.reactionGameTap = (data) => {
+            opTapTime = data.tapTime;
+            checkWinner();
+        };
+
+        function checkWinner() {
+            if (myTapTime > 0 && opTapTime > 0) {
+                state = 'done';
+                const myDiff = myTapTime - goTimestamp;
+                const opDiff = opTapTime - goTimestamp;
+                
+                document.getElementById('reaction-result').classList.remove('hidden');
+                document.getElementById('reaction-my-time').textContent = myDiff;
+                document.getElementById('reaction-op-time').textContent = opDiff;
+                
+                if (myDiff < opDiff) {
+                    document.getElementById('reaction-winner').textContent = '¡GANASTE!';
+                } else if (opDiff < myDiff) {
+                    document.getElementById('reaction-winner').textContent = 'PERDISTE';
+                } else {
+                    document.getElementById('reaction-winner').textContent = 'EMPATE';
+                }
+                
+                circle.className = "w-40 h-40 rounded-full bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg border-4 border-outline-variant/30 select-none";
+                text.textContent = 'Fin';
+            }
+        }
+
+        circle.addEventListener('mousedown', (e) => {
+            if (state === 'go') {
+                myTapTime = Date.now();
+                WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.REACTION_TAP, { tapTime: myTapTime });
+                circle.className = "w-40 h-40 rounded-full bg-primary/20 flex items-center justify-center text-primary shadow-lg border-4 border-primary/50 select-none";
+                text.textContent = 'Tocado';
+                checkWinner();
+            } else if (state === 'ready') {
+                text.textContent = '¡Muy pronto!';
+            }
+        });
+        circle.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // prevent mouse emulation
+            circle.dispatchEvent(new Event('mousedown'));
+        });
+
+        // Initiator coordinates the sequence
+        if (isInitiator) {
+            setTimeout(() => {
+                WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.REACTION_READY, {});
+                window.reactionGameStart();
+                
+                const randomWait = Math.floor(Math.random() * 3000) + 2000; // 2 to 5 seconds
+                setTimeout(() => {
+                    const ts = Date.now();
+                    WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.REACTION_GO, { timestamp: ts });
+                    window.reactionGameGo({ timestamp: ts });
+                }, randomWait);
+            }, 1000);
+        }
+    }
+
+    // --- TRIVIA GLOBAL ---
+    let triviaInterval = null;
+    window.showTriviaModal = function(data) {
+        const modal = document.getElementById('trivia-modal');
+        const qEl = document.getElementById('trivia-question');
+        const optContainer = document.getElementById('trivia-options');
+        const timerEl = document.getElementById('trivia-timer');
+        if(!modal || !qEl || !optContainer) return;
+        
+        qEl.textContent = data.question;
+        optContainer.innerHTML = '';
+        
+        let timeLeft = 10;
+        let answered = false;
+        
+        data.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left bg-surface/50 border border-outline-variant/30 hover:border-primary hover:bg-primary/10 rounded-xl p-4 transition-all text-white text-[14px]";
+            btn.textContent = opt;
+            btn.onclick = () => {
+                if (answered) return;
+                answered = true;
+                btn.classList.add('bg-primary', 'text-white', 'border-primary');
+                WebRTCEngine.broadcast(PROTOCOL.TRIVIA_ANSWER, { answerIndex: idx, nombre: myNombre });
+            };
+            optContainer.appendChild(btn);
+        });
+
+        modal.classList.remove('hidden');
+        timerEl.textContent = timeLeft;
+        
+        if(triviaInterval) clearInterval(triviaInterval);
+        triviaInterval = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(triviaInterval);
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 2000);
+            }
+        }, 1000);
+    };
+
+    window.currentGameType = null;
+    window.activeGameSession = null; // { opponentId, opponentName }
+    
+    window.showGameLobby = function(gameType) {
+        window.currentGameType = gameType;
+        const list = document.getElementById('games-list-view');
+        const lobby = document.getElementById('game-lobby-view');
+        const active = document.getElementById('active-game-view');
+        if(list) list.classList.add('hidden');
+        if(active) active.classList.add('hidden');
+        if(lobby) {
+            lobby.classList.remove('hidden');
+            const title = gameType === 'reaction' ? 'Carrera de Reacción' : (gameType === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra Papel Tijera');
+            document.getElementById('lobby-game-title').textContent = title;
+            renderLobbyUsers();
+        }
+    };
+    
+    window.closeGameLobby = function() {
+        window.currentGameType = null;
+        document.getElementById('game-lobby-view').classList.add('hidden');
+        document.getElementById('active-game-view').classList.add('hidden');
+        document.getElementById('games-list-view').classList.remove('hidden');
+    };
+
+    function renderLobbyUsers() {
+        const container = document.getElementById('lobby-users-list');
+        if (!container) return;
+        const peers = WebRTCEngine.getPeers().filter(p => p.nombre !== "Dashboard" && p.nombre !== "Organizador");
+        
+        if (peers.length === 0) {
+            container.innerHTML = '<p class="text-[12px] text-on-surface-variant/50">No hay otros usuarios conectados.</p>';
+            return;
+        }
+
+        container.innerHTML = peers.map(peer => `
+            <div class="glass-card-solid flex items-center justify-between p-3 rounded-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
+                        <span class="text-[14px]">${peer.avatar || '?'}</span>
+                    </div>
+                    <span class="font-bold text-[14px]" style="color: ${peer.color || '#fff'}">${peer.nombre}</span>
+                </div>
+                <button onclick="window.inviteToGame('${peer.id}', '${peer.nombre}')" class="btn-primary rounded-xl px-4 py-1.5 text-[12px]">Retar</button>
+            </div>
+        `).join('');
+    }
+
+    window.inviteToGame = function(peerId, peerName) {
+        if (!window.currentGameType) return;
+        if (typeof showToast !== 'undefined') showToast(`Enviando reto a ${peerName}...`);
+        WebRTCEngine.sendToPeer(peerId, PROTOCOL.GAME_INVITE, {
+            gameType: window.currentGameType,
+            nombre: myNombre
+        });
+    };
+
 
     window.renderPrivateChatList = function() {
         const container = document.getElementById('private-chats-container');

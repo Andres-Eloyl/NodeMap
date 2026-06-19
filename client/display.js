@@ -404,3 +404,75 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 500);
     });
 });
+
+
+    let forumCounters = { 'Zona A': 0, 'Zona B': 0, 'Zona C': 0 };
+    WebRTCEngine.onMessage(PROTOCOL.FORUM_MSG, (data) => {
+        if (data.zona && typeof forumCounters[data.zona] !== 'undefined') {
+            forumCounters[data.zona]++;
+            const countA = document.getElementById('forum-count-a');
+            const countB = document.getElementById('forum-count-b');
+            const countC = document.getElementById('forum-count-c');
+            if (countA) countA.textContent = forumCounters['Zona A'];
+            if (countB) countB.textContent = forumCounters['Zona B'];
+            if (countC) countC.textContent = forumCounters['Zona C'];
+            
+            const el = data.zona === 'Zona A' ? countA : (data.zona === 'Zona B' ? countB : countC);
+            if (el) {
+                el.classList.add('scale-150');
+                setTimeout(() => el.classList.remove('scale-150'), 300);
+            }
+        }
+    });
+
+    let activeGames = {};
+    WebRTCEngine.onMessage(PROTOCOL.GAME_ACCEPT, (data) => {
+        activeGames[data.senderId] = { player1: data.nombre, player2: 'Oponente', type: data.gameType, time: Date.now() };
+        renderActiveGames();
+    });
+    WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
+        activeGames[data.senderId + '_inv'] = { player1: data.nombre, player2: 'Esperando...', type: data.gameType, time: Date.now() };
+        renderActiveGames();
+    });
+    WebRTCEngine.onMessage(PROTOCOL.REACTION_TAP, (data) => {
+        activeGames[data.senderId + '_reaction'] = { player1: 'Jugador', player2: 'Jugador', type: 'reaction', time: Date.now(), status: 'Terminado' };
+        renderActiveGames();
+    });
+
+    function renderActiveGames() {
+        const container = document.getElementById('display-active-games');
+        if (!container) return;
+        const games = Object.values(activeGames).sort((a,b) => b.time - a.time).slice(0, 5);
+        if (games.length === 0) return;
+        container.innerHTML = games.map(g => `
+            <div class="glass-card-solid p-3 rounded-xl border border-secondary/20 flex justify-between items-center transition-all animate-fade-in">
+                <span class="text-[12px] font-bold text-white">${g.player1} <span class="text-secondary text-[10px]">VS</span> ${g.player2}</span>
+                <span class="badge-chip px-2 py-1 rounded-lg text-[9px]">${g.type === 'reaction' ? 'Reacción' : g.type}</span>
+            </div>
+        `).join('');
+    }
+
+    let triviaScores = {};
+    WebRTCEngine.onMessage(PROTOCOL.TRIVIA_START, (data) => {
+        const container = document.getElementById('display-trivia-leaderboard');
+        if(container) container.innerHTML = `<p class="text-white font-bold text-sm text-tertiary animate-pulse">¡Trivia iniciada! Esperando respuestas...</p>`;
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.TRIVIA_ANSWER, (data) => {
+        if (!triviaScores[data.nombre]) triviaScores[data.nombre] = 0;
+        triviaScores[data.nombre] += 100;
+        
+        const container = document.getElementById('display-trivia-leaderboard');
+        if (!container) return;
+        
+        const sorted = Object.entries(triviaScores).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        container.innerHTML = sorted.map((entry, idx) => `
+            <div class="glass-card-solid p-2 rounded-xl flex items-center justify-between border ${idx===0?'border-tertiary':'border-white/10'} transition-all animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <span class="text-[14px] font-bold text-tertiary">#${idx+1}</span>
+                    <span class="text-[13px] font-bold text-white">${entry[0]}</span>
+                </div>
+                <span class="font-mono text-tertiary text-[12px]">${entry[1]} pts</span>
+            </div>
+        `).join('');
+    });
