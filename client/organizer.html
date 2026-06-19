@@ -46,9 +46,19 @@
             </div>
         </div>
 
-        <div id="status-box" class="mb-6 p-4 rounded-xl border border-white/10 bg-black/20 flex items-center justify-between">
+                <div id="status-box" class="mb-6 p-4 rounded-xl border border-white/10 bg-black/20 flex items-center justify-between">
             <span class="text-sm font-medium">Estado WebRTC:</span>
             <span id="status-text" class="text-xs font-mono px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">CONECTANDO...</span>
+        </div>
+
+        <div class="mb-6 p-4 rounded-xl border border-white/10 bg-black/20">
+            <h3 class="text-xs tracking-widest text-white/70 uppercase font-medium mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-yellow-400">warning</span> Simulador de Red (QoS)</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button type="button" class="btn-qos px-2 py-2 rounded border border-green-500/30 bg-green-500/10 text-green-400 text-xs font-bold hover:bg-green-500/20 transition-all ring-2 ring-white" data-latency="0">0ms (Normal)</button>
+                <button type="button" class="btn-qos px-2 py-2 rounded border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-xs font-bold hover:bg-yellow-500/20 transition-all" data-latency="50">50ms (Baja)</button>
+                <button type="button" class="btn-qos px-2 py-2 rounded border border-orange-500/30 bg-orange-500/10 text-orange-400 text-xs font-bold hover:bg-orange-500/20 transition-all" data-latency="200">200ms (Media)</button>
+                <button type="button" class="btn-qos px-2 py-2 rounded border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all" data-latency="500">500ms (Crítica)</button>
+            </div>
         </div>
 
         <form id="broadcast-form" class="flex flex-col gap-4">
@@ -116,6 +126,16 @@
                         btnSend.classList.remove('bg-green-600');
                     }, 2000);
                 }
+            });
+
+            document.querySelectorAll('.btn-qos').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const latency = parseInt(e.target.dataset.latency);
+                    WebRTCEngine.broadcast(PROTOCOL.SET_LATENCY, { latency: latency });
+                    
+                    document.querySelectorAll('.btn-qos').forEach(b => b.classList.remove('ring-2', 'ring-white'));
+                    e.target.classList.add('ring-2', 'ring-white');
+                });
             });
         });
     </script>

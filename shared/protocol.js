@@ -15,6 +15,7 @@ const PROTOCOL = {
   ORGANIZER_BROADCAST: "organizer-broadcast",
   GET_REPLAY: "get-replay",
   REPLAY_DATA: "replay-data",
+  SET_LATENCY: "set-latency",
   };
 
 if (typeof module !== 'undefined' && module.exports) {

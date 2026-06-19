@@ -3,6 +3,7 @@ const callbacks = new Map();
 const latencies = new Map();
 const iceBuffers = new Map();
 const reconnecting = new Set();
+window.simulatedLatency = 0;
 
 let myId = null;
 let myNombre = null;
@@ -112,15 +113,20 @@ function setupDataChannel(peerId, nombre, dc) {
         return;
       }
 
+      if (tipo === PROTOCOL.SET_LATENCY) {
+        window.simulatedLatency = msg.latency || 0;
+        return;
+      }
+
       if (tipo === PROTOCOL.PONG) {
         const latencia = (Date.now() - msg.timestamp) / 2;
         latencies.set(peerId, latencia);
         return;
-      }
-      fireCallbacks("RAW_PACKET", { raw: event.data, size: event.data.length, peerId: peerId });
+      }
+      fireCallbacks("RAW_PACKET", { raw: event.data, size: event.data.length, peerId: peerId });
       if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
         if (msg._encrypted) {
-            try {
+            try {
                 const decoded = decodeURIComponent(atob(msg._encrypted));
                 msg.text = decoded.replace("_NO_LEER_ESTO_XD_", "");
             } catch(e) {}
@@ -307,15 +313,19 @@ function sendMessage(peerId, tipo, datos) {
   const peer = peers.get(peerId);
   if (!peer || !peer.dc || peer.dc.readyState !== "open") return;
   try {
-    let finalDatos = { ...datos };
+    let finalDatos = { ...datos };
     if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
-        if (finalDatos.text) {
+        if (finalDatos.text) {
             finalDatos._encrypted = btoa(encodeURIComponent(finalDatos.text + "_NO_LEER_ESTO_XD_"));
             delete finalDatos.text;
         }
     }
     
-    peer.dc.send(JSON.stringify({ tipo, ...finalDatos }));
+    setTimeout(() => {
+        if (peer.dc && peer.dc.readyState === "open") {
+            peer.dc.send(JSON.stringify({ tipo, ...finalDatos }));
+        }
+    }, window.simulatedLatency || 0);
   } catch (err) {
     console.error("[WebRTC] Error enviando mensaje:", err);
   }

@@ -39,7 +39,7 @@ const initSignaling = function(io) {
     const nombre = socket.handshake.query.nombre || "Anónimo";
     const zona = socket.handshake.query.zona || "Zona A";
     const color = socket.handshake.query.color || "#ffb3ad";
-    const avatar = socket.handshake.query.avatar || "👤";
+    const avatar = socket.handshake.query.avatar || (nombre && nombre !== "Anónimo" ? nombre.charAt(0).toUpperCase() : "?");
     const peer = { id, socket, nombre, zona, color, avatar };
 
     peers.set(id, peer);

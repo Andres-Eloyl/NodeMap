@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const screenEntry = document.getElementById('screen-entry');
     const screenZone = document.getElementById('screen-zone');
     const screenMain = document.getElementById('screen-main');
@@ -20,14 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnToggleHeatmap = document.getElementById('btn-toggle-heatmap');
     const heatmapLeaderboard = document.getElementById('heatmap-leaderboard');
     const leaderboardList = document.getElementById('leaderboard-list');
-    const blueprintContainer = document.getElementById('blueprint-container');
+    const blueprintContainer = document.getElementById('blueprint-container');
     let myNombre = "";
     let myZone = "";
     let myColor = "#ffb3ad";
-    let myAvatar = "👤";
+    let myAvatar = "?";
     let latencyInterval = null;
     let isHeatmapMode = false;
-    let heatmapUIInterval = null;
+    let heatmapUIInterval = null;
     function showScreen(screenEl) {
         screenEntry.classList.add('view-hidden');
         screenZone.classList.add('view-hidden');
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(targetId === 'tab-chat') scrollToBottomChat();
     }
     const AVATAR_COLORS = ['#ffb3ad', '#44e2cd', '#69d8d4', '#e4beba', '#ffdad6', '#87f4f0', '#62fae3', '#ab8986'];
-    const AVATAR_EMOJIS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵'];
+    
 
     String.prototype.hashCode = function() {
         var hash = 0, i, chr;
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="glass-card-solid flex items-center justify-between p-4 rounded-2xl hover:border-primary/30 transition-all duration-200 ${peer.isSelf ? 'border border-primary/40 bg-primary/5' : ''}">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'};">
-                            <span class="text-[20px]">${peer.avatar || '👤'}</span>
+                            <span class="text-[20px]">${peer.avatar || peer.nombre.charAt(0).toUpperCase()}</span>
                         </div>
                         <div>
                             <div class="font-body-md text-on-surface font-medium text-[14px]" style="color: ${peer.color || '#fff'}">${peer.nombre}</div>
@@ -124,77 +124,77 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
             `;
-        }).join('');
+        }).join('');
         const mapCanvas = document.getElementById('map-canvas');
-        if (!mapCanvas) return;
+        if (!mapCanvas) return;
         const waypoints = {
-            'Zona A': [
+            'Zona A': [
                 { id: 'p1', t: 10, l: 25, edges: ['p2', 'r1'] },
                 { id: 'p2', t: 30, l: 25, edges: ['p1', 'p3', 'r2'] },
                 { id: 'p3', t: 50, l: 25, edges: ['p2', 'p4', 'r3'] },
                 { id: 'p4', t: 70, l: 25, edges: ['p3', 'p5', 'r4'] },
-                { id: 'p5', t: 90, l: 25, edges: ['p4', 'r5'] },
+                { id: 'p5', t: 90, l: 25, edges: ['p4', 'r5'] },
                 { id: 'r1', t: 15, l: 12, edges: ['p1'] },
                 { id: 'r2', t: 35, l: 12, edges: ['p2'] },
                 { id: 'r3', t: 55, l: 12, edges: ['p3'] },
                 { id: 'r4', t: 75, l: 12, edges: ['p4'] },
                 { id: 'r5', t: 85, l: 12, edges: ['p5'] },
             ],
-            'Zona B': [
+            'Zona B': [
                 { id: 'c1', t: 15, l: 50, edges: ['c2', 'c6'] },
                 { id: 'c2', t: 35, l: 50, edges: ['c1', 'c3', 'c7'] },
                 { id: 'c3', t: 55, l: 50, edges: ['c2', 'c4'] },
                 { id: 'c4', t: 75, l: 50, edges: ['c3', 'c5'] },
-                { id: 'c5', t: 85, l: 50, edges: ['c4'] },
+                { id: 'c5', t: 85, l: 50, edges: ['c4'] },
                 { id: 'c6', t: 15, l: 38, edges: ['c1'] },
                 { id: 'c7', t: 35, l: 62, edges: ['c2'] },
             ],
-            'Zona C': [
+            'Zona C': [
                 { id: 'pd1', t: 10, l: 75, edges: ['pd2', 'o1'] },
                 { id: 'pd2', t: 30, l: 75, edges: ['pd1', 'pd3', 'o2'] },
                 { id: 'pd3', t: 50, l: 75, edges: ['pd2', 'pd4', 'o3'] },
                 { id: 'pd4', t: 70, l: 75, edges: ['pd3', 'pd5', 'o4'] },
-                { id: 'pd5', t: 90, l: 75, edges: ['pd4', 'o5'] },
+                { id: 'pd5', t: 90, l: 75, edges: ['pd4', 'o5'] },
                 { id: 'o1', t: 15, l: 88, edges: ['pd1'] },
                 { id: 'o2', t: 35, l: 88, edges: ['pd2'] },
                 { id: 'o3', t: 55, l: 88, edges: ['pd3'] },
                 { id: 'o4', t: 75, l: 88, edges: ['pd4'] },
                 { id: 'o5', t: 85, l: 88, edges: ['pd5'] },
             ]
-        };
+        };
         if (!window.peerNodesState) window.peerNodesState = {};
 
         const allNodesData = [...peers, { id: myNombre + '-self', nombre: myNombre + " (Tú)", zona: myZone, isSelf: true, color: myColor, avatar: myAvatar }];
-        const activeIds = new Set(allNodesData.map(p => p.id));
+        const activeIds = new Set(allNodesData.map(p => p.id));
         Object.keys(window.peerNodesState).forEach(id => {
             if (!activeIds.has(id)) {
                 if (window.peerNodesState[id].interval) clearInterval(window.peerNodesState[id].interval);
                 if (window.peerNodesState[id].domNode) window.peerNodesState[id].domNode.remove();
                 delete window.peerNodesState[id];
             }
-        });
-        allNodesData.forEach(peer => {
-            if (!window.peerNodesState[peer.id] || window.peerNodesState[peer.id].zona !== peer.zona) {
+        });
+        allNodesData.forEach(peer => {
+            if (!window.peerNodesState[peer.id] || window.peerNodesState[peer.id].zona !== peer.zona) {
                 if (window.peerNodesState[peer.id]) {
                     if (window.peerNodesState[peer.id].interval) clearInterval(window.peerNodesState[peer.id].interval);
                     if (window.peerNodesState[peer.id].domNode) window.peerNodesState[peer.id].domNode.remove();
-                }
+                }
                 const node = document.createElement('div');
                 node.className = `absolute w-9 h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
                 node.style.borderColor = peer.color || '#ffb3ad';
                 node.style.backgroundColor = peer.isSelf ? peer.color : `${peer.color || '#ffb3ad'}20`;
                 node.style.transform = 'translate(-50%, -50%)';
                 node.innerHTML = `
-                    <span class="text-[16px]">${peer.avatar || '👤'}</span>
+                    <span class="text-[16px]">${peer.avatar || peer.nombre.charAt(0).toUpperCase()}</span>
                     <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[9px] text-on-surface-variant/70 bg-surface/70 backdrop-blur-sm px-1.5 py-0.5 rounded-md">${peer.nombre}</div>
                 `;
-                mapCanvas.appendChild(node);
+                mapCanvas.appendChild(node);
                 const zonePoints = waypoints[peer.zona] || waypoints['Zona A'];
-                const startPt = zonePoints[Math.floor(Math.random() * zonePoints.length)];
+                const startPt = zonePoints[Math.floor(Math.random() * zonePoints.length)];
                 node.style.transition = 'none';
                 node.style.top = `${startPt.t}%`;
-                node.style.left = `${startPt.l}%`;
-                setTimeout(() => { node.style.transition = 'top 6s linear, left 6s linear'; }, 50);
+                node.style.left = `${startPt.l}%`;
+                setTimeout(() => { node.style.transition = 'top 6s linear, left 6s linear'; }, 50);
                 const interval = setInterval(() => {
                     const st = window.peerNodesState[peer.id];
                     if (!st) return;
@@ -202,12 +202,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     const points = waypoints[st.zona] || waypoints['Zona A'];
                     const currentPt = points.find(p => p.id === st.wpId);
                     
-                    if (currentPt && currentPt.edges && currentPt.edges.length > 0) {
+                    if (currentPt && currentPt.edges && currentPt.edges.length > 0) {
                         const nextId = currentPt.edges[Math.floor(Math.random() * currentPt.edges.length)];
                         const nextPt = points.find(p => p.id === nextId);
                         
                         if (nextPt) {
-                            st.wpId = nextId;
+                            st.wpId = nextId;
                             const rT = nextPt.t + (Math.random() * 4 - 2);
                             const rL = nextPt.l + (Math.random() * 2 - 1);
                             st.domNode.style.top = `${rT}%`;
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 window.peerNodesState[peer.id] = { domNode: node, wpId: startPt.id, zona: peer.zona, interval };
             }
-        });
+        });
         if (!document.getElementById('map-center-indicator')) {
             const stairsNode = document.createElement('div');
             stairsNode.id = 'map-center-indicator';
@@ -245,21 +245,27 @@ document.addEventListener("DOMContentLoaded", () => {
     window.startPrivateChat = function(id, nombre) {
         switchTab('tab-chat');
         chatInput.value = '';
-        chatInput.placeholder = `Susurrando a ${nombre}...`;
-        chatInput.dataset.privateTarget = id;
+        chatInput.placeholder = `Mensaje privado para ${nombre}...`;
+        
         chatInput.focus();
     };
 
-    function appendMessage(sender, text, isSelf, isPrivate = false) {
+        function appendMessageToContainer(containerEl, sender, text, isSelf, isPrivate = false, isGlobal = false) {
+        if (!containerEl) return;
         const alignClass = isSelf ? 'self-end' : 'self-start';
         let bgClass = '';
-        let labelPrivate = '';
+        let labelTag = '';
 
         if (isPrivate) {
             bgClass = isSelf
                 ? 'bg-gradient-to-br from-[#9c27b0] to-[#7b1fa2] text-white rounded-2xl rounded-br-md border border-[#e1bee7]/30 shadow-[0_0_15px_rgba(156,39,176,0.4)]'
                 : 'glass-card-solid bg-[#f3e5f5]/10 border border-[#ab47bc]/40 text-[#ce93d8] rounded-2xl rounded-bl-md shadow-[0_0_15px_rgba(171,71,188,0.2)]';
-            labelPrivate = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded">Privado</span>`;
+            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded">Privado</span>`;
+        } else if (isGlobal) {
+            bgClass = isSelf
+                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
+                : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md';
+            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded text-primary border border-primary/20">Global</span>`;
         } else {
             bgClass = isSelf
                 ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
@@ -273,21 +279,26 @@ document.addEventListener("DOMContentLoaded", () => {
         msgEl.innerHTML = `
             <div class="${senderClass}">
                 <span>${sender}</span>
-                ${isPrivate && !isSelf ? labelPrivate : ''}
+                ${(!isSelf && (isPrivate || isGlobal)) ? labelTag : ''}
             </div>
             <div class="chat-bubble px-4 py-2.5 ${bgClass} ${isPrivate ? 'text-[14px] italic' : ''}">
                 ${text}
-                ${isPrivate && isSelf ? labelPrivate : ''}
+                ${(isSelf && (isPrivate || isGlobal)) ? labelTag : ''}
             </div>
         `;
-        chatMessages.appendChild(msgEl);
-        scrollToBottomChat();
+        containerEl.appendChild(msgEl);
+        containerEl.scrollTop = containerEl.scrollHeight;
+    }
+
+    function appendMessage(sender, text, isSelf, isPrivate = false) {
+        appendMessageToContainer(chatMessages, sender, text, isSelf, isPrivate, false);
     }
 
     function scrollToBottomChat() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    }
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (data) => {
+        if (typeof AudioSystem !== "undefined") AudioSystem.play("chat");
         if (data.isPrivate) {
             if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
             
@@ -300,30 +311,60 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (window.activePrivateChatId === peerId) {
                     window.renderPrivateMessages(peerId);
                 } else {
-                    showToast(`<span class="font-bold text-[#ce93d8]">${data.nombre || 'Desconocido'}</span> te ha susurrado.`);
+                    showToast(`<span class="font-bold text-[#ce93d8]">${data.nombre || 'Desconocido'}</span> te ha enviado un mensaje privado.`, () => {
+                        if (typeof window.startPrivateChat === 'function') {
+                            window.startPrivateChat(peerId, data.nombre || 'Desconocido');
+                        }
+                    });
                 }
+                if (typeof window.renderPrivateChatList === 'function') window.renderPrivateChatList();
+            }
+        } else if (data.isGlobal) {
+            const gc = document.getElementById('chat-global-messages');
+            appendMessageToContainer(gc, data.nombre || 'Desconocido', data.text, false, false, true);
+            
+            const tabChat = document.getElementById('tab-chat');
+            const chatGlobal = document.getElementById('chat-global-view');
+            if ((tabChat && tabChat.classList.contains('view-hidden')) || (chatGlobal && chatGlobal.classList.contains('hidden'))) {
+                showToast(`<span class="font-bold text-primary">${data.nombre || 'Desconocido'}</span> (Global): ${data.text.substring(0, 20)}${data.text.length > 20 ? '...' : ''}`, () => {
+                    switchTab('tab-chat');
+                    if (typeof switchChatSubtab === 'function') switchChatSubtab('global');
+                });
             }
         } else {
-            appendMessage(data.nombre || 'Desconocido', data.text, false, false);
+            const senderPeer = WebRTCEngine.getPeers().find(p => p.id === data.senderId);
+            if (senderPeer && senderPeer.zona === myZone) {
+                appendMessage(data.nombre || 'Desconocido', data.text, false, false);
+                
+                const tabChat = document.getElementById('tab-chat');
+                const chatZone = document.getElementById('chat-zone-view');
+                if ((tabChat && tabChat.classList.contains('view-hidden')) || (chatZone && chatZone.classList.contains('hidden'))) {
+                    showToast(`<span class="font-bold">${data.nombre || 'Desconocido'}</span> (Zona): ${data.text.substring(0, 20)}${data.text.length > 20 ? '...' : ''}`, () => {
+                        switchTab('tab-chat');
+                        if (typeof switchChatSubtab === 'function') switchChatSubtab('zona');
+                    });
+                }
+            }
         }
     });
 
     WebRTCEngine.onMessage(PROTOCOL.ORGANIZER_BROADCAST, (data) => {
+        if (typeof AudioSystem !== "undefined") AudioSystem.play("broadcast");
         const modal = document.getElementById('broadcast-modal');
         const content = document.getElementById('broadcast-content');
         const textEl = document.getElementById('broadcast-text');
 
         if (modal && content && textEl && data.text) {
-            textEl.textContent = data.text;
+            textEl.textContent = data.text;
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
             content.classList.remove('scale-95');
-            content.classList.add('scale-100');
+            content.classList.add('scale-100');
             setTimeout(() => {
                 modal.classList.remove('opacity-100', 'pointer-events-auto');
             modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.style.pointerEvents = ''; // Clear inline style so the class pointer-events-none works again
-            modal.style.pointerEvents = 'none'; // Explicit pointer-events
+            modal.style.pointerEvents = ''; 
+            modal.style.pointerEvents = 'none'; 
                 content.classList.remove('scale-100');
                 content.classList.add('scale-95');
             }, 8000);
@@ -331,18 +372,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
-        if (data.zona === myZone && data.nombre) {
+        if (data.zona === myZone && data.nombre) {
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             
-            showToast(`<span class="font-bold">${data.nombre}</span> acaba de llegar a tu zona`);
+            if (typeof AudioSystem !== "undefined") AudioSystem.play("join");
+            showToast(`<span class="font-bold">${data.nombre}</span> acaba de llegar a tu zona`, () => {
+                switchTab('tab-nodes');
+            });
         }
-    });
-    function showToast(messageHtml) {
+    });
+    function showToast(messageHtml, onClick) {
         const container = document.getElementById('toast-container');
         if (!container) return;
         
         const toast = document.createElement('div');
-        toast.className = 'glass-card-solid bg-surface/90 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto border-secondary/30 transform transition-all duration-300 translate-y-[-20px] opacity-0';
+        toast.className = 'glass-card-solid bg-surface/90 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto border-secondary/30 transform transition-all duration-300 translate-y-[-20px] opacity-0' + (onClick ? ' cursor-pointer' : '');
+        if (onClick) {
+            toast.addEventListener('click', () => {
+                onClick();
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
         
         toast.innerHTML = `
             <div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
@@ -351,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="font-body-md text-[13px] leading-tight flex-grow">${messageHtml}</div>
         `;
         
-        container.appendChild(toast);
+        container.appendChild(toast);
         requestAnimationFrame(() => {
             toast.classList.remove('translate-y-[-20px]', 'opacity-0');
         });
@@ -360,14 +411,14 @@ document.addEventListener("DOMContentLoaded", () => {
             toast.classList.add('opacity-0', 'scale-95');
             setTimeout(() => toast.remove(), 300);
         }, 4000);
-    }
+    }
     window.heatmapCRDT = {};
     let heatmapLocalInterval = null;
     let heatmapSyncInterval = null;
 
     function startHeatmapCRDT() {
         if (heatmapLocalInterval) clearInterval(heatmapLocalInterval);
-        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
+        if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
         heatmapLocalInterval = setInterval(() => {
             const myId = WebRTCEngine.getMyId();
             if (!myId || !myZone) return;
@@ -376,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.heatmapCRDT[myId] = {};
             }
             window.heatmapCRDT[myId][myZone] = (window.heatmapCRDT[myId][myZone] || 0) + 1;
-        }, 1000);
+        }, 1000);
         heatmapSyncInterval = setInterval(() => {
             if (!WebRTCEngine.getMyId()) return;
             WebRTCEngine.broadcast(PROTOCOL.HEATMAP_SYNC, window.heatmapCRDT);
@@ -388,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (heatmapSyncInterval) clearInterval(heatmapSyncInterval);
     }
 
-    WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, (data) => {
+    WebRTCEngine.onMessage(PROTOCOL.HEATMAP_SYNC, (data) => {
         for (const peerId in data) {
             if (!window.heatmapCRDT[peerId]) {
                 window.heatmapCRDT[peerId] = {};
@@ -413,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderHeatmap() {
-        if (!isHeatmapMode) {
+        if (!isHeatmapMode) {
             ['zona-a-bg', 'zona-b-bg', 'zona-c-bg'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -446,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     el.style.boxShadow = '';
                 }
             }
-        }
+        }
         const sortedZones = Object.keys(totals).map(z => ({ name: z, score: totals[z] })).sort((a,b) => b.score - a.score);
         if (sortedZones.length === 0) {
             leaderboardList.innerHTML = `<div class="text-center text-on-surface-variant/40 text-[11px] font-label-mono mt-2">Sin datos aún</div>`;
@@ -464,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
             }).join('');
         }
-    }
+    }
     inputNickname.addEventListener('input', (e) => {
         btnEnter.disabled = e.target.value.trim().length < 3;
     });
@@ -472,7 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnEnter.addEventListener('click', () => {
         const name = inputNickname.value.trim();
         if(name.length >= 3) {
-            myNombre = name;
+            myNombre = name;
             const urlParams = new URLSearchParams(window.location.search);
             const preselectedZone = urlParams.get('zona');
             
@@ -513,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
         WebRTCEngine.desconectar();
         stopHeatmapCRDT();
         showScreen(screenZone);
-    });
+    });
     if (btnToggleHeatmap) {
         btnToggleHeatmap.addEventListener('click', () => {
             isHeatmapMode = !isHeatmapMode;
@@ -548,63 +599,129 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const msg = chatInput.value.trim();
         if(msg) {
-            
-                appendMessage(myNombre, msg, true, false);
-            WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre });
+            appendMessage(myNombre, msg, true, false);
+            const peers = WebRTCEngine.getPeers();
+            for (const p of peers) {
+                if (p.zona === myZone) {
+                    WebRTCEngine.sendToPeer(p.id, PROTOCOL.CHAT, { text: msg, nombre: myNombre });
+                }
+            }
             chatInput.value = '';
         }
     });
 
-    document.querySelectorAll('.reaction-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const emoji = btn.dataset.emoji;
-            WebRTCEngine.broadcast(PROTOCOL.REACTION, { emoji, nombre: myNombre });
-            if (navigator.vibrate) navigator.vibrate(50);
-            
-            // local feedback
-            btn.classList.add('scale-150');
-            setTimeout(() => btn.classList.remove('scale-150'), 150);
-            spawnLocalReaction(emoji);
-        });
-    });
-
-    function spawnLocalReaction(emoji) {
-        const el = document.createElement('div');
-        el.className = 'fixed text-4xl pointer-events-none z-[9999]';
-        el.innerText = emoji;
-        el.style.left = Math.random() * 80 + 10 + '%';
-        el.style.bottom = '-50px';
-        const animName = 'floatUp' + Date.now();
-        const style = document.createElement('style');
-        style.innerText = `
-            @keyframes ${animName} {
-                0% { transform: translateY(0) scale(0.8); opacity: 0; }
-                10% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-                20% { transform: translateY(-40px) scale(1); opacity: 1; }
-                80% { transform: translateY(-350px) scale(1); opacity: 0.8; }
-                100% { transform: translateY(-400px) scale(0.8); opacity: 0; }
+    const chatGlobalForm = document.getElementById('chat-global-form');
+    const chatGlobalInput = document.getElementById('chat-global-input');
+    
+    if (chatGlobalForm && chatGlobalInput) {
+        chatGlobalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = chatGlobalInput.value.trim();
+            if (msg) {
+                const gc = document.getElementById('chat-global-messages');
+                appendMessageToContainer(gc, myNombre, msg, true, false, true);
+                
+                
+                WebRTCEngine.broadcast(PROTOCOL.CHAT, { text: msg, nombre: myNombre, isGlobal: true });
+                
+                chatGlobalInput.value = '';
             }
-        `;
-        document.head.appendChild(style);
-        el.style.animation = `${animName} 3s ease-out forwards`;
-        document.body.appendChild(el);
-        setTimeout(() => {
-            el.remove();
-            style.remove();
-        }, 3000);
+        });
     }
+
+    
+
+    
 
     showScreen(screenEntry);
 
     window.privateChats = {}; 
     window.activePrivateChatId = null;
 
+    const subtabZona = document.getElementById('subtab-zona');
+    const subtabGlobal = document.getElementById('subtab-global');
+    const subtabPrivados = document.getElementById('subtab-privados');
+    const chatZoneView = document.getElementById('chat-zone-view');
+    const chatGlobalView = document.getElementById('chat-global-view');
+    const chatPrivatesListView = document.getElementById('chat-privates-list-view');
+    const chatPrivateConvView = document.getElementById('chat-private-conversation-view');
+
+    function switchChatSubtab(tab) {
+        if (!subtabZona) return;
+        subtabZona.className = tab === 'zona' ? 'flex-1 py-2 font-bold text-primary border-b-2 border-primary transition-all text-[14px]' : 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+        if (subtabGlobal) subtabGlobal.className = tab === 'global' ? 'flex-1 py-2 font-bold text-primary border-b-2 border-primary transition-all text-[14px]' : 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+        subtabPrivados.className = tab === 'privados' ? 'flex-1 py-2 font-bold text-primary border-b-2 border-primary transition-all text-[14px]' : 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+        
+        if (chatZoneView) chatZoneView.classList.add('hidden');
+        if (chatGlobalView) chatGlobalView.classList.add('hidden');
+        if (chatPrivatesListView) chatPrivatesListView.classList.add('hidden');
+        if (chatPrivateConvView) chatPrivateConvView.classList.add('hidden');
+
+        if (tab === 'zona') {
+            if (chatZoneView) chatZoneView.classList.remove('hidden');
+            setTimeout(() => { if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }, 50);
+        } else if (tab === 'global') {
+            if (chatGlobalView) chatGlobalView.classList.remove('hidden');
+            setTimeout(() => { 
+                const gc = document.getElementById('chat-global-messages'); 
+                if (gc) gc.scrollTop = gc.scrollHeight; 
+            }, 50);
+        } else if (tab === 'privados') {
+            if (chatPrivatesListView) chatPrivatesListView.classList.remove('hidden');
+            window.renderPrivateChatList();
+        }
+    }
+
+    if (subtabZona) subtabZona.addEventListener('click', () => switchChatSubtab('zona'));
+    if (subtabGlobal) subtabGlobal.addEventListener('click', () => switchChatSubtab('global'));
+    if (subtabPrivados) subtabPrivados.addEventListener('click', () => switchChatSubtab('privados'));
+
+    window.renderPrivateChatList = function() {
+        const container = document.getElementById('private-chats-container');
+        if (!container) return;
+        if (!window.privateChats || Object.keys(window.privateChats).length === 0) {
+            container.innerHTML = '<div class="text-center font-label-mono text-[11px] text-on-surface-variant/40 mt-10 tracking-wide">No tienes chats privados activos.</div>';
+            return;
+        }
+
+        const peers = WebRTCEngine.getPeers();
+        let html = '';
+        for (const [peerId, messages] of Object.entries(window.privateChats)) {
+            if (messages.length === 0) continue;
+            const lastMsg = messages[messages.length - 1];
+            const peer = peers.find(p => p.id === peerId) || { nombre: 'Desconocido', color: '#fff' };
+            const avatarChar = peer.avatar || peer.nombre.charAt(0).toUpperCase();
+            
+            html += `
+                <div class="glass-card-solid flex items-center justify-between p-3 rounded-2xl hover:border-primary/30 transition-all cursor-pointer" onclick="window.startPrivateChat('${peerId}', '${peer.nombre}')">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
+                            <span class="text-[16px]">${avatarChar}</span>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="font-headline-md text-on-surface font-semibold text-[14px] truncate">${peer.nombre}</div>
+                            <div class="font-body-md text-[12px] text-on-surface-variant/70 truncate">${lastMsg.isSelf ? 'Tú: ' : ''}${lastMsg.text}</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant/50 text-[18px]">chevron_right</span>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    };
+
     window.startPrivateChat = (peerId, name) => {
         window.activePrivateChatId = peerId;
-        const modal = document.getElementById('private-chat-modal');
         const title = document.getElementById('private-chat-title');
         const avatar = document.getElementById('private-chat-avatar');
         
+        switchTab('tab-chat');
+        if (subtabZona) {
+            subtabZona.className = 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+            if (subtabGlobal) subtabGlobal.className = 'flex-1 py-2 font-bold text-on-surface-variant/70 border-b-2 border-transparent transition-all text-[14px]';
+            subtabPrivados.className = 'flex-1 py-2 font-bold text-primary border-b-2 border-primary transition-all text-[14px]';
+        }
+
         const peer = WebRTCEngine.getPeers().find(p => p.id === peerId);
         if (peer) {
             title.textContent = peer.nombre;
@@ -618,11 +735,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         window.renderPrivateMessages(peerId);
         
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.classList.add('opacity-100');
-        modal.style.pointerEvents = 'auto'; // Explicit pointer-events
-        document.getElementById('private-chat-content').classList.remove('scale-95');
-        document.getElementById('private-chat-content').classList.add('scale-100');
+        if (chatZoneView) chatZoneView.classList.add('hidden');
+        if (chatPrivatesListView) chatPrivatesListView.classList.add('hidden');
+        if (chatPrivateConvView) chatPrivateConvView.classList.remove('hidden');
         
         setTimeout(() => {
             const input = document.getElementById('private-chat-input');
@@ -630,16 +745,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 50);
     };
 
-    const closeBtn = document.getElementById('private-chat-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
+    const backBtnPrivates = document.getElementById('btn-back-privates');
+    if (backBtnPrivates) {
+        backBtnPrivates.addEventListener('click', () => {
             window.activePrivateChatId = null;
-            const modal = document.getElementById('private-chat-modal');
-            modal.classList.remove('opacity-100', 'pointer-events-auto');
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            modal.style.pointerEvents = 'none';
-            document.getElementById('private-chat-content').classList.remove('scale-100');
-            document.getElementById('private-chat-content').classList.add('scale-95');
+            if (chatZoneView) chatZoneView.classList.add('hidden');
+            if (chatPrivatesListView) chatPrivatesListView.classList.remove('hidden');
+            if (chatPrivateConvView) chatPrivateConvView.classList.add('hidden');
+            window.renderPrivateChatList();
         });
     }
 
@@ -650,12 +763,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const input = document.getElementById('private-chat-input');
             const msg = input.value.trim();
             if (msg && window.activePrivateChatId) {
+                if (!window.privateChats) window.privateChats = {};
                 if (!window.privateChats[window.activePrivateChatId]) window.privateChats[window.activePrivateChatId] = [];
                 window.privateChats[window.activePrivateChatId].push({ sender: myNombre, text: msg, isSelf: true });
                 
                 WebRTCEngine.sendToPeer(window.activePrivateChatId, PROTOCOL.CHAT, { text: msg, nombre: myNombre, isPrivate: true });
                 window.renderPrivateMessages(window.activePrivateChatId);
                 input.value = '';
+                if (typeof window.renderPrivateChatList === 'function') window.renderPrivateChatList();
             }
         });
     }
@@ -677,3 +792,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
 });
+
+    WebRTCEngine.onMessage(PROTOCOL.PEER_LEAVE, (data) => {
+        if (typeof AudioSystem !== "undefined") AudioSystem.play("leave");
+    });
+    WebRTCEngine.onMessage(PROTOCOL.PEER_EXIT, (data) => {
+        if (typeof AudioSystem !== "undefined") AudioSystem.play("leave");
+    });
