@@ -323,12 +323,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
-        if (confirm(`¡${data.nombre} te ha retado a jugar ${data.gameType === 'reaction' ? 'Carrera de Reacción' : data.gameType}! ¿Aceptas?`)) {
+        if (typeof AudioSystem !== "undefined") AudioSystem.play("chat");
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        
+        const modalId = 'game-invite-modal-' + Date.now();
+        const gameName = data.gameType === 'reaction' ? 'Carrera de Reacción' : (data.gameType === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra, Papel, Tijera');
+        
+        const modalHtml = `
+            <div id="${modalId}" class="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+                <div class="glass-card-solid p-6 rounded-2xl max-w-xs w-full text-center border-primary/40 shadow-2xl">
+                    <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-primary text-4xl">sports_esports</span>
+                    </div>
+                    <h3 class="font-headline-lg text-xl mb-2 text-on-surface">¡Nuevo Reto!</h3>
+                    <p class="font-body-md text-on-surface-variant mb-6 text-[14px]">
+                        <span class="font-bold text-white">${data.nombre}</span> te ha retado a jugar 
+                        <span class="font-bold text-primary">${gameName}</span>.
+                    </p>
+                    <div class="flex gap-3">
+                        <button id="btn-reject-${modalId}" class="flex-1 py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold transition-colors">Rechazar</button>
+                        <button id="btn-accept-${modalId}" class="flex-1 py-3 rounded-xl bg-primary text-[#68000a] font-bold hover:bg-primary/90 transition-colors shadow-lg">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        document.getElementById(`btn-accept-${modalId}`).onclick = () => {
+            document.getElementById(modalId).remove();
             WebRTCEngine.sendToPeer(data.senderId, PROTOCOL.GAME_ACCEPT, { gameType: data.gameType, nombre: myNombre });
             window.startGameSession(data.senderId, data.nombre, data.gameType, false);
-        } else {
+        };
+        
+        document.getElementById(`btn-reject-${modalId}`).onclick = () => {
+            document.getElementById(modalId).remove();
             WebRTCEngine.sendToPeer(data.senderId, PROTOCOL.GAME_REJECT, { nombre: myNombre });
-        }
+        };
     });
 
     WebRTCEngine.onMessage(PROTOCOL.GAME_ACCEPT, (data) => {
@@ -833,10 +863,241 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (gameType === 'reaction') {
             initReactionGame(isInitiator);
+        } else if (gameType === 'tictactoe') {
+            initTicTacToe(isInitiator);
+        } else if (gameType === 'rps') {
+            initRockPaperScissors(isInitiator);
         } else {
             document.getElementById('game-canvas-area').innerHTML = `<p class="text-on-surface-variant/50">Juego ${gameType} en desarrollo...</p>`;
         }
     };
+
+    window.gameMoveHandler = null;
+    WebRTCEngine.onMessage(PROTOCOL.GAME_MOVE, (data) => {
+        if (window.gameMoveHandler) window.gameMoveHandler(data);
+    });
+
+    function initTicTacToe(isInitiator) {
+        const area = document.getElementById('game-canvas-area');
+        area.innerHTML = `
+            <div class="mb-4 text-center font-bold" id="ttt-status"></div>
+            <div class="relative w-64 h-64 mx-auto">
+                <div class="grid grid-cols-3 gap-2 w-full h-full" id="ttt-board">
+                    ${Array(9).fill(0).map((_, i) => `<div class="w-[80px] h-[80px] bg-surface-bright flex items-center justify-center text-5xl font-bold cursor-pointer rounded-2xl border border-outline-variant/30 hover:bg-primary/10 transition-colors overflow-hidden" data-idx="${i}"></div>`).join('')}
+                </div>
+                <div id="ttt-line" class="absolute bg-primary rounded-full origin-left transition-transform duration-500 ease-out z-10 drop-shadow-[0_0_8px_rgba(255,84,81,0.8)]" style="height: 6px; opacity: 0; transform: scaleX(0);"></div>
+            </div>
+        `;
+        let board = Array(9).fill(null);
+        let myTurn = isInitiator;
+        let mySymbol = isInitiator ? 'X' : 'O';
+        let opSymbol = isInitiator ? 'O' : 'X';
+        let gameOver = false;
+
+        const status = document.getElementById('ttt-status');
+        const cells = document.querySelectorAll('#ttt-board div');
+
+        function updateStatus() {
+            if (gameOver) return;
+            status.textContent = myTurn ? 'Tu turno (' + mySymbol + ')' : 'Turno del rival (' + opSymbol + ')';
+            status.className = myTurn ? 'mb-4 text-center font-bold text-green-400' : 'mb-4 text-center font-bold text-yellow-400';
+        }
+
+        function checkWin(b) {
+            const lines = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            for (let i = 0; i < lines.length; i++) {
+                const [x, y, z] = lines[i];
+                if (b[x] && b[x] === b[y] && b[x] === b[z]) return { winner: b[x], line: [x, y, z] };
+            }
+            if (b.every(c => c !== null)) return { winner: 'draw', line: null };
+            return null;
+        }
+
+        function drawLine(line) {
+            if (!line) return;
+            const lineEl = document.getElementById('ttt-line');
+            const [a, b, c] = line;
+            
+            const getCol = (idx) => idx % 3;
+            const getRow = (idx) => Math.floor(idx / 3);
+            const centers = [40, 128, 216]; // 80px + 8px gap precalculated centers
+            
+            const x1 = centers[getCol(a)];
+            const y1 = centers[getRow(a)];
+            const x2 = centers[getCol(c)];
+            const y2 = centers[getRow(c)];
+            
+            const length = Math.hypot(x2 - x1, y2 - y1);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            lineEl.style.left = `${x1}px`;
+            lineEl.style.top = `${y1 - 3}px`; // -3 to center the 6px height line
+            lineEl.style.width = `${length}px`;
+            lineEl.style.opacity = '1';
+            
+            requestAnimationFrame(() => {
+                lineEl.style.transform = `rotate(${angle}deg) scaleX(1)`;
+            });
+        }
+
+        function handleEnd(result) {
+            gameOver = true;
+            const winner = result.winner;
+            if (winner === 'draw') {
+                status.textContent = '¡Empate!';
+                status.className = 'mb-4 text-center font-bold text-white text-xl';
+            } else if (winner === mySymbol) {
+                status.textContent = '¡Ganaste!';
+                status.className = 'mb-4 text-center font-bold text-primary text-xl';
+                drawLine(result.line);
+            } else {
+                status.textContent = '¡Perdiste!';
+                status.className = 'mb-4 text-center font-bold text-red-500 text-xl';
+                drawLine(result.line);
+            }
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (!myTurn || gameOver) return;
+                const idx = cell.dataset.idx;
+                if (board[idx]) return;
+
+                board[idx] = mySymbol;
+                cell.textContent = mySymbol;
+                cell.classList.add(mySymbol === 'X' ? 'text-primary' : 'text-tertiary');
+                myTurn = false;
+                
+                WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.GAME_MOVE, { game: 'tictactoe', idx: idx });
+                
+                const result = checkWin(board);
+                if (result) handleEnd(result);
+                else updateStatus();
+            });
+        });
+
+        window.gameMoveHandler = (data) => {
+            if (data.game !== 'tictactoe' || gameOver) return;
+            const idx = data.idx;
+            board[idx] = opSymbol;
+            cells[idx].textContent = opSymbol;
+            cells[idx].classList.add(opSymbol === 'X' ? 'text-primary' : 'text-tertiary');
+            myTurn = true;
+            
+            const result = checkWin(board);
+            if (result) handleEnd(result);
+            else updateStatus();
+        };
+
+        updateStatus();
+    }
+
+    function initRockPaperScissors(isInitiator) {
+        const area = document.getElementById('game-canvas-area');
+        area.innerHTML = `
+            <div class="mb-8 text-center font-bold text-xl text-on-surface" id="rps-status">Elige tu jugada</div>
+            <div class="flex gap-4 md:gap-6" id="rps-options">
+                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="rock">
+                    <span class="text-4xl md:text-5xl">✊</span>
+                    <span class="text-xs mt-2 font-bold uppercase tracking-wide">Piedra</span>
+                </button>
+                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="paper">
+                    <span class="text-4xl md:text-5xl">✋</span>
+                    <span class="text-xs mt-2 font-bold uppercase tracking-wide">Papel</span>
+                </button>
+                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="scissors">
+                    <span class="text-4xl md:text-5xl">✌️</span>
+                    <span class="text-xs mt-2 font-bold uppercase tracking-wide">Tijera</span>
+                </button>
+            </div>
+            <div id="rps-result" class="hidden mt-8 flex flex-col items-center w-full">
+                <div class="flex justify-center items-center w-full max-w-sm mb-6">
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] font-mono text-white/50 mb-2 uppercase">Tú</span>
+                        <div id="rps-my-choice" class="text-6xl transform scale-x-[-1] drop-shadow-lg"></div>
+                    </div>
+                    <div class="text-2xl font-bold text-primary/80 mx-4 italic">VS</div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] font-mono text-white/50 mb-2 uppercase">Rival</span>
+                        <div id="rps-op-choice" class="text-6xl drop-shadow-lg"></div>
+                    </div>
+                </div>
+                <div id="rps-winner" class="font-headline-lg text-3xl font-bold uppercase tracking-wider py-2 px-6 rounded-xl bg-black/20 border"></div>
+            </div>
+        `;
+
+        let myChoice = null;
+        let opChoice = null;
+        const status = document.getElementById('rps-status');
+        const options = document.querySelectorAll('#rps-options button');
+        const resultDiv = document.getElementById('rps-result');
+
+        const emojis = { rock: '✊', paper: '✋', scissors: '✌️' };
+
+        function resolveGame() {
+            document.getElementById('rps-options').classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            
+            document.getElementById('rps-my-choice').textContent = emojis[myChoice];
+            document.getElementById('rps-op-choice').textContent = emojis[opChoice];
+            
+            let winner = '';
+            if (myChoice === opChoice) winner = 'Empate';
+            else if (
+                (myChoice === 'rock' && opChoice === 'scissors') ||
+                (myChoice === 'paper' && opChoice === 'rock') ||
+                (myChoice === 'scissors' && opChoice === 'paper')
+            ) winner = '¡Ganaste!';
+            else winner = '¡Perdiste!';
+
+            const wEl = document.getElementById('rps-winner');
+            wEl.textContent = winner;
+            if (winner === '¡Ganaste!') {
+                wEl.classList.add('text-green-400', 'border-green-500/30', 'bg-green-500/10');
+            } else if (winner === '¡Perdiste!') {
+                wEl.classList.add('text-red-500', 'border-red-500/30', 'bg-red-500/10');
+            } else {
+                wEl.classList.add('text-white', 'border-white/30');
+            }
+            
+            status.textContent = 'Juego Terminado';
+        }
+
+        options.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (myChoice) return;
+                myChoice = btn.dataset.choice;
+                
+                options.forEach(b => b.classList.add('opacity-30', 'scale-95'));
+                btn.classList.remove('opacity-30', 'scale-95');
+                btn.classList.add('border-primary', 'bg-primary/20', 'scale-105');
+
+                WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.GAME_MOVE, { game: 'rps', choice: myChoice });
+                
+                if (opChoice) {
+                    resolveGame();
+                } else {
+                    status.textContent = 'Esperando al rival...';
+                    status.classList.add('animate-pulse', 'text-yellow-400');
+                }
+            });
+        });
+
+        window.gameMoveHandler = (data) => {
+            if (data.game !== 'rps') return;
+            opChoice = data.choice;
+            if (myChoice) {
+                resolveGame();
+            } else {
+                status.textContent = 'El rival ya eligió. ¡Te toca!';
+                status.classList.add('text-primary');
+            }
+        };
+    }
 
     function initReactionGame(isInitiator) {
         const area = document.getElementById('game-canvas-area');
