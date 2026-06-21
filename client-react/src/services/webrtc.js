@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
-import PROTOCOL from '../../../shared/protocol.js';
-import CONFIG from '../../../shared/config.js';
+import PROTOCOL from '../shared/protocol.js';
+import CONFIG from '../shared/config.js';
 
 const peers = new Map();
 const callbacks = new Map();

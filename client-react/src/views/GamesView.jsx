@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Swords, Gamepad } from 'lucide-react';
 import { TicTacToe } from '../components/Games/TicTacToe';
 import { RockPaperScissors } from '../components/Games/RockPaperScissors';
-import PROTOCOL from '../../../shared/protocol.js';
+import PROTOCOL from '../shared/protocol.js';
 
 export function GamesView() {
   const peers = useWebRTCStore(state => state.peers);

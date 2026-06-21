@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWebRTCStore } from '../store/useWebRTCStore';
 import { Send } from 'lucide-react';
-import PROTOCOL from '../../../shared/protocol.js';
+import PROTOCOL from '../shared/protocol.js';
 
 export function ChatView() {
   const [text, setText] = useState('');

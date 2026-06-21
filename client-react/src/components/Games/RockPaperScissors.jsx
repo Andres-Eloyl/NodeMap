@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebRTCStore } from '../../store/useWebRTCStore';
-import PROTOCOL from '../../../../shared/protocol.js';
+import PROTOCOL from '../../shared/protocol.js';
 
 const CHOICES = {
   rock: '✊',

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebRTCStore } from '../../store/useWebRTCStore';
-import PROTOCOL from '../../../../shared/protocol.js';
+import PROTOCOL from '../../shared/protocol.js';
 
 export function TicTacToe({ opponent, onExit }) {
   const [board, setBoard] = useState(Array(9).fill(null));
