@@ -16,7 +16,7 @@
 
 .d3-chart text {
     fill: rgba(255, 255, 255, 0.5);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Montserrat', sans-serif;
     font-size: 11px;
 }
 
@@ -30,7 +30,7 @@
 
 .bar {
     fill: url(#bar-gradient);
-    rx: 4; /* rounded corners */
+    rx: 4; /*  corners */
 }
 
 /* --- Animated Background --- */

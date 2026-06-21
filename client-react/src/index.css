@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-bright: #393844;
+  --color-surface-container-highest: #353340;
+  --color-tertiary: #69d8d4;
+  --color-surface: #13121d;
+  --color-tertiary-fixed-dim: #69d8d4;
+  --color-outline-variant: #5b403e;
+  --color-surface-container: #1f1e2a;
+  --color-primary-container: #ff5451;
+  --color-primary: #ffb3ad;
+  --color-surface-dim: #13121d;
+  --color-on-secondary-fixed-variant: #005047;
+  --color-on-tertiary-fixed-variant: #00504e;
+  --color-surface-container-low: #1b1a26;
+  --color-tertiary-container: #24a09d;
+  --color-secondary-container: #03c6b2;
+  --color-on-error-container: #ffdad6;
+  --color-background: #13121d;
+  --color-secondary-fixed: #62fae3;
+  --color-inverse-surface: #e5e0f0;
+  --color-outline: #ab8986;
+  --color-on-primary-fixed-variant: #930013;
+  --color-error: #ffb4ab;
+  --color-on-background: #e5e0f0;
+  --color-surface-tint: #ffb3ad;
+  --color-on-surface-variant: #e4beba;
+  --color-on-tertiary: #003736;
+  --color-tertiary-fixed: #87f4f0;
+  --color-primary-fixed: #ffdad7;
+  --color-primary-fixed-dim: #ffb3ad;
+  --color-on-secondary-container: #004d44;
+  --color-surface-container-lowest: #0e0d18;
+  --color-surface-variant: #353340;
+  --color-secondary: #44e2cd;
+  --color-on-primary-container: #5c0008;
+  --color-on-secondary: #003731;
+  --color-on-surface: #e5e0f0;
+  --color-surface-container-high: #2a2934;
+  --color-inverse-on-surface: #302f3b;
+  --color-inverse-primary: #b91a24;
+  --color-secondary-fixed-dim: #3cddc7;
+  --color-on-tertiary-container: #00302e;
+  --color-on-tertiary-fixed: #00201f;
+  --color-on-primary: #68000a;
+  --color-on-secondary-fixed: #00201c;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-primary-fixed: #410004;
+
+  --font-sans: "Montserrat", sans-serif;
+  --font-headline-lg: "Montserrat", sans-serif;
+  --font-headline-md: "Montserrat", sans-serif;
+  --font-headline-sm: "Montserrat", sans-serif;
+  --font-body-lg: "Montserrat", sans-serif;
+  --font-body-md: "Montserrat", sans-serif;
+  --font-label-md: "Montserrat", sans-serif;
+  --font-label-sm: "Montserrat", sans-serif;
+  --font-label-mono: "Montserrat", sans-serif;
+  --font-logo: "Montserrat", sans-serif;
+  --font-profile: "Montserrat", sans-serif;
+}
+
+@keyframes slide-bg {
+    from { right: -25vw; }
+    to { right: 125vw; }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Pathfinding transition for map nodes --- */
+.node-walking {
+    transition: top 6s linear, left 6s linear;
+}
+
+#animated-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.rainbow-line {
+    height: 100vh;
+    width: 0;
+    top: 0;
+    position: absolute;
+    transform: rotate(10deg);
+    transform-origin: top right;
+    opacity: 0.6;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    margin: 0;
+    overflow: hidden;
+}
+
+/* --- Glass card system --- */
+.glass-card {
+    background: rgba(21, 20, 31, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(91, 64, 62, 0.35);
+}
+
+.glass-card-solid {
+    background: rgba(24, 23, 34, 0.95);
+    border: 1px solid rgba(91, 64, 62, 0.3);
+}
+
+.map-zone-glow { box-shadow: 0 0 15px 3px rgba(255, 84, 81, 0.3); }
+
+.grid-bg {
+    background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+@media (max-width: 767px) {
+    .grid-bg { background-image: none; }
+}
+
+.blueprint-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.5fr 2fr 0.5fr 1fr;
+    grid-template-rows: repeat(17, 1fr);
+    background-color: var(--color-surface-container-lowest);
+}
+
+.blueprint-room {
+    border: 1px solid rgba(91, 64, 62, 0.6);
+    background-color: rgba(31, 30, 42, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    color: var(--color-on-surface-variant);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.blueprint-room:hover {
+    background-color: rgba(255, 84, 81, 0.08);
+    border-color: rgba(255, 179, 173, 0.5);
+}
+
+.blueprint-pasillo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-outline);
+    letter-spacing: 0.1em;
+    font-size: 10px;
+}
+
+.blueprint-stairs {
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 4px,
+        rgba(255, 179, 173, 0.15) 4px,
+        rgba(255, 179, 173, 0.15) 6px
+    );
+}
+
+.zone-left { background-color: rgba(105, 216, 212, 0.03); }
+.zone-center { background-color: rgba(68, 226, 205, 0.03); }
+.zone-right { background-color: rgba(255, 179, 173, 0.03); }
+
+/* --- Material Icons Fallback --- */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(53, 51, 64, 0.8); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-outline-variant); }
+
+/* --- Button base --- */
+.btn-primary {
+    background: linear-gradient(135deg, #ff5451 0%, #d63b38 100%);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 20px rgba(255, 84, 81, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(91, 64, 62, 0.5);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+    background: rgba(53, 51, 64, 0.5);
+    border-color: rgba(255, 179, 173, 0.4);
+}
+
+/* --- Input field --- */
+.input-field {
+    width: 100%;
+    background: #0c0b15 !important;
+    border: 1px solid rgba(91, 64, 62, 0.45);
+    color: #f0ece6;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    outline: none;
+    border-radius: 0;
+    transition: all 0.25s ease;
+}
+
+.input-field::placeholder {
+    color: rgba(171, 137, 134, 0.45);
+}
+
+.input-field:focus {
+    border-color: rgba(255, 84, 81, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 84, 81, 0.08);
+    background: #0e0d18 !important;
+}
+
+/* --- Nav tab active indicator --- */
+.nav-tab-item {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.nav-tab-item.active {
+    color: var(--color-primary);
+    background: rgba(255, 84, 81, 0.12);
+}
+
+.nav-tab-item:not(.active):hover {
+    background: rgba(53, 51, 64, 0.4);
+}
+
+/* --- Zone card hover --- */
+.zone-card {
+    transition: all 0.3s ease;
+}
+
+.zone-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Badge chip --- */
+.badge-chip {
+    background: rgba(255, 84, 81, 0.1);
+    border: 1px solid rgba(255, 84, 81, 0.3);
+    color: var(--color-primary);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 0;
+    white-space: nowrap;
+}

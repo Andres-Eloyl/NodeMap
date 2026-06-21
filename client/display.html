@@ -34,7 +34,7 @@
         
         <header class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(255,179,173,0.3)]">
+                <div class="w-12 h-12  bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(255,179,173,0.3)]">
                     <span class="material-symbols-outlined text-primary text-3xl">hub</span>
                 </div>
                 <div>
@@ -43,14 +43,14 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 bg-black/20 p-2 rounded-xl border border-white/5">
+            <div class="flex items-center gap-3 bg-black/20 p-2  border border-white/5">
                 <select id="replay-speed" class="bg-transparent border-none text-white/80 text-xs font-mono outline-none cursor-pointer">
                     <option value="10">10x Speed</option>
                     <option value="50" selected>50x Speed</option>
                     <option value="100">100x Speed</option>
                     <option value="500">500x Speed</option>
                 </select>
-                <button id="btn-replay" class="bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary px-4 py-1.5 rounded-lg font-bold text-sm tracking-wide transition-all flex items-center gap-2 shadow-[0_0_10px_rgba(255,179,173,0.2)]">
+                <button id="btn-replay" class="bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary px-4 py-1.5  font-bold text-sm tracking-wide transition-all flex items-center gap-2 shadow-[0_0_10px_rgba(255,179,173,0.2)]">
                     <span class="material-symbols-outlined text-xl" id="replay-icon">history</span>
                     <span id="replay-text">Replay del Día</span>
                 </button>
@@ -59,8 +59,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             
-            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div class="glass-card  p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10  blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
                     <div>
                         <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Nodos Activos</p>
@@ -70,8 +70,8 @@
                 </div>
             </div>
             
-            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div class="glass-card  p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10  blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
                     <div>
                         <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Peak Simultáneo</p>
@@ -81,8 +81,8 @@
                 </div>
             </div>
             
-            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div class="glass-card  p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10  blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
                     <div>
                         <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Tráfico Total (Msjs)</p>
@@ -92,8 +92,8 @@
                 </div>
             </div>
             
-            <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
-                <div id="kpi-latency-glow" class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div class="glass-card  p-6 relative overflow-hidden group">
+                <div id="kpi-latency-glow" class="absolute top-0 right-0 w-32 h-32 bg-green-500/10  blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div class="relative z-10 flex items-start justify-between">
                     <div>
                         <p class="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Calidad de Red</p>
@@ -106,27 +106,27 @@
 
         <div class="flex-grow flex flex-col md:flex-row gap-6 min-h-[400px]">
 
-            <div class="glass-card rounded-3xl p-6 relative flex flex-col flex-grow md:w-2/3">
+            <div class="glass-card  p-6 relative flex flex-col flex-grow md:w-2/3">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg tracking-wide flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">bar_chart</span>
                         Flujo de Mensajes por Segundo
                     </h3>
-                    <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
+                    <span class="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 ">Últimos 60s</span>
                 </div>
                 <div id="chart-container" class="flex-grow w-full relative min-h-[200px]">
                     
                 </div>
             </div>
 
-            <div class="glass-card rounded-3xl p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
+            <div class="glass-card  p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
                 <div class="flex justify-between items-center mb-4 border-b border-green-500/20 pb-3">
                     <h3 class="font-mono text-green-400 font-bold text-sm tracking-widest flex items-center gap-2">
                         <span class="material-symbols-outlined text-green-400 text-lg">terminal</span>
                         E2EE PACKET SNIFFER
                     </h3>
                     <div class="flex gap-1">
-                        <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+                        <div class="w-2 h-2  bg-green-500 animate-ping"></div>
                     </div>
                 </div>
                 <div id="terminal-output" class="flex-grow w-full h-0 overflow-y-auto font-mono text-[10px] sm:text-xs text-green-500/70 flex flex-col gap-2 scroll-smooth pr-2 pb-2 custom-scrollbar">
@@ -138,7 +138,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 mb-4">
-            <div class="glass-card rounded-3xl p-6 relative flex flex-col">
+            <div class="glass-card  p-6 relative flex flex-col">
                 <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
                     <span class="material-symbols-outlined text-primary">forum</span>
                     Foros Multicast
@@ -159,7 +159,7 @@
                 </div>
             </div>
 
-            <div class="glass-card rounded-3xl p-6 relative flex flex-col">
+            <div class="glass-card  p-6 relative flex flex-col">
                 <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
                     <span class="material-symbols-outlined text-secondary">sports_esports</span>
                     Juegos en Vivo
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            <div class="glass-card rounded-3xl p-6 relative flex flex-col border border-tertiary/20 shadow-[0_0_20px_rgba(105,216,212,0.1)]">
+            <div class="glass-card  p-6 relative flex flex-col border border-tertiary/20 shadow-[0_0_20px_rgba(105,216,212,0.1)]">
                 <h3 class="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
                     <span class="material-symbols-outlined text-tertiary">emoji_events</span>
                     Top Trivia
@@ -187,58 +187,58 @@
                 <h2 class="font-logo text-3xl md:text-5xl text-primary font-bold tracking-tight">Time-Lapse: <span class="text-white">Red P2P</span></h2>
                 <p class="text-white/60 font-mono mt-2" id="replay-status">Inicializando mapa histórico...</p>
             </div>
-            <button id="btn-close-replay" class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/40 flex items-center justify-center border border-red-500/30 transition-all">
+            <button id="btn-close-replay" class="w-12 h-12  bg-red-500/20 text-red-400 hover:bg-red-500/40 flex items-center justify-center border border-red-500/30 transition-all">
                 <span class="material-symbols-outlined text-3xl">close</span>
             </button>
         </div>
         
-        <div class="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0e0d18] rounded-3xl border border-primary/30 overflow-hidden shadow-[0_0_50px_rgba(255,84,81,0.15)]">
+        <div class="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0e0d18]  border border-primary/30 overflow-hidden shadow-[0_0_50px_rgba(255,84,81,0.15)]">
             <div class="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none blueprint-grid font-mono">
-                <div id="zona-a-bg" class="zone-left rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3;">
+                <div id="zona-a-bg" class="zone-left  h-full w-full border-r border-primary/20 relative" style="grid-column: 1 / 3;">
                     <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona A</div>
                 </div>
-                <div id="zona-b-bg" class="zone-center rounded-sm h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4;">
+                <div id="zona-b-bg" class="zone-center  h-full w-full border-r border-primary/20 relative" style="grid-column: 3 / 4;">
                     <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona B</div>
                 </div>
-                <div id="zona-c-bg" class="zone-right rounded-sm h-full w-full relative" style="grid-column: 4 / 6;">
+                <div id="zona-c-bg" class="zone-right  h-full w-full relative" style="grid-column: 4 / 6;">
                     <div class="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona C</div>
                 </div>
             </div>
             
             <div class="absolute inset-0 z-0 blueprint-grid font-mono gap-1 p-2 pointer-events-none opacity-80" style="background: transparent;">
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 1 / 3 / 2;">Aula 6</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 1 / 5 / 2;">Aula 5</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 1 / 7 / 2;">Aula 4</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 1 / 9 / 2;">Aula 3</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 1 / 11 / 2;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 1 / 13 / 2;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 1 / 15 / 2;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 15 / 1 / 17 / 2;">Almacen</div>
+                <div class="blueprint-room  z-10" style="grid-area: 1 / 1 / 3 / 2;">Aula 6</div>
+                <div class="blueprint-room  z-10" style="grid-area: 3 / 1 / 5 / 2;">Aula 5</div>
+                <div class="blueprint-room  z-10" style="grid-area: 5 / 1 / 7 / 2;">Aula 4</div>
+                <div class="blueprint-room  z-10" style="grid-area: 7 / 1 / 9 / 2;">Aula 3</div>
+                <div class="blueprint-room  z-10" style="grid-area: 9 / 1 / 11 / 2;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 11 / 1 / 13 / 2;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 13 / 1 / 15 / 2;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 15 / 1 / 17 / 2;">Almacen</div>
                 <div class="blueprint-pasillo z-10" style="grid-area: 1 / 2 / 17 / 3; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 3 / 3 / 4;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 3 / 3 / 5 / 4;">Servicio Comunitario</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 5 / 3 / 7 / 4;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 7 / 3 / 9 / 4;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 1 / 3 / 3 / 4;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 3 / 3 / 5 / 4;">Servicio Comunitario</div>
+                <div class="blueprint-room  z-10" style="grid-area: 5 / 3 / 7 / 4;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 7 / 3 / 9 / 4;">Laboratorio</div>
                 <div class="flex gap-1 z-10" style="grid-area: 9 / 3 / 11 / 4;">
-                    <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 rounded">Escaleras</span></div>
-                    <div class="blueprint-room blueprint-stairs rounded-sm flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 rounded">Escaleras</span></div>
+                    <div class="blueprint-room blueprint-stairs  flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 ">Escaleras</span></div>
+                    <div class="blueprint-room blueprint-stairs  flex-1"><span class="bg-[#1f1e2a]/80 px-1 py-0.5 ">Escaleras</span></div>
                 </div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 3 / 14 / 4;">Laboratorio de Computación</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 14 / 3 / 17 / 4;">Laboratorio de Robótica</div>
+                <div class="blueprint-room  z-10" style="grid-area: 11 / 3 / 14 / 4;">Laboratorio de Computación</div>
+                <div class="blueprint-room  z-10" style="grid-area: 14 / 3 / 17 / 4;">Laboratorio de Robótica</div>
                 <div class="blueprint-pasillo z-10" style="grid-area: 1 / 4 / 17 / 5; writing-mode: vertical-rl; transform: rotate(180deg);">Pasillo</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 1 / 5 / 4 / 6;">Telecomunicaciones</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 4 / 5 / 6 / 6;">Baños</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 6 / 5 / 9 / 6;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 9 / 5 / 11 / 6;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 11 / 5 / 13 / 6;">Laboratorio</div>
-                <div class="blueprint-room rounded-sm z-10" style="grid-area: 13 / 5 / 17 / 6;">Oficinas</div>
+                <div class="blueprint-room  z-10" style="grid-area: 1 / 5 / 4 / 6;">Telecomunicaciones</div>
+                <div class="blueprint-room  z-10" style="grid-area: 4 / 5 / 6 / 6;">Baños</div>
+                <div class="blueprint-room  z-10" style="grid-area: 6 / 5 / 9 / 6;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 9 / 5 / 11 / 6;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 11 / 5 / 13 / 6;">Laboratorio</div>
+                <div class="blueprint-room  z-10" style="grid-area: 13 / 5 / 17 / 6;">Oficinas</div>
                 <div class="flex items-center justify-center text-white/40 font-mono text-[11px] pb-2 pt-1 uppercase tracking-[0.12em] z-10" style="grid-area: 17 / 1 / 18 / 6; border-top: 1px dashed rgba(255,255,255,0.1);">
                     Entrada
                 </div>
             </div>
             
             <div class="absolute inset-0 z-10 pointer-events-none" id="replay-canvas">
-                <div class="absolute w-16 h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(255,84,81,0.3)]" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                <div class="absolute w-16 h-16  border-2 border-primary bg-primary/20 flex items-center justify-center z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(255,84,81,0.3)]" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
                     <span class="material-symbols-outlined text-primary text-2xl">router</span>
                 </div>
             </div>

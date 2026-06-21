@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (kpiLatency) {
             kpiLatency.innerHTML = `${avgLatency}<span class="text-xl text-white/50">ms</span>`;
             kpiLatencyIcon.className = "material-symbols-outlined text-4xl transition-colors";
-            kpiLatencyGlow.className = "absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150";
+            kpiLatencyGlow.className = "absolute top-0 right-0 w-32 h-32  blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150";
             
             if (avgLatency === 0) {
                 kpiLatencyIcon.classList.add("text-gray-400/80");
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch(e) {}
 
         const el = document.createElement('div');
-        el.className = "break-all bg-green-500/5 p-2 rounded border border-green-500/10";
+        el.className = "break-all bg-green-500/5 p-2  border border-green-500/10";
         
         const header = `<div class="text-white/60 mb-1 flex justify-between">
             <span>[${new Date().toLocaleTimeString()}] INBOUND_PACKET</span>
@@ -324,13 +324,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (replayNodesState[peer.id]) return;
 
             const node = document.createElement('div');
-            node.className = "absolute w-8 h-8 rounded-xl border backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
+            node.className = "absolute w-8 h-8  border backdrop-blur-sm flex items-center justify-center z-10 shadow-md transition-all duration-[400ms]";
             node.style.borderColor = peer.color || '#ffb3ad';
             node.style.backgroundColor = `${peer.color || '#ffb3ad'}20`;
             node.style.transform = 'translate(-50%, -50%)'; 
             node.innerHTML = `
                 <span class="text-[14px]">${peer.avatar || peer.nombre.charAt(0).toUpperCase()}</span>
-                <div class="absolute -bottom-4 whitespace-nowrap font-mono text-[8px] text-white/70 bg-black/50 px-1 rounded">${peer.nombre}</div>
+                <div class="absolute -bottom-4 whitespace-nowrap font-mono text-[8px] text-white/70 bg-black/50 px-1 ">${peer.nombre}</div>
             `;
             replayCanvas.appendChild(node);
 
@@ -445,9 +445,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const games = Object.values(activeGames).sort((a,b) => b.time - a.time).slice(0, 5);
         if (games.length === 0) return;
         container.innerHTML = games.map(g => `
-            <div class="glass-card-solid p-3 rounded-xl border border-secondary/20 flex justify-between items-center transition-all animate-fade-in">
+            <div class="glass-card-solid p-3  border border-secondary/20 flex justify-between items-center transition-all animate-fade-in">
                 <span class="text-[12px] font-bold text-white">${g.player1} <span class="text-secondary text-[10px]">VS</span> ${g.player2}</span>
-                <span class="badge-chip px-2 py-1 rounded-lg text-[9px]">${g.type === 'reaction' ? 'Reacción' : g.type}</span>
+                <span class="badge-chip px-2 py-1  text-[9px]">${g.type === 'reaction' ? 'Reacción' : g.type}</span>
             </div>
         `).join('');
     }
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const sorted = Object.entries(triviaScores).sort((a,b) => b[1] - a[1]).slice(0, 5);
         container.innerHTML = sorted.map((entry, idx) => `
-            <div class="glass-card-solid p-2 rounded-xl flex items-center justify-between border ${idx===0?'border-tertiary':'border-white/10'} transition-all animate-fade-in">
+            <div class="glass-card-solid p-2  flex items-center justify-between border ${idx===0?'border-tertiary':'border-white/10'} transition-all animate-fade-in">
                 <div class="flex items-center gap-2">
                     <span class="text-[14px] font-bold text-tertiary">#${idx+1}</span>
                     <span class="text-[13px] font-bold text-white">${entry[0]}</span>

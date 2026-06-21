@@ -100,14 +100,14 @@ document.addEventListener("DOMContentLoaded", () => {
         nodesList.innerHTML = allListNodes.map(peer => {
             const lat = peer.isSelf ? '0' : (WebRTCEngine.getLatency(peer.id) || '---');
             const chatBtn = peer.isSelf ? '' : `
-                <button onclick="window.startPrivateChat('${peer.id}', '${peer.nombre}')" class="bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary p-2 rounded-xl transition-all shadow-sm">
+                <button onclick="window.startPrivateChat('${peer.id}', '${peer.nombre}')" class="bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary p-2  transition-all shadow-sm">
                     <span class="material-symbols-outlined text-[16px]">chat</span>
                 </button>
             `;
             return `
-                <div class="glass-card-solid flex items-center justify-between p-4 rounded-2xl hover:border-primary/30 transition-all duration-200 ${peer.isSelf ? 'border border-primary/40 bg-primary/5' : ''}">
+                <div class="glass-card-solid flex items-center justify-between p-4  hover:border-primary/30 transition-all duration-200 ${peer.isSelf ? 'border border-primary/40 bg-primary/5' : ''}">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'};">
+                        <div class="w-10 h-10  flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'};">
                             <span class="text-[20px]">${peer.avatar || peer.nombre.charAt(0).toUpperCase()}</span>
                         </div>
                         <div>
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="flex items-center gap-2">
                         ${chatBtn}
-                        <div class="badge-chip px-2.5 py-1 rounded-lg flex items-center gap-1">
+                        <div class="badge-chip px-2.5 py-1  flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">speed</span>
                             <span>${lat}ms</span>
                         </div>
@@ -180,13 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (window.peerNodesState[peer.id].domNode) window.peerNodesState[peer.id].domNode.remove();
                 }
                 const node = document.createElement('div');
-                node.className = `absolute w-9 h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
+                node.className = `absolute w-9 h-9  border backdrop-blur-sm flex items-center justify-center z-10 shadow-md node-walking`;
                 node.style.borderColor = peer.color || '#ffb3ad';
                 node.style.backgroundColor = peer.isSelf ? peer.color : `${peer.color || '#ffb3ad'}20`;
                 node.style.transform = 'translate(-50%, -50%)';
                 node.innerHTML = `
                     <span class="text-[16px]">${peer.avatar || peer.nombre.charAt(0).toUpperCase()}</span>
-                    <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[9px] text-on-surface-variant/70 bg-surface/70 backdrop-blur-sm px-1.5 py-0.5 rounded-md">${peer.nombre}</div>
+                    <div class="absolute -bottom-5 whitespace-nowrap font-label-mono text-[9px] text-on-surface-variant/70 bg-surface/70 backdrop-blur-sm px-1.5 py-0.5 ">${peer.nombre}</div>
                 `;
                 mapCanvas.appendChild(node);
                 const zonePoints = waypoints[peer.zona] || waypoints['Zona A'];
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!document.getElementById('map-center-indicator')) {
             const stairsNode = document.createElement('div');
             stairsNode.id = 'map-center-indicator';
-            stairsNode.className = "absolute w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-0 backdrop-blur-sm pointer-events-auto";
+            stairsNode.className = "absolute w-12 h-12 md:w-16 md:h-16  border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-0 backdrop-blur-sm pointer-events-auto";
             stairsNode.style.left = "50%";
             stairsNode.style.top = "53%";
             stairsNode.style.transform = "translate(-50%, -50%)";
@@ -258,18 +258,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (isPrivate) {
             bgClass = isSelf
-                ? 'bg-gradient-to-br from-[#9c27b0] to-[#7b1fa2] text-white rounded-2xl rounded-br-md border border-[#e1bee7]/30 shadow-[0_0_15px_rgba(156,39,176,0.4)]'
-                : 'glass-card-solid bg-[#f3e5f5]/10 border border-[#ab47bc]/40 text-[#ce93d8] rounded-2xl rounded-bl-md shadow-[0_0_15px_rgba(171,71,188,0.2)]';
-            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded">Privado</span>`;
+                ? 'bg-gradient-to-br from-[#9c27b0] to-[#7b1fa2] text-white   border border-[#e1bee7]/30 shadow-[0_0_15px_rgba(156,39,176,0.4)]'
+                : 'glass-card-solid bg-[#f3e5f5]/10 border border-[#ab47bc]/40 text-[#ce93d8]   shadow-[0_0_15px_rgba(171,71,188,0.2)]';
+            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 ">Privado</span>`;
         } else if (isGlobal) {
             bgClass = isSelf
-                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
-                : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md';
-            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5 rounded text-primary border border-primary/20">Global</span>`;
+                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white  '
+                : 'glass-card-solid text-on-surface  ';
+            labelTag = `<span class="ml-2 font-bold text-[9px] uppercase tracking-wider text-white/50 bg-black/20 px-1.5 py-0.5  text-primary border border-primary/20">Global</span>`;
         } else {
             bgClass = isSelf
-                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md'
-                : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md';
+                ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white  '
+                : 'glass-card-solid text-on-surface  ';
         }
 
         const senderClass = isSelf ? 'hidden' : 'font-label-mono text-[10px] text-on-surface-variant/50 mb-1 ml-1 tracking-wide flex items-center';
@@ -331,8 +331,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const modalHtml = `
             <div id="${modalId}" class="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div class="glass-card-solid p-6 rounded-2xl max-w-xs w-full text-center border-primary/40 shadow-2xl">
-                    <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                <div class="glass-card-solid p-6  max-w-xs w-full text-center border-primary/40 shadow-2xl">
+                    <div class="w-16 h-16  bg-primary/20 flex items-center justify-center mx-auto mb-4">
                         <span class="material-symbols-outlined text-primary text-4xl">sports_esports</span>
                     </div>
                     <h3 class="font-headline-lg text-xl mb-2 text-on-surface">¡Nuevo Reto!</h3>
@@ -341,8 +341,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="font-bold text-primary">${gameName}</span>.
                     </p>
                     <div class="flex gap-3">
-                        <button id="btn-reject-${modalId}" class="flex-1 py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold transition-colors">Rechazar</button>
-                        <button id="btn-accept-${modalId}" class="flex-1 py-3 rounded-xl bg-primary text-[#68000a] font-bold hover:bg-primary/90 transition-colors shadow-lg">Aceptar</button>
+                        <button id="btn-reject-${modalId}" class="flex-1 py-3  border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold transition-colors">Rechazar</button>
+                        <button id="btn-accept-${modalId}" class="flex-1 py-3  bg-primary text-[#68000a] font-bold hover:bg-primary/90 transition-colors shadow-lg">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -473,7 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!container) return;
         
         const toast = document.createElement('div');
-        toast.className = 'glass-card-solid bg-surface/90 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto border-secondary/30 transform transition-all duration-300 translate-y-[-20px] opacity-0' + (onClick ? ' cursor-pointer' : '');
+        toast.className = 'glass-card-solid bg-surface/90 text-white px-4 py-3  shadow-xl flex items-center gap-3 animate-fade-in pointer-events-auto border-secondary/30 transform transition-all duration-300 translate-y-[-20px] opacity-0' + (onClick ? ' cursor-pointer' : '');
         if (onClick) {
             toast.addEventListener('click', () => {
                 onClick();
@@ -483,7 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         toast.innerHTML = `
-            <div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
+            <div class="w-8 h-8  bg-secondary/20 flex items-center justify-center flex-shrink-0">
                 <span class="material-symbols-outlined text-secondary text-sm">waving_hand</span>
             </div>
             <div class="font-body-md text-[13px] leading-tight flex-grow">${messageHtml}</div>
@@ -592,12 +592,12 @@ document.addEventListener("DOMContentLoaded", () => {
             leaderboardList.innerHTML = sortedZones.slice(0, 5).map((z, idx) => {
                 const color = idx === 0 ? '#fbbf24' : idx === 1 ? '#9ca3af' : idx === 2 ? '#b45309' : '#6b7280';
                 return `
-                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface/40 border border-outline-variant/20">
+                    <div class="flex items-center justify-between p-2  bg-surface/40 border border-outline-variant/20">
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-[12px]" style="color: ${color}">#${idx + 1}</span>
                             <span class="font-headline-md text-[13px] text-on-surface">${z.name}</span>
                         </div>
-                        <span class="font-label-mono text-[11px] text-white/60 bg-black/30 px-1.5 py-0.5 rounded">${Math.floor(z.score)}s</span>
+                        <span class="font-label-mono text-[11px] text-white/60 bg-black/30 px-1.5 py-0.5 ">${Math.floor(z.score)}s</span>
                     </div>
                 `;
             }).join('');
@@ -777,8 +777,8 @@ document.addEventListener("DOMContentLoaded", () => {
         msgs.forEach(m => {
             const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             html += `
-                <div class="glass-card-solid p-3 rounded-2xl flex gap-3 shadow-sm border border-outline-variant/20 mb-2">
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${m.color ? m.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${m.color || '#fff'}">
+                <div class="glass-card-solid p-3  flex gap-3 shadow-sm border border-outline-variant/20 mb-2">
+                    <div class="w-8 h-8  flex items-center justify-center flex-shrink-0" style="background-color: ${m.color ? m.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${m.color || '#fff'}">
                         <span class="text-[14px]">${m.avatar || '?'}</span>
                     </div>
                     <div class="flex-grow">
@@ -883,9 +883,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="mb-4 text-center font-bold" id="ttt-status"></div>
             <div class="relative w-64 h-64 mx-auto">
                 <div class="grid grid-cols-3 gap-2 w-full h-full" id="ttt-board">
-                    ${Array(9).fill(0).map((_, i) => `<div class="w-[80px] h-[80px] bg-surface-bright flex items-center justify-center text-5xl font-bold cursor-pointer rounded-2xl border border-outline-variant/30 hover:bg-primary/10 transition-colors overflow-hidden" data-idx="${i}"></div>`).join('')}
+                    ${Array(9).fill(0).map((_, i) => `<div class="w-[80px] h-[80px] bg-surface-bright flex items-center justify-center text-5xl font-bold cursor-pointer  border border-outline-variant/30 hover:bg-primary/10 transition-colors overflow-hidden" data-idx="${i}"></div>`).join('')}
                 </div>
-                <div id="ttt-line" class="absolute bg-primary rounded-full origin-left transition-transform duration-500 ease-out z-10 drop-shadow-[0_0_8px_rgba(255,84,81,0.8)]" style="height: 6px; opacity: 0; transform: scaleX(0);"></div>
+                <div id="ttt-line" class="absolute bg-primary  origin-left transition-transform duration-500 ease-out z-10 drop-shadow-[0_0_8px_rgba(255,84,81,0.8)]" style="height: 6px; opacity: 0; transform: scaleX(0);"></div>
             </div>
         `;
         let board = Array(9).fill(null);
@@ -1001,15 +1001,15 @@ document.addEventListener("DOMContentLoaded", () => {
         area.innerHTML = `
             <div class="mb-8 text-center font-bold text-xl text-on-surface" id="rps-status">Elige tu jugada</div>
             <div class="flex gap-4 md:gap-6" id="rps-options">
-                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="rock">
+                <button class="w-24 h-24 md:w-28 md:h-28  bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="rock">
                     <span class="text-4xl md:text-5xl">✊</span>
                     <span class="text-xs mt-2 font-bold uppercase tracking-wide">Piedra</span>
                 </button>
-                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="paper">
+                <button class="w-24 h-24 md:w-28 md:h-28  bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="paper">
                     <span class="text-4xl md:text-5xl">✋</span>
                     <span class="text-xs mt-2 font-bold uppercase tracking-wide">Papel</span>
                 </button>
-                <button class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="scissors">
+                <button class="w-24 h-24 md:w-28 md:h-28  bg-surface-bright border border-outline-variant/30 hover:border-primary hover:bg-primary/20 flex flex-col items-center justify-center transition-all shadow-md" data-choice="scissors">
                     <span class="text-4xl md:text-5xl">✌️</span>
                     <span class="text-xs mt-2 font-bold uppercase tracking-wide">Tijera</span>
                 </button>
@@ -1026,7 +1026,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div id="rps-op-choice" class="text-6xl drop-shadow-lg"></div>
                     </div>
                 </div>
-                <div id="rps-winner" class="font-headline-lg text-3xl font-bold uppercase tracking-wider py-2 px-6 rounded-xl bg-black/20 border"></div>
+                <div id="rps-winner" class="font-headline-lg text-3xl font-bold uppercase tracking-wider py-2 px-6  bg-black/20 border"></div>
             </div>
         `;
 
@@ -1102,7 +1102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function initReactionGame(isInitiator) {
         const area = document.getElementById('game-canvas-area');
         area.innerHTML = `
-            <div id="reaction-circle" class="w-40 h-40 rounded-full bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg cursor-pointer transition-colors duration-100 border-4 border-outline-variant/30 select-none">
+            <div id="reaction-circle" class="w-40 h-40  bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg cursor-pointer transition-colors duration-100 border-4 border-outline-variant/30 select-none">
                 <span class="font-bold text-lg pointer-events-none" id="reaction-text">Esperando...</span>
             </div>
             <div id="reaction-result" class="mt-8 text-center hidden">
@@ -1123,14 +1123,14 @@ document.addEventListener("DOMContentLoaded", () => {
         window.reactionGameStart = (data) => {
             state = 'ready';
             text.textContent = '¡Prepárate!';
-            circle.className = "w-40 h-40 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(249,115,22,0.5)] cursor-pointer border-4 border-orange-400 select-none";
+            circle.className = "w-40 h-40  bg-orange-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(249,115,22,0.5)] cursor-pointer border-4 border-orange-400 select-none";
         };
 
         window.reactionGameGo = (data) => {
             state = 'go';
             goTimestamp = data.timestamp; // The actual time the signal was sent
             text.textContent = '¡TOCA!';
-            circle.className = "w-40 h-40 rounded-full bg-green-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(34,197,94,0.7)] cursor-pointer border-4 border-green-400 select-none scale-105 transition-transform";
+            circle.className = "w-40 h-40  bg-green-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(34,197,94,0.7)] cursor-pointer border-4 border-green-400 select-none scale-105 transition-transform";
         };
 
         window.reactionGameTap = (data) => {
@@ -1156,7 +1156,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById('reaction-winner').textContent = 'EMPATE';
                 }
                 
-                circle.className = "w-40 h-40 rounded-full bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg border-4 border-outline-variant/30 select-none";
+                circle.className = "w-40 h-40  bg-surface-bright flex items-center justify-center text-on-surface-variant shadow-lg border-4 border-outline-variant/30 select-none";
                 text.textContent = 'Fin';
             }
         }
@@ -1165,7 +1165,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (state === 'go') {
                 myTapTime = Date.now();
                 WebRTCEngine.sendToPeer(window.activeGameSession.opponentId, PROTOCOL.REACTION_TAP, { tapTime: myTapTime });
-                circle.className = "w-40 h-40 rounded-full bg-primary/20 flex items-center justify-center text-primary shadow-lg border-4 border-primary/50 select-none";
+                circle.className = "w-40 h-40  bg-primary/20 flex items-center justify-center text-primary shadow-lg border-4 border-primary/50 select-none";
                 text.textContent = 'Tocado';
                 checkWinner();
             } else if (state === 'ready') {
@@ -1210,7 +1210,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         data.options.forEach((opt, idx) => {
             const btn = document.createElement('button');
-            btn.className = "w-full text-left bg-surface/50 border border-outline-variant/30 hover:border-primary hover:bg-primary/10 rounded-xl p-4 transition-all text-white text-[14px]";
+            btn.className = "w-full text-left bg-surface/50 border border-outline-variant/30 hover:border-primary hover:bg-primary/10  p-4 transition-all text-white text-[14px]";
             btn.textContent = opt;
             btn.onclick = () => {
                 if (answered) return;
@@ -1273,14 +1273,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         container.innerHTML = peers.map(peer => `
-            <div class="glass-card-solid flex items-center justify-between p-3 rounded-2xl">
+            <div class="glass-card-solid flex items-center justify-between p-3 ">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
+                    <div class="w-8 h-8  flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
                         <span class="text-[14px]">${peer.avatar || '?'}</span>
                     </div>
                     <span class="font-bold text-[14px]" style="color: ${peer.color || '#fff'}">${peer.nombre}</span>
                 </div>
-                <button onclick="window.inviteToGame('${peer.id}', '${peer.nombre}')" class="btn-primary rounded-xl px-4 py-1.5 text-[12px]">Retar</button>
+                <button onclick="window.inviteToGame('${peer.id}', '${peer.nombre}')" class="btn-primary  px-4 py-1.5 text-[12px]">Retar</button>
             </div>
         `).join('');
     }
@@ -1312,9 +1312,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const avatarChar = peer.avatar || peer.nombre.charAt(0).toUpperCase();
             
             html += `
-                <div class="glass-card-solid flex items-center justify-between p-3 rounded-2xl hover:border-primary/30 transition-all cursor-pointer" onclick="window.startPrivateChat('${peerId}', '${peer.nombre}')">
+                <div class="glass-card-solid flex items-center justify-between p-3  hover:border-primary/30 transition-all cursor-pointer" onclick="window.startPrivateChat('${peerId}', '${peer.nombre}')">
                     <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
+                        <div class="w-10 h-10  flex items-center justify-center flex-shrink-0" style="background-color: ${peer.color ? peer.color + '20' : 'rgba(255,255,255,0.1)'}; color: ${peer.color || '#fff'}">
                             <span class="text-[16px]">${avatarChar}</span>
                         </div>
                         <div class="overflow-hidden">
@@ -1399,7 +1399,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!container) return;
         const messages = window.privateChats[peerId] || [];
         container.innerHTML = messages.map(m => {
-            const bgClass = m.isSelf ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white rounded-2xl rounded-br-md' : 'glass-card-solid text-on-surface rounded-2xl rounded-bl-md border border-outline-variant/30';
+            const bgClass = m.isSelf ? 'bg-gradient-to-br from-primary-container to-[#d63b38] text-white  ' : 'glass-card-solid text-on-surface   border border-outline-variant/30';
             const alignClass = m.isSelf ? 'items-end self-end' : 'items-start self-start';
             const senderClass = m.isSelf ? 'hidden' : 'font-label-mono text-[10px] text-on-surface-variant/50 mb-1 ml-1 tracking-wide flex items-center';
             return `<div class="flex flex-col max-w-[85%] ${alignClass}">
