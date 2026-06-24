@@ -4,25 +4,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Swords, Gamepad } from 'lucide-react';
 import { TicTacToe } from '../components/Games/TicTacToe';
 import { RockPaperScissors } from '../components/Games/RockPaperScissors';
+import { ReactionGame } from '../components/Games/ReactionGame';
+import SoundEngine from '../services/SoundEngine';
 import PROTOCOL from '../shared/protocol.js';
 
 export function GamesView() {
   const peers = useWebRTCStore(state => state.peers);
   const myId = useWebRTCStore(state => state.myId);
-  const [activeGame, setActiveGame] = useState(null); // null, 'tictactoe', 'rps'
+  const [activeGame, setActiveGame] = useState(null); // null, 'tictactoe', 'rps', 'reaction'
   const [opponent, setOpponent] = useState(null);
   const [invites, setInvites] = useState([]);
+  const [selectedGameToInvite, setSelectedGameToInvite] = useState(null);
 
   useEffect(() => {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
-      WebRTCEngine.on(PROTOCOL.GAME_INVITE, (data) => {
+      WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
         setInvites(prev => [...prev, { from: data.senderId, name: data.nombre, game: data.gameType }]);
+        SoundEngine.playAlert();
       });
-      WebRTCEngine.on(PROTOCOL.GAME_ACCEPT, (data) => {
+      WebRTCEngine.onMessage(PROTOCOL.GAME_ACCEPT, (data) => {
         setOpponent({ id: data.senderId, name: data.nombre });
         setActiveGame(data.gameType);
       });
-      WebRTCEngine.on(PROTOCOL.GAME_REJECT, (data) => {
+      WebRTCEngine.onMessage(PROTOCOL.GAME_REJECT, (data) => {
         alert(`${data.nombre} rechazó tu invitación a jugar.`);
       });
     });
@@ -32,6 +36,7 @@ export function GamesView() {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
       WebRTCEngine.sendMessage(peerId, PROTOCOL.GAME_INVITE, { gameType, nombre: 'Yo' });
       alert(`Invitación enviada a ${peerName}`);
+      setSelectedGameToInvite(null);
     });
   };
 
@@ -57,10 +62,13 @@ export function GamesView() {
   if (activeGame === 'rps' || activeGame === 'rockpaperscissors') {
     return <RockPaperScissors opponent={opponent} onExit={() => setActiveGame(null)} />;
   }
+  if (activeGame === 'reaction') {
+    return <ReactionGame opponent={opponent} onExit={() => setActiveGame(null)} />;
+  }
 
   return (
-    <div className="flex flex-col h-full bg-surface-container  border border-primary/20 overflow-hidden relative">
-      <div className="p-4 border-b border-primary/20 bg-surface-container-highest/50 backdrop-blur-md">
+    <div className="flex flex-col h-full bg-transparent border-none overflow-hidden relative">
+      <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md">
         <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Zona Arcade</h2>
         <p className="text-[12px] text-on-surface-variant">Reta a tus amigos a una partida rápida.</p>
       </div>
@@ -83,28 +91,78 @@ export function GamesView() {
           )}
         </AnimatePresence>
 
-        <h3 className="font-bold text-white mb-4">Peers Disponibles</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {peers.map(peer => (
-            <div key={peer.id} className="glass-card p-4  flex items-center justify-between border border-outline-variant/30 hover:border-primary/50 transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10  flex items-center justify-center text-xl bg-primary/20" style={{ color: peer.color || '#fff' }}>
-                  {peer.avatar || '👤'}
+        {!selectedGameToInvite ? (
+          <>
+            <h3 className="font-bold text-white mb-4">Selecciona un Juego</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button onClick={() => setSelectedGameToInvite('tictactoe')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all hover:-translate-y-1 group">
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Gamepad size={32} className="text-primary" />
                 </div>
-                <span className="font-bold text-[14px]" style={{ color: peer.color || '#fff' }}>{peer.nombre}</span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => inviteToGame(peer.id, peer.nombre, 'tictactoe')} className="btn-ghost px-3 py-1.5 text-xs  flex items-center gap-1" title="Tic Tac Toe">
-                  <Gamepad size={14}/> TTT
-                </button>
-                <button onClick={() => inviteToGame(peer.id, peer.nombre, 'rps')} className="btn-ghost px-3 py-1.5 text-xs  flex items-center gap-1" title="Piedra Papel Tijera">
-                  <Swords size={14}/> PPT
-                </button>
-              </div>
+                <div className="text-center">
+                  <h4 className="font-bold text-on-surface text-lg">Tic Tac Toe</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">El clásico tres en raya.</p>
+                </div>
+              </button>
+              
+              <button onClick={() => setSelectedGameToInvite('rps')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-secondary/50 transition-all hover:-translate-y-1 group">
+                <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Swords size={32} className="text-secondary" />
+                </div>
+                <div className="text-center">
+                  <h4 className="font-bold text-on-surface text-lg">Piedra Papel Tijera</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">Suerte y estrategia.</p>
+                </div>
+              </button>
+
+              <button onClick={() => setSelectedGameToInvite('reaction')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-tertiary/50 transition-all hover:-translate-y-1 group">
+                <div className="w-16 h-16 rounded-full bg-tertiary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-tertiary text-4xl">timer</span>
+                </div>
+                <div className="text-center">
+                  <h4 className="font-bold text-on-surface text-lg">Carrera de Reacción</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">¿Quién tiene mejores reflejos?</p>
+                </div>
+              </button>
             </div>
-          ))}
-          {peers.length === 0 && <p className="text-sm text-on-surface-variant">Nadie más está conectado en este momento.</p>}
-        </div>
+          </>
+        ) : (
+          <div className="animate-fade-in">
+            <div className="flex items-center gap-4 mb-6">
+              <button onClick={() => setSelectedGameToInvite(null)} className="btn-ghost p-2 flex items-center justify-center rounded-full hover:bg-surface-variant/50">
+                <span className="material-symbols-outlined text-xl">arrow_back</span>
+              </button>
+              <h3 className="font-bold text-white text-lg">
+                Invitar a jugar {selectedGameToInvite === 'tictactoe' ? 'Tic Tac Toe' : selectedGameToInvite === 'rps' ? 'Piedra Papel Tijera' : 'Carrera de Reacción'}
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {peers.map(peer => (
+                <div key={peer.id} className="glass-card p-4 flex items-center justify-between border border-outline-variant/30 hover:border-primary/50 transition-all hover:bg-surface-variant/10 cursor-pointer" onClick={() => inviteToGame(peer.id, peer.nombre, selectedGameToInvite)}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-surface-variant/50 shadow-inner" style={{ color: peer.color || '#fff' }}>
+                      {peer.avatar || peer.nombre.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-[15px] text-on-surface">{peer.nombre}</span>
+                      <span className="text-[11px] text-on-surface-variant/60 uppercase tracking-widest mt-0.5">{peer.zona}</span>
+                    </div>
+                  </div>
+                  <button className="btn-primary px-4 py-2 text-xs rounded-lg shadow-md">
+                    Invitar
+                  </button>
+                </div>
+              ))}
+              {peers.length === 0 && (
+                <div className="col-span-full py-8 text-center bg-surface/20 rounded-xl border border-outline-variant/10">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">person_off</span>
+                  <p className="text-sm text-on-surface-variant">No hay usuarios disponibles en la red para invitar.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

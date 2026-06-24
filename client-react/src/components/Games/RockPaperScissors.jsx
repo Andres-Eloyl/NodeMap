@@ -16,7 +16,7 @@ export function RockPaperScissors({ opponent, onExit }) {
 
   useEffect(() => {
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
-      WebRTCEngine.on(PROTOCOL.GAME_MOVE, (data) => {
+      WebRTCEngine.onMessage(PROTOCOL.GAME_MOVE, (data) => {
         if ((data.gameType === 'rps' || data.gameType === 'rockpaperscissors') && data.senderId === opponent.id) {
           if (myChoice) {
             // Both have chosen, reveal and calculate

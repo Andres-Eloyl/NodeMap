@@ -1,4 +1,5 @@
-import { io } from 'socket.io-client';
+import socketIOClient from 'socket.io-client';
+const io = socketIOClient.io || socketIOClient;
 import PROTOCOL from '../shared/protocol.js';
 import CONFIG from '../shared/config.js';
 
@@ -95,7 +96,7 @@ function setupDataChannel(peerId, nombre, dc) {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     reconnecting.delete(peerId);
-    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer ? peer.avatar : "👤" });
+    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer && peer.avatar ? peer.avatar : (nombre ? nombre.charAt(0).toUpperCase() : "?") });
     if (!pingInterval) startPingCycle();
   };
 

@@ -89,11 +89,8 @@ export function OrganizerView() {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col items-center justify-center relative p-4 bg-[#13121d] text-[#e5e0f0]">
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 blur-[100px]"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 blur-[100px]"></div>
-      </div>
+    <div className="min-h-screen w-screen flex flex-col items-center justify-center relative p-4 bg-transparent text-[#e5e0f0]">
+
 
       <div className="glass-card p-8 md:p-10 w-full max-w-[500px] relative z-10 shadow-2xl">
         <div className="text-center flex flex-col items-center gap-3 mb-8">

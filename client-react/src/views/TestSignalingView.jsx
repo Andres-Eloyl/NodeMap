@@ -133,7 +133,7 @@ export function TestSignalingView() {
   };
 
   return (
-    <div className="font-['Inter'] bg-[#0f1117] text-[#e4e6ed] p-6 max-w-[800px] mx-auto min-h-screen">
+    <div className="font-['Inter'] bg-transparent text-[#e4e6ed] p-6 max-w-[800px] mx-auto min-h-screen">
       <h1 className="text-2xl font-bold bg-gradient-to-br from-[#6c63ff] to-[#a78bfa] bg-clip-text text-transparent mb-2">Test de Señalización</h1>
       <p className="text-[#8b8fa3] text-sm mb-6">Prueba de conexión con el servidor de señalización (sin WebRTC)</p>
 

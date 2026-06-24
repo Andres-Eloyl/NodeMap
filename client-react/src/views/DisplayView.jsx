@@ -369,18 +369,7 @@ export function DisplayView() {
   const sortedTrivia = Object.entries(triviaScores).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background text-white p-4 md:p-8 overflow-y-auto overflow-x-hidden relative">
-      <div id="animated-bg">
-         {Array.from({length: 25}).map((_, i) => (
-             <div key={i} className="rainbow-line" style={{
-                 boxShadow: `-130px 0 80px 40px #13121d, -50px 0 50px 25px #ffb3ad, 0 0 50px 25px #e3bdba, 50px 0 50px 25px #69d8d4, 130px 0 80px 40px #13121d`,
-                 animation: `slide-bg ${45 - (45/25/2*i)}s linear infinite`,
-                 animationDelay: `${-(i/25*45)}s`
-             }}></div>
-         ))}
-      </div>
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-20" style={{backgroundImage: "radial-gradient(circle at 50% 50%, rgba(255, 179, 173, 0.1) 0%, transparent 50%)"}}></div>
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)", backgroundSize: "40px 40px"}}></div>
+    <div className="min-h-screen w-full flex flex-col bg-transparent text-white p-4 md:p-8 overflow-y-auto overflow-x-hidden relative">
 
       <div className="relative z-10 flex-grow flex flex-col max-w-[1400px] w-full mx-auto">
         <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">

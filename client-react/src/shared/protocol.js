@@ -17,6 +17,7 @@ const PROTOCOL = {
   REPLAY_DATA: "replay-data",
   SET_LATENCY: "set-latency",
   FORUM_MSG: "forum-msg",
+  FORUM_COMMENT: "forum-comment",
   FORUM_SYNC_REQ: "forum-sync-req",
   FORUM_SYNC_RES: "forum-sync-res",
   GAME_INVITE: "game-invite",

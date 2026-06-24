@@ -1,45 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface-bright: #393844;
-  --color-surface-container-highest: #353340;
+  --color-surface-bright: #1f1f1f;
+  --color-surface-container-highest: #1a1a1a;
   --color-tertiary: #69d8d4;
-  --color-surface: #13121d;
+  --color-surface: #000000;
   --color-tertiary-fixed-dim: #69d8d4;
-  --color-outline-variant: #5b403e;
-  --color-surface-container: #1f1e2a;
+  --color-outline-variant: #333333;
+  --color-surface-container: #0a0a0a;
   --color-primary-container: #ff5451;
   --color-primary: #ffb3ad;
-  --color-surface-dim: #13121d;
-  --color-on-secondary-fixed-variant: #005047;
-  --color-on-tertiary-fixed-variant: #00504e;
-  --color-surface-container-low: #1b1a26;
+  --color-surface-dim: #000000;
+  --color-on-secondary-fixed-variant: #ffffff;
+  --color-on-tertiary-fixed-variant: #ffffff;
+  --color-surface-container-low: #050505;
   --color-tertiary-container: #24a09d;
   --color-secondary-container: #03c6b2;
   --color-on-error-container: #ffdad6;
-  --color-background: #13121d;
+  --color-background: #000000;
   --color-secondary-fixed: #62fae3;
   --color-inverse-surface: #e5e0f0;
-  --color-outline: #ab8986;
-  --color-on-primary-fixed-variant: #930013;
+  --color-outline: #444444;
+  --color-on-primary-fixed-variant: #ffffff;
   --color-error: #ffb4ab;
-  --color-on-background: #e5e0f0;
+  --color-on-background: #ffffff;
   --color-surface-tint: #ffb3ad;
   --color-on-surface-variant: #e4beba;
-  --color-on-tertiary: #003736;
+  --color-on-tertiary: #ffffff;
   --color-tertiary-fixed: #87f4f0;
   --color-primary-fixed: #ffdad7;
   --color-primary-fixed-dim: #ffb3ad;
-  --color-on-secondary-container: #004d44;
-  --color-surface-container-lowest: #0e0d18;
-  --color-surface-variant: #353340;
+  --color-on-secondary-container: #ffffff;
+  --color-surface-container-lowest: #000000;
+  --color-surface-variant: #111111;
   --color-secondary: #44e2cd;
-  --color-on-primary-container: #5c0008;
-  --color-on-secondary: #003731;
-  --color-on-surface: #e5e0f0;
-  --color-surface-container-high: #2a2934;
-  --color-inverse-on-surface: #302f3b;
-  --color-inverse-primary: #b91a24;
+  --color-on-primary-container: #ffffff;
+  --color-on-secondary: #ffffff;
+  --color-on-surface: #ffffff;
+  --color-surface-container-high: #151515;
+  --color-inverse-on-surface: #1a1a1a;
+  --color-inverse-primary: #ff5451;
   --color-secondary-fixed-dim: #3cddc7;
   --color-on-tertiary-container: #00302e;
   --color-on-tertiary-fixed: #00201f;
@@ -63,8 +63,8 @@
 }
 
 @keyframes slide-bg {
-    from { right: -25vw; }
-    to { right: 125vw; }
+    from { transform: translateX(-150vw) rotate(10deg); }
+    to { transform: translateX(150vw) rotate(10deg); }
 }
 
 @keyframes fade-in {
@@ -107,15 +107,15 @@ body {
 
 /* --- Glass card system --- */
 .glass-card {
-    background: rgba(21, 20, 31, 0.92);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(91, 64, 62, 0.35);
+    border: 1px solid rgba(255, 179, 173, 0.2);
 }
 
 .glass-card-solid {
-    background: rgba(24, 23, 34, 0.95);
-    border: 1px solid rgba(91, 64, 62, 0.3);
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 179, 173, 0.3);
 }
 
 .map-zone-glow { box-shadow: 0 0 15px 3px rgba(255, 84, 81, 0.3); }
@@ -139,8 +139,8 @@ body {
 }
 
 .blueprint-room {
-    border: 1px solid rgba(91, 64, 62, 0.6);
-    background-color: rgba(31, 30, 42, 0.7);
+    border: 1px solid rgba(255, 179, 173, 0.3);
+    background-color: rgba(10, 10, 10, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;

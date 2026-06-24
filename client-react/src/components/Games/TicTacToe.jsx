@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWebRTCStore } from '../../store/useWebRTCStore';
 import PROTOCOL from '../../shared/protocol.js';
@@ -8,13 +8,20 @@ export function TicTacToe({ opponent, onExit }) {
   const [xIsNext, setXIsNext] = useState(true);
   const [myMark, setMyMark] = useState(null); // 'X' or 'O'
   const myId = useWebRTCStore(state => state.myId);
+  const boardRef = useRef(board);
+  const [myTurn, setMyTurn] = useState(false);
+
+  useEffect(() => {
+    boardRef.current = board;
+  }, [board]);
 
   useEffect(() => {
     // Arbitrary assignment based on IDs
     setMyMark(myId < opponent.id ? 'X' : 'O');
+    setMyTurn(myId < opponent.id);
 
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
-      WebRTCEngine.on(PROTOCOL.GAME_MOVE, (data) => {
+      WebRTCEngine.onMessage(PROTOCOL.GAME_MOVE, (data) => {
         if (data.gameType === 'tictactoe' && data.senderId === opponent.id) {
           setBoard(data.board);
           setXIsNext(data.xIsNext);
