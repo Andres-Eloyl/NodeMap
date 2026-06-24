@@ -194,7 +194,7 @@ export function DominoGame({ initialState, onExit }) {
     });
   };
 
-  const renderPips = (num) => {
+  const renderPips = (num, isHorizontal) => {
     const pips = Array(9).fill(false);
     if (num === 1) { pips[4] = true; }
     else if (num === 2) { pips[0] = true; pips[8] = true; }
@@ -204,9 +204,9 @@ export function DominoGame({ initialState, onExit }) {
     else if (num === 6) { pips[0] = true; pips[3] = true; pips[6] = true; pips[2] = true; pips[5] = true; pips[8] = true; }
     
     return (
-      <div className="grid grid-cols-3 grid-rows-3 w-full h-full p-[3px] sm:p-1 gap-[1px] sm:gap-[2px]">
+      <div className={`grid grid-cols-3 grid-rows-3 w-full h-full p-[3px] sm:p-[4px] gap-[2px] ${isHorizontal ? 'rotate-90' : ''}`}>
         {pips.map((show, i) => (
-          <div key={i} className={`rounded-full ${show ? 'bg-black shadow-inner' : 'bg-transparent'}`} />
+          <div key={i} className={`rounded-full aspect-square ${show ? 'bg-black shadow-inner' : 'bg-transparent'}`} />
         ))}
       </div>
     );
@@ -215,26 +215,28 @@ export function DominoGame({ initialState, onExit }) {
   const DominoPiece = ({ tile, isHorizontal }) => {
     return (
         <div className={`bg-slate-100 rounded-md border border-slate-300 shadow-md flex ${isHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center overflow-hidden shrink-0`} style={{ width: isHorizontal ? '60px' : '30px', height: isHorizontal ? '30px' : '60px'}}>
-            <div className={`flex-1 flex items-center justify-center ${isHorizontal ? 'border-r border-slate-300' : 'border-b border-slate-300'} w-full h-full`}>
-                {renderPips(tile[0])}
+            <div className={`flex items-center justify-center ${isHorizontal ? 'border-r border-slate-300' : 'border-b border-slate-300'}`} style={{ width: '30px', height: '30px' }}>
+                {renderPips(tile[0], isHorizontal)}
             </div>
-            <div className="flex-1 flex items-center justify-center w-full h-full">
-                {renderPips(tile[1])}
+            <div className="flex items-center justify-center" style={{ width: '30px', height: '30px' }}>
+                {renderPips(tile[1], isHorizontal)}
             </div>
         </div>
     );
   };
+
+
 
   // Helper para dibujar las fichas en la mesa secuencialmente
   const renderBoard = () => {
       if (board.length === 0) return <div className="text-white/30 italic">La mesa está vacía. Juega cualquier ficha.</div>;
       
       return (
-      <div className="flex flex-wrap items-center justify-center gap-1 p-4 bg-green-800/30 rounded-xl min-h-[200px] border border-green-500/20 shadow-inner">
+      <div className="flex flex-nowrap items-center justify-start sm:justify-center gap-[2px] p-4 bg-green-800/30 rounded-xl min-h-[140px] border border-green-500/20 shadow-inner w-full overflow-x-auto min-w-full">
          {board.map((move, idx) => {
              const isDouble = move.tile[0] === move.tile[1];
              return (
-                 <motion.div key={idx} initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                 <motion.div key={idx} initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0 flex items-center justify-center">
                     <DominoPiece tile={move.tile} isHorizontal={!isDouble} />
                  </motion.div>
              );
