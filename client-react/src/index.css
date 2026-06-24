@@ -49,17 +49,17 @@
   --color-error-container: #93000a;
   --color-on-primary-fixed: #410004;
 
-  --font-sans: "Montserrat", sans-serif;
-  --font-headline-lg: "Montserrat", sans-serif;
-  --font-headline-md: "Montserrat", sans-serif;
-  --font-headline-sm: "Montserrat", sans-serif;
-  --font-body-lg: "Montserrat", sans-serif;
-  --font-body-md: "Montserrat", sans-serif;
-  --font-label-md: "Montserrat", sans-serif;
-  --font-label-sm: "Montserrat", sans-serif;
-  --font-label-mono: "Montserrat", sans-serif;
+  --font-sans: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-headline-lg: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-headline-md: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-headline-sm: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-body-lg: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-body-md: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-label-md: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-label-sm: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-label-mono: "Google Sans", "Product Sans", "Open Sans", sans-serif;
   --font-logo: "Montserrat", sans-serif;
-  --font-profile: "Montserrat", sans-serif;
+  --font-profile: "Google Sans", "Product Sans", "Open Sans", sans-serif;
 }
 
 @keyframes slide-bg {
