@@ -213,8 +213,9 @@ export function DominoGame({ initialState, onExit }) {
   };
 
   const DominoPiece = ({ tile, isHorizontal }) => {
+    // Si isHorizontal es falso, dibujamos la ficha en vertical.
     return (
-        <div className={`bg-slate-100 rounded-md border border-slate-300 shadow-md flex ${isHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center overflow-hidden shrink-0`} style={{ width: isHorizontal ? '60px' : '30px', height: isHorizontal ? '30px' : '60px'}}>
+        <div className={`bg-slate-100 rounded-md border border-slate-300 shadow-[0_4px_6px_rgba(0,0,0,0.3)] flex ${isHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center overflow-hidden`} style={{ width: isHorizontal ? '60px' : '30px', height: isHorizontal ? '30px' : '60px'}}>
             <div className={`flex items-center justify-center ${isHorizontal ? 'border-r border-slate-300' : 'border-b border-slate-300'}`} style={{ width: '30px', height: '30px' }}>
                 {renderPips(tile[0], isHorizontal)}
             </div>
@@ -227,20 +228,81 @@ export function DominoGame({ initialState, onExit }) {
 
 
 
-  // Helper para dibujar las fichas en la mesa secuencialmente
+  // Calculate 2D Layout
+  const getLayout = () => {
+    const layout = [];
+    let hX = 0, tX = 0;
+    let lastHead = null;
+    let lastTail = null;
+
+    board.forEach((move, i) => {
+      const isDouble = move.tile[0] === move.tile[1];
+      const w = isDouble ? 30 : 60;
+      const h = isDouble ? 60 : 30;
+
+      if (i === 0) {
+        layout.push({ ...move, id: i, x: 0, y: 0, isDouble, w, h });
+        lastHead = layout[0];
+        lastTail = layout[0];
+        return;
+      }
+
+      if (move.end === 'tail') {
+        const dist = (lastTail.w / 2) + (w / 2);
+        tX += dist;
+        layout.push({ ...move, id: i, x: tX, y: 0, isDouble, w, h });
+        lastTail = layout[layout.length - 1];
+      } else {
+        const dist = (lastHead.w / 2) + (w / 2);
+        hX -= dist;
+        layout.push({ ...move, id: i, x: hX, y: 0, isDouble, w, h });
+        lastHead = layout[layout.length - 1];
+      }
+    });
+    return layout;
+  };
+
+  const boardRef = useRef(null);
+  
+  useEffect(() => {
+      if (boardRef.current) {
+          // Centrar el scroll
+          boardRef.current.scrollLeft = 1500 - (boardRef.current.clientWidth / 2);
+          boardRef.current.scrollTop = 1500 - (boardRef.current.clientHeight / 2);
+      }
+  }, []);
+
   const renderBoard = () => {
-      if (board.length === 0) return <div className="text-white/30 italic">La mesa está vacía. Juega cualquier ficha.</div>;
+      if (board.length === 0) return <div className="text-white/30 italic absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">La mesa está vacía. Juega cualquier ficha.</div>;
       
+      const layout = getLayout();
+
       return (
-      <div className="flex flex-nowrap items-center justify-start sm:justify-center gap-[2px] p-4 bg-green-800/30 rounded-xl min-h-[140px] border border-green-500/20 shadow-inner w-full overflow-x-auto min-w-full">
-         {board.map((move, idx) => {
-             const isDouble = move.tile[0] === move.tile[1];
-             return (
-                 <motion.div key={idx} initial={{ scale: 0 }} animate={{ scale: 1 }} className="shrink-0 flex items-center justify-center">
-                    <DominoPiece tile={move.tile} isHorizontal={!isDouble} />
-                 </motion.div>
-             );
-         })}
+      <div 
+        ref={boardRef}
+        className="w-full h-full overflow-auto bg-green-800/30 rounded-xl border border-green-500/20 shadow-inner relative cursor-grab active:cursor-grabbing"
+      >
+         <div className="absolute" style={{ width: '3000px', height: '3000px' }}>
+             {layout.map((item) => {
+                 return (
+                     <motion.div 
+                        key={item.id} 
+                        initial={{ scale: 0, opacity: 0 }} 
+                        animate={{ scale: 1, opacity: 1 }} 
+                        className="absolute flex items-center justify-center transition-all duration-300"
+                        style={{
+                            left: `calc(1500px + ${item.x}px)`,
+                            top: `calc(1500px + ${item.y}px)`,
+                            transform: `translate(-50%, -50%)`,
+                            width: `${item.w}px`,
+                            height: `${item.h}px`
+                        }}
+                     >
+                        <DominoPiece tile={item.tile} isHorizontal={!item.isDouble} />
+                     </motion.div>
+                 );
+             })}
+         </div>
       </div>
     );
   };
@@ -305,7 +367,7 @@ export function DominoGame({ initialState, onExit }) {
         <PlayerBadge index={rightIndex} positionClass="right-2 top-1/2 -translate-y-1/2" />
 
         {/* Board */}
-        <div className="flex-1 flex flex-col items-center justify-center py-12 px-16 w-full overflow-y-auto">
+        <div className="flex-1 w-full h-full relative overflow-hidden z-0">
             {renderBoard()}
         </div>
 

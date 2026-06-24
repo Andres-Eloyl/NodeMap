@@ -188,7 +188,8 @@ function BroadcastModal() {
 }
 
 export function PeerView() {
-  const [activeTab, setActiveTab] = useState('map');
+  const activeTab = useWebRTCStore(state => state.activeTab);
+  const setActiveTab = useWebRTCStore(state => state.setActiveTab);
   const isConnected = useWebRTCStore(state => state.isConnected);
   const disconnect = useWebRTCStore(state => state.disconnect);
   const myPoints = useWebRTCStore(state => state.myPoints);

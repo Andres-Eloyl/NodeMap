@@ -16,6 +16,17 @@ export const useWebRTCStore = create((set, get) => ({
   toasts: [],
   broadcast: null,
   myPoints: 0,
+  
+  // UI Global State
+  activeTab: 'map',
+  chatTab: 'global',
+  privateChatId: null,
+  activeGame: null,
+  
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  setChatTab: (tab) => set({ chatTab: tab }),
+  setPrivateChatId: (id) => set({ privateChatId: id }),
+  setActiveGame: (gameId) => set({ activeGame: gameId }),
 
   addToast: (message, type = 'info', onClick = null) => {
     const id = Date.now() + Math.random();
@@ -31,7 +42,7 @@ export const useWebRTCStore = create((set, get) => ({
     WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
       set({ peers: WebRTCEngine.getPeers() });
       if (data.zona === mapZone && data.nombre) {
-        get().addToast(`${data.nombre} acaba de unirse a tu zona`, 'info');
+        get().addToast(`${data.nombre} acaba de unirse a tu zona`, 'info', () => get().setActiveTab('users'));
         SoundEngine.playJoin();
       }
     });
@@ -86,13 +97,23 @@ export const useWebRTCStore = create((set, get) => ({
       }));
       if (msg.senderId !== get().myId) {
         if (msg.isPrivate) {
-          get().addToast(`${msg.nombre} (Privado): ${msg.text.substring(0,20)}...`, 'private');
+          get().addToast(`${msg.nombre} (Privado): ${msg.text.substring(0,20)}...`, 'private', () => {
+              get().setActiveTab('chat');
+              get().setChatTab('privados');
+              get().setPrivateChatId(msg.senderId);
+          });
           SoundEngine.playPrivateChat();
         } else if (msg.isGlobal) {
-          get().addToast(`${msg.nombre} (Global): ${msg.text.substring(0,20)}...`, 'global');
+          get().addToast(`${msg.nombre} (Global): ${msg.text.substring(0,20)}...`, 'global', () => {
+              get().setActiveTab('chat');
+              get().setChatTab('global');
+          });
           SoundEngine.playGlobalChat();
         } else if (msg.zona === mapZone || (!msg.zona && msg.isGlobal)) { // fallback
-          get().addToast(`${msg.nombre} (Zona): ${msg.text.substring(0,20)}...`, 'info');
+          get().addToast(`${msg.nombre} (Zona): ${msg.text.substring(0,20)}...`, 'info', () => {
+              get().setActiveTab('chat');
+              get().setChatTab('zona');
+          });
           SoundEngine.playZoneChat();
         }
       }
@@ -106,7 +127,7 @@ export const useWebRTCStore = create((set, get) => ({
         return { forumMessages: [...state.forumMessages, newMsg].sort((a,b) => b.timestamp - a.timestamp) };
       });
       if (msg.senderId !== get().myId) {
-        get().addToast(`${msg.nombre} publicó en Social`, 'info');
+        get().addToast(`${msg.nombre} publicó en Social`, 'info', () => get().setActiveTab('forum'));
         SoundEngine.playSocial();
       }
     });

@@ -49,6 +49,9 @@ export function GamesView() {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
       WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
         setInvites(prev => [...prev, { from: data.senderId, name: data.nombre, game: data.gameType }]);
+        useWebRTCStore.getState().addToast(`Nueva invitación a ${data.gameType} de ${data.nombre}`, 'info', () => {
+            useWebRTCStore.getState().setActiveTab('games');
+        });
         SoundEngine.playAlert();
       });
       WebRTCEngine.onMessage(PROTOCOL.GAME_ACCEPT, (data) => {
@@ -60,11 +63,12 @@ export function GamesView() {
       });
 
       const handleDominoInvite = (data) => {
-        const accept = window.confirm(`${data.nombre} te invita a una partida de Dominó 2v2. ¿Aceptar?`);
-        if (accept) {
+        useWebRTCStore.getState().addToast(`${data.nombre} te invita a jugar Dominó 2v2. ¡Clic para unirte!`, 'info', () => {
           WebRTCEngine.sendMessage(data.hostId, PROTOCOL.DOMINO_ACCEPT, { senderId: myId, nombre: useWebRTCStore.getState().myName });
+          useWebRTCStore.getState().setActiveTab('games');
           setActiveGame('domino_lobby'); 
-        }
+        });
+        SoundEngine.playAlert();
       };
 
       const handleDominoStart = (data) => {
