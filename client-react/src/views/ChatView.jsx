@@ -11,23 +11,23 @@ function MessageList({ messages, myId, peers, isPrivateView }) {
   }, [messages]);
 
   return (
-    <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${isPrivateView ? 'bg-[#0B141A]' : ''}`}>
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((msg, idx) => {
         const isMe = msg.senderId === myId;
         const peer = peers.find(p => p.id === msg.senderId);
         const color = isMe ? '#ffb3ad' : (peer?.color || msg.color || '#69d8d4');
         const name = isMe ? 'Yo' : (msg.nombre || peer?.nombre || 'Desconocido');
 
-        // WhatsApp Style for Private Chats
+        // WhatsApp Structure with Original NodeMap Colors for Private Chats
         if (isPrivateView) {
             return (
               <div key={idx} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} animate-[fade-in_0.3s_ease-out]`}>
-                <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-[15px] shadow-sm relative ${
-                    isMe ? 'bg-[#005C4B] text-white rounded-tr-sm' : 'bg-[#202C33] text-white rounded-tl-sm'
+                <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-[15px] shadow-sm relative pb-5 ${
+                    isMe ? 'bg-primary text-[#68000a] rounded-tr-sm' : 'glass-card-solid bg-[#f3e5f5]/10 border border-[#ab47bc]/40 text-[#ce93d8] rounded-tl-sm'
                 }`}>
                     {!isMe && <div className="text-[12px] font-bold mb-0.5" style={{ color }}>{name}</div>}
                     <div className="leading-snug break-words pr-8">{msg.text}</div>
-                    <span className="text-[10px] text-white/50 absolute bottom-1 right-2">{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    <span className={`text-[10px] absolute bottom-1 right-2 ${isMe ? 'text-[#68000a]/60' : 'text-[#ce93d8]/60'}`}>{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
               </div>
             );
@@ -111,6 +111,14 @@ export function ChatView() {
                           activeTab === 'zona' ? messages.filter(m => m.zona === myZone && !m.isGlobal && !m.isPrivate) :
                           activeTab === 'privados' && privatePeerId ? messages.filter(m => m.isPrivate && (m.senderId === privatePeerId || m.targetId === privatePeerId)) : [];
 
+  const privateContacts = [...peers].sort((a, b) => {
+    const aMsgs = messages.filter(m => m.isPrivate && (m.senderId === a.id || m.targetId === a.id));
+    const bMsgs = messages.filter(m => m.isPrivate && (m.senderId === b.id || m.targetId === b.id));
+    const aLast = aMsgs.length > 0 ? aMsgs[aMsgs.length - 1].timestamp : 0;
+    const bLast = bMsgs.length > 0 ? bMsgs[bMsgs.length - 1].timestamp : 0;
+    return bLast - aLast;
+  });
+
   return (
     <div className="flex flex-col h-full bg-transparent overflow-hidden relative">
       
@@ -132,29 +140,33 @@ export function ChatView() {
         <div className="flex-1 overflow-y-auto p-4">
           <h3 className="font-bold text-white mb-4">Selecciona un Peer</h3>
           <div className="flex flex-col gap-2">
-            {peers.length === 0 && <p className="text-on-surface-variant text-sm">No hay peers conectados.</p>}
-            {peers.map(p => (
-              <button key={p.id} onClick={() => setPrivatePeerId(p.id)} className="glass-card p-4 flex items-center gap-3 hover:bg-surface-container text-left transition-colors">
-                <div className="w-10 h-10 flex items-center justify-center bg-primary/20" style={{ color: p.color || '#fff' }}>{p.avatar || p.nombre.charAt(0).toUpperCase()}</div>
-                <div>
+            {privateContacts.length === 0 && <p className="text-on-surface-variant text-sm">No hay peers conectados.</p>}
+            {privateContacts.map(p => {
+              const pMsgs = messages.filter(m => m.isPrivate && (m.senderId === p.id || m.targetId === p.id));
+              const lastMsg = pMsgs.length > 0 ? pMsgs[pMsgs.length - 1] : null;
+              return (
+              <button key={p.id} onClick={() => setPrivatePeerId(p.id)} className="glass-card p-4 flex items-center gap-3 hover:bg-surface-container text-left transition-colors relative">
+                <div className="w-10 h-10 flex items-center justify-center bg-primary/20 rounded-full" style={{ color: p.color || '#fff' }}>{p.avatar || p.nombre.charAt(0).toUpperCase()}</div>
+                <div className="flex-1 overflow-hidden">
                   <div className="font-bold text-white text-[14px]">{p.nombre}</div>
-                  <div className="text-[11px] text-on-surface-variant">{p.zona}</div>
+                  <div className="text-[12px] text-on-surface-variant truncate">{lastMsg ? lastMsg.text : p.zona}</div>
                 </div>
+                {lastMsg && <div className="text-[10px] text-on-surface-variant/60 absolute top-4 right-4">{new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>}
               </button>
-            ))}
+            )})}
           </div>
         </div>
       ) : (
         <>
           {/* Context Header for sub-tabs */}
           {activeTab === 'privados' && privatePeerId && (
-            <div className="bg-[#202C33] p-3 flex items-center gap-3 z-10 shadow-md">
+            <div className="bg-surface-container-highest/50 p-2 border-b border-outline-variant/20 flex items-center gap-2">
               <button onClick={() => setPrivatePeerId(null)} className="p-1 hover:bg-white/10 rounded-full text-white transition-colors"><ChevronLeft size={24}/></button>
               <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/20 text-white font-bold" style={{ backgroundColor: peers.find(p => p.id === privatePeerId)?.color || '#555' }}>
                   {peers.find(p => p.id === privatePeerId)?.nombre?.charAt(0).toUpperCase() || '?'}
               </div>
               <div className="flex flex-col">
-                  <span className="font-bold text-white text-[16px] leading-tight">{peers.find(p => p.id === privatePeerId)?.nombre || 'Desconocido'}</span>
+                  <span className="font-bold text-[#ce93d8] text-[16px] leading-tight">{peers.find(p => p.id === privatePeerId)?.nombre || 'Desconocido'}</span>
                   <span className="text-[12px] text-white/60 leading-tight">en línea</span>
               </div>
             </div>
@@ -162,17 +174,17 @@ export function ChatView() {
 
           <MessageList messages={currentMessages} myId={myId} peers={peers} isPrivateView={activeTab === 'privados'} />
 
-          <div className={`p-3 ${activeTab === 'privados' ? 'bg-[#202C33]' : 'border-t border-primary/20 bg-surface-container-highest/80 backdrop-blur-md'}`}>
+          <div className="p-4 border-t border-primary/20 bg-surface-container-highest/80 backdrop-blur-md">
             <form onSubmit={handleSubmit} className="flex gap-2 items-center max-w-4xl mx-auto w-full">
               <input
                 type="text"
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Escribe un mensaje..."
-                className={`flex-1 px-5 h-12 outline-none ${activeTab === 'privados' ? 'bg-[#2A3942] text-white rounded-full' : 'input-field'}`}
+                className={`flex-1 px-5 h-12 outline-none ${activeTab === 'privados' ? 'glass-card text-white rounded-full' : 'input-field'}`}
                 autoComplete="off"
               />
-              <button type="submit" className={`flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${activeTab === 'privados' ? 'bg-[#00A884] text-white w-12 h-12 rounded-full shadow-lg' : 'btn-primary px-6 h-12'}`}>
+              <button type="submit" className={`flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${activeTab === 'privados' ? 'bg-primary text-[#68000a] w-12 h-12 rounded-full shadow-lg' : 'btn-primary px-6 h-12'}`}>
                 <Send size={activeTab === 'privados' ? 20 : 18} className={activeTab === 'privados' ? 'ml-1' : ''} />
               </button>
             </form>
