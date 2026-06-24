@@ -63,10 +63,9 @@ export function GamesView() {
       });
 
       const handleDominoInvite = (data) => {
-        useWebRTCStore.getState().addToast(`${data.nombre} te invita a jugar Dominó 2v2. ¡Clic para unirte!`, 'info', () => {
-          WebRTCEngine.sendMessage(data.hostId, PROTOCOL.DOMINO_ACCEPT, { senderId: myId, nombre: useWebRTCStore.getState().myName });
-          useWebRTCStore.getState().setActiveTab('games');
-          setActiveGame('domino_lobby'); 
+        setInvites(prev => [...prev, { from: data.hostId, name: data.nombre, game: 'domino_lobby' }]);
+        useWebRTCStore.getState().addToast(`Nueva invitación a Dominó 2v2 de ${data.nombre}`, 'info', () => {
+            useWebRTCStore.getState().setActiveTab('games');
         });
         SoundEngine.playAlert();
       };
@@ -91,9 +90,14 @@ export function GamesView() {
 
   const acceptInvite = (inv) => {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
-      WebRTCEngine.sendMessage(inv.from, PROTOCOL.GAME_ACCEPT, { gameType: inv.game, nombre: 'Yo' });
-      setOpponent({ id: inv.from, name: inv.name });
-      setActiveGame(inv.game);
+      if (inv.game === 'domino_lobby') {
+        WebRTCEngine.sendMessage(inv.from, PROTOCOL.DOMINO_ACCEPT, { senderId: myId, nombre: useWebRTCStore.getState().myName });
+        setActiveGame('domino_lobby'); 
+      } else {
+        WebRTCEngine.sendMessage(inv.from, PROTOCOL.GAME_ACCEPT, { gameType: inv.game, nombre: 'Yo' });
+        setOpponent({ id: inv.from, name: inv.name });
+        setActiveGame(inv.game);
+      }
       setInvites(prev => prev.filter(i => i !== inv));
     });
   };
@@ -155,11 +159,19 @@ export function GamesView() {
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 space-y-2">
               <h3 className="font-bold text-primary flex items-center gap-2"><Swords size={18}/> Invitaciones Pendientes</h3>
               {invites.map((inv, idx) => (
-                <div key={idx} className="glass-card-solid p-3  flex items-center justify-between border border-primary/50">
-                  <span className="text-sm font-medium">{inv.name} te reta a {inv.game === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra Papel Tijera'}</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => acceptInvite(inv)} className="btn-primary px-3 py-1 text-xs ">Aceptar</button>
-                    <button onClick={() => rejectInvite(inv)} className="btn-ghost px-3 py-1 text-xs ">Rechazar</button>
+                <div key={idx} className="glass-card-solid p-4 flex flex-col md:flex-row items-start md:items-center justify-between border border-primary/40 gap-3">
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                          <Swords size={20} />
+                      </div>
+                      <div>
+                          <span className="font-bold text-white text-[15px]">{inv.name}</span>
+                          <span className="text-sm text-on-surface-variant block">Te invita a jugar {inv.game === 'domino_lobby' ? 'Dominó 2v2' : (inv.game === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra Papel Tijera')}</span>
+                      </div>
+                  </div>
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <button onClick={() => rejectInvite(inv)} className="flex-1 md:flex-none btn-ghost px-4 py-2 border border-white/10 hover:bg-red-500/20 hover:text-red-300 transition-colors">Rechazar</button>
+                    <button onClick={() => acceptInvite(inv)} className="flex-1 md:flex-none btn-primary px-6 py-2 shadow-lg hover:shadow-primary/30">Aceptar</button>
                   </div>
                 </div>
               ))}

@@ -273,8 +273,6 @@ export function DominoGame({ initialState, onExit }) {
   }, []);
 
   const renderBoard = () => {
-      if (board.length === 0) return <div className="text-white/30 italic absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">La mesa está vacía. Juega cualquier ficha.</div>;
-      
       const layout = getLayout();
 
       return (
@@ -283,25 +281,31 @@ export function DominoGame({ initialState, onExit }) {
         className="w-full h-full overflow-auto bg-green-800/30 rounded-xl border border-green-500/20 shadow-inner relative cursor-grab active:cursor-grabbing"
       >
          <div className="absolute" style={{ width: '3000px', height: '3000px' }}>
-             {layout.map((item) => {
-                 return (
-                     <motion.div 
-                        key={item.id} 
-                        initial={{ scale: 0, opacity: 0 }} 
-                        animate={{ scale: 1, opacity: 1 }} 
-                        className="absolute flex items-center justify-center transition-all duration-300"
-                        style={{
-                            left: `calc(1500px + ${item.x}px)`,
-                            top: `calc(1500px + ${item.y}px)`,
-                            transform: `translate(-50%, -50%)`,
-                            width: `${item.w}px`,
-                            height: `${item.h}px`
-                        }}
-                     >
-                        <DominoPiece tile={item.tile} isHorizontal={!item.isDouble} />
-                     </motion.div>
-                 );
-             })}
+             {board.length === 0 ? (
+                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/40 italic font-medium bg-black/30 px-6 py-3 rounded-full backdrop-blur-sm pointer-events-none">
+                     La mesa está vacía. Juega cualquier ficha para empezar.
+                 </div>
+             ) : (
+                 layout.map((item) => {
+                     return (
+                         <motion.div 
+                            key={item.id} 
+                            initial={{ scale: 0, opacity: 0 }} 
+                            animate={{ scale: 1, opacity: 1 }} 
+                            className="absolute flex items-center justify-center transition-all duration-300"
+                            style={{
+                                left: `calc(1500px + ${item.x}px)`,
+                                top: `calc(1500px + ${item.y}px)`,
+                                transform: `translate(-50%, -50%)`,
+                                width: `${item.w}px`,
+                                height: `${item.h}px`
+                            }}
+                         >
+                            <DominoPiece tile={item.tile} isHorizontal={!item.isDouble} />
+                         </motion.div>
+                     );
+                 })
+             )}
          </div>
       </div>
     );
@@ -331,11 +335,14 @@ export function DominoGame({ initialState, onExit }) {
       </div>
 
       {gameState === 'finished' && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div className="bg-surface p-8 rounded-xl border border-primary text-center max-w-sm">
-                <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">emoji_events</span>
-                <h3 className="text-2xl font-bold text-white mb-4 whitespace-pre-line">{resultMsg}</h3>
-                <button onClick={onExit} className="btn-primary w-full py-3">Volver al Arcade</button>
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in">
+            <div className="glass-card-solid bg-surface/90 p-10 rounded-3xl border border-primary/40 text-center max-w-sm shadow-[0_0_40px_rgba(255,179,173,0.15)] flex flex-col items-center">
+                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6">
+                    <span className="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(255,179,173,0.5)]">emoji_events</span>
+                </div>
+                <h3 className="text-[22px] font-bold text-white mb-2 whitespace-pre-line leading-tight">{resultMsg}</h3>
+                <p className="text-on-surface-variant text-sm mb-8">La partida ha finalizado. ¡Bien jugado!</p>
+                <button onClick={onExit} className="btn-primary w-full py-3 text-[15px] font-bold tracking-wide rounded-xl shadow-lg hover:shadow-primary/30 transition-all">Volver al Arcade</button>
             </div>
         </div>
       )}
