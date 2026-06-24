@@ -31,8 +31,12 @@ export function DominoGame({ initialState, onExit }) {
   const isMyTurn = turnIndex === myIndex;
 
   useEffect(() => {
+    let unmounted = false;
+    let handleAction = null;
+
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
-      const handleAction = (data) => {
+      if (unmounted) return;
+      handleAction = (data) => {
         if (data.type === 'PLAY') {
           applyPlay(data.playerId, data.tile, data.end);
         } else if (data.type === 'PASS') {
@@ -42,7 +46,16 @@ export function DominoGame({ initialState, onExit }) {
       
       WebRTCEngine.onMessage(PROTOCOL.DOMINO_ACTION, handleAction);
     });
-  }, [boardHead, boardTail, turnIndex, handsCount]);
+
+    return () => {
+      unmounted = true;
+      if (handleAction) {
+        import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
+            WebRTCEngine.offMessage(PROTOCOL.DOMINO_ACTION, handleAction);
+        });
+      }
+    };
+  }, [boardHead, boardTail, turnIndex, handsCount, board]);
 
   const advanceTurn = () => {
     setTurnIndex(prev => (prev + 1) % 4);
@@ -172,14 +185,32 @@ export function DominoGame({ initialState, onExit }) {
     });
   };
 
+  const renderPips = (num) => {
+    const pips = Array(9).fill(false);
+    if (num === 1) { pips[4] = true; }
+    else if (num === 2) { pips[0] = true; pips[8] = true; }
+    else if (num === 3) { pips[0] = true; pips[4] = true; pips[8] = true; }
+    else if (num === 4) { pips[0] = true; pips[2] = true; pips[6] = true; pips[8] = true; }
+    else if (num === 5) { pips[0] = true; pips[2] = true; pips[4] = true; pips[6] = true; pips[8] = true; }
+    else if (num === 6) { pips[0] = true; pips[3] = true; pips[6] = true; pips[2] = true; pips[5] = true; pips[8] = true; }
+    
+    return (
+      <div className="grid grid-cols-3 grid-rows-3 w-full h-full p-[3px] sm:p-1 gap-[1px] sm:gap-[2px]">
+        {pips.map((show, i) => (
+          <div key={i} className={`rounded-full ${show ? 'bg-black shadow-inner' : 'bg-transparent'}`} />
+        ))}
+      </div>
+    );
+  };
+
   const DominoPiece = ({ tile, isHorizontal }) => {
     return (
-        <div className={`bg-slate-100 rounded-md border border-slate-300 shadow-md flex ${isHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center overflow-hidden`} style={{ width: isHorizontal ? '80px' : '40px', height: isHorizontal ? '40px' : '80px'}}>
-            <div className={`flex-1 flex items-center justify-center font-bold text-xl text-black ${isHorizontal ? 'border-r border-slate-300' : 'border-b border-slate-300'} w-full h-full`}>
-                {tile[0]}
+        <div className={`bg-slate-100 rounded-md border border-slate-300 shadow-md flex ${isHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center overflow-hidden shrink-0`} style={{ width: isHorizontal ? '60px' : '30px', height: isHorizontal ? '30px' : '60px'}}>
+            <div className={`flex-1 flex items-center justify-center ${isHorizontal ? 'border-r border-slate-300' : 'border-b border-slate-300'} w-full h-full`}>
+                {renderPips(tile[0])}
             </div>
-            <div className="flex-1 flex items-center justify-center font-bold text-xl text-black w-full h-full">
-                {tile[1]}
+            <div className="flex-1 flex items-center justify-center w-full h-full">
+                {renderPips(tile[1])}
             </div>
         </div>
     );

@@ -349,6 +349,12 @@ function onMessage(tipo, callback) {
   callbacks.get(tipo).push(callback);
 }
 
+function offMessage(tipo, callback) {
+  if (!callbacks.has(tipo)) return;
+  const cbs = callbacks.get(tipo);
+  callbacks.set(tipo, cbs.filter(cb => cb !== callback));
+}
+
 function getPeers() {
   const result = [];
   for (const [id, peer] of peers) {
@@ -397,6 +403,7 @@ export const WebRTCEngine = {
   sendToPeer: sendMessage,
   broadcast,
   onMessage,
+  offMessage,
   getPeers,
   getLatency,
   getMyId,
