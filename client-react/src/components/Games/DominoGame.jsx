@@ -18,6 +18,7 @@ export function DominoGame({ initialState, onExit }) {
   
   const [consecutivePasses, setConsecutivePasses] = useState(0);
   const [resultMsg, setResultMsg] = useState('');
+  const [pendingChoice, setPendingChoice] = useState(null); // { tile }
   
   // To track opponents' tile counts
   const [handsCount, setHandsCount] = useState({
@@ -145,8 +146,8 @@ export function DominoGame({ initialState, onExit }) {
       const canTail = tile[0] === boardTail || tile[1] === boardTail;
       
       if (canHead && canTail && boardHead !== boardTail) {
-        // En un juego completo habría UI para elegir. Aquí elegimos 'tail' por defecto si coinciden ambos para simplificar
-        end = 'tail'; 
+        setPendingChoice({ tile });
+        return; 
       } else if (canHead) {
         end = 'head';
       } else if (canTail) {
@@ -156,9 +157,13 @@ export function DominoGame({ initialState, onExit }) {
       }
     }
 
-    // Remove from my hand
+    executePlay(tile, end);
+  };
+
+  const executePlay = (tile, end) => {
     const newHand = myHand.filter(t => !(t[0] === tile[0] && t[1] === tile[1]));
     setMyHand(newHand);
+    setPendingChoice(null);
 
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
       const action = { type: 'PLAY', playerId: myId, tile, end };
@@ -250,6 +255,25 @@ export function DominoGame({ initialState, onExit }) {
                 <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">emoji_events</span>
                 <h3 className="text-2xl font-bold text-white mb-4 whitespace-pre-line">{resultMsg}</h3>
                 <button onClick={onExit} className="btn-primary w-full py-3">Volver al Arcade</button>
+            </div>
+        </div>
+      )}
+
+      {pendingChoice && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div className="bg-surface p-6 rounded-xl border border-blue-500 text-center max-w-sm">
+                <h3 className="text-xl font-bold text-white mb-6">¿Dónde colocar la ficha?</h3>
+                <div className="flex justify-center gap-6">
+                    <button onClick={() => executePlay(pendingChoice.tile, 'head')} className="flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+                        <span className="text-white/70">Izquierda</span>
+                        <div className="bg-slate-800 p-3 rounded-lg border border-slate-600 font-bold text-xl">{boardHead}</div>
+                    </button>
+                    <button onClick={() => executePlay(pendingChoice.tile, 'tail')} className="flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+                        <span className="text-white/70">Derecha</span>
+                        <div className="bg-slate-800 p-3 rounded-lg border border-slate-600 font-bold text-xl">{boardTail}</div>
+                    </button>
+                </div>
+                <button onClick={() => setPendingChoice(null)} className="mt-6 text-sm text-red-400 hover:text-red-300">Cancelar</button>
             </div>
         </div>
       )}
