@@ -6,10 +6,12 @@ export function ReactionGame({ opponent, onExit }) {
   const [gameState, setGameState] = useState('waiting'); // waiting, ready, go, result
   const [result, setResult] = useState(null); // { winner: 'Me' | 'Opponent' | 'Draw', myTime, opTime }
   const myId = useWebRTCStore(state => state.myId);
+  const addPoints = useWebRTCStore(state => state.addPoints);
   const startTimeRef = useRef(0);
   const myTapTimeRef = useRef(null);
   const opTapTimeRef = useRef(null);
   const isInitiatorRef = useRef(false);
+  const [pointsAwarded, setPointsAwarded] = useState(false);
 
   useEffect(() => {
     // When mounting, determine if we are initiator
@@ -58,6 +60,13 @@ export function ReactionGame({ opponent, onExit }) {
     setGameState('go');
   };
 
+  useEffect(() => {
+    if (result?.isWinner && !pointsAwarded) {
+      addPoints(20);
+      setPointsAwarded(true);
+    }
+  }, [result, pointsAwarded, addPoints]);
+
   const handleTap = () => {
     if (gameState !== 'go') return;
     myTapTimeRef.current = Date.now();
@@ -74,11 +83,12 @@ export function ReactionGame({ opponent, onExit }) {
         const opDiff = opTapTimeRef.current - startTimeRef.current;
         
         let winnerStr = '';
-        if (myDiff < opDiff) winnerStr = '¡GANASTE!';
-        else if (opDiff < myDiff) winnerStr = 'PERDISTE';
-        else winnerStr = 'EMPATE';
+        let isWinner = false;
+        if (myDiff < opDiff) { winnerStr = '¡GANASTE!'; isWinner = true; }
+        else if (opDiff < myDiff) { winnerStr = 'PERDISTE'; }
+        else { winnerStr = 'EMPATE'; }
 
-        setResult({ winner: winnerStr, myTime: myDiff, opTime: opDiff });
+        setResult({ winner: winnerStr, isWinner, myTime: myDiff, opTime: opDiff });
     }
   };
 

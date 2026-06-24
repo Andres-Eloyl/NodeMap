@@ -13,6 +13,8 @@ export function RockPaperScissors({ opponent, onExit }) {
   const [myChoice, setMyChoice] = useState(null);
   const [opponentChoice, setOpponentChoice] = useState(null); // 'hidden' initially, then the actual choice
   const [result, setResult] = useState(null);
+  const [pointsAwarded, setPointsAwarded] = useState(false);
+  const addPoints = useWebRTCStore(state => state.addPoints);
 
   useEffect(() => {
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
@@ -47,6 +49,13 @@ export function RockPaperScissors({ opponent, onExit }) {
     }
   };
 
+  useEffect(() => {
+    if (result === 'win' && !pointsAwarded) {
+      addPoints(15);
+      setPointsAwarded(true);
+    }
+  }, [result, pointsAwarded, addPoints]);
+
   const handleChoice = (choice) => {
     if (myChoice) return;
     setMyChoice(choice);
@@ -69,6 +78,7 @@ export function RockPaperScissors({ opponent, onExit }) {
     setMyChoice(null);
     setOpponentChoice(null);
     setResult(null);
+    setPointsAwarded(false);
     window.lastOpponentRPSChoice = null;
   };
 

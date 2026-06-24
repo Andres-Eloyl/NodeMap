@@ -29,6 +29,9 @@ const PROTOCOL = {
   REACTION_TAP: "reaction-tap",
   TRIVIA_START: "trivia-start",
   TRIVIA_ANSWER: "trivia-answer",
+  ZONE_CHANGE: "zone-change",
+  POS_SYNC: "pos-sync",
+  UPDATE_POINTS: "update-points",
 };
 
 export default PROTOCOL;

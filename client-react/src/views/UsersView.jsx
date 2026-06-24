@@ -1,4 +1,5 @@
 import { useWebRTCStore } from '../store/useWebRTCStore';
+import { getMacroZone } from '../shared/zones.js';
 
 export function UsersView() {
   const peers = useWebRTCStore(state => state.peers);
@@ -7,9 +8,10 @@ export function UsersView() {
   const myColor = useWebRTCStore(state => state.myColor);
   const myAvatar = useWebRTCStore(state => state.myAvatar);
   const myZone = useWebRTCStore(state => state.zone);
+  const myPoints = useWebRTCStore(state => state.myPoints);
 
   const allUsers = [
-    { id: myId, nombre: myName, color: myColor, avatar: myAvatar, zona: myZone, isMe: true },
+    { id: myId, nombre: myName, color: myColor, avatar: myAvatar, zona: myZone, isMe: true, puntos: myPoints },
     ...peers
   ].filter(u => u.id); // Filter out in case myId isn't fully loaded yet
 
@@ -43,8 +45,12 @@ export function UsersView() {
               </div>
               
               <div className="ml-auto text-right flex flex-col items-end">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-primary/70">Zona</span>
-                  <span className="text-xs text-on-surface">{peer.zona}</span>
+                  <div className="flex items-center gap-1 bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded text-[11px] font-bold mb-1 shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+                      <span className="material-symbols-outlined text-[14px]">stars</span>
+                      {peer.puntos || 0} pts
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-primary/70">Se encuentra en:</span>
+                  <span className="text-xs text-on-surface">{getMacroZone(peer.zona)} {peer.zona !== getMacroZone(peer.zona) ? `- ${peer.zona}` : ''}</span>
               </div>
             </div>
           ))}

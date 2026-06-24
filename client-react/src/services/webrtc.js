@@ -44,7 +44,7 @@ function getChannelLabel() {
 
 
 
-function initConnection(peerId, nombre, zona, color, avatar) {
+function initConnection(peerId, nombre, zona, color, avatar, puntos = 0) {
   if (peers.has(peerId)) return;
 
   const pc = new RTCPeerConnection(getIceConfig());
@@ -70,7 +70,7 @@ function initConnection(peerId, nombre, zona, color, avatar) {
     setupDataChannel(peerId, nombre, event.channel);
   };
 
-  const peerEntry = { id: peerId, nombre, zona, color, avatar, pc, dc: null };
+  const peerEntry = { id: peerId, nombre, zona, color, avatar, puntos, pc, dc: null };
 
   if (shouldIOffer(peerId)) {
     const dc = pc.createDataChannel(getChannelLabel());
@@ -96,7 +96,7 @@ function setupDataChannel(peerId, nombre, dc) {
     const peer = peers.get(peerId);
     if (peer) peer.dc = dc;
     reconnecting.delete(peerId);
-    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer && peer.avatar ? peer.avatar : (nombre ? nombre.charAt(0).toUpperCase() : "?") });
+    fireCallbacks(PROTOCOL.PEER_JOIN, { id: peerId, nombre, zona: peer ? peer.zona : "Desconocida", color: peer ? peer.color : "#fff", avatar: peer && peer.avatar ? peer.avatar : (nombre ? nombre.charAt(0).toUpperCase() : "?"), puntos: peer ? peer.puntos : 0 });
     if (!pingInterval) startPingCycle();
   };
 
@@ -156,17 +156,17 @@ function conectar(nombre, zona, color, avatar) {
     ? `http://${window.location.hostname}:${CONFIG.PORT}`
     : window.location.origin;
 
-  socket = io(serverUrl, { query: { nombre, zona, color, avatar } });
+  socket = io(serverUrl, { query: { nombre, zona, color, avatar, puntos: 0 } });
 
   socket.on(PROTOCOL.PEER_LIST, (data) => {
     myId = data.miId;
     for (const peer of data.peers) {
-      initConnection(peer.id, peer.nombre, peer.zona, peer.color, peer.avatar);
+      initConnection(peer.id, peer.nombre, peer.zona, peer.color, peer.avatar, peer.puntos);
     }
   });
 
   socket.on(PROTOCOL.PEER_JOIN, (data) => {
-    initConnection(data.id, data.nombre, data.zona, data.color, data.avatar);
+    initConnection(data.id, data.nombre, data.zona, data.color, data.avatar, data.puntos);
   });
 
   socket.on(PROTOCOL.REPLAY_DATA, (data) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useWebRTCStore } from '../store/useWebRTCStore';
 import PROTOCOL from '../shared/protocol.js';
+import { getMacroZone } from '../shared/zones.js';
 
 const waypoints = {
     'Zona A': [
@@ -38,15 +39,59 @@ const waypoints = {
     ]
 };
 
+const roomWaypoints = {
+    'Aula 6': [{ id: 'rm1', t: 5, l: 10, edges: [] }],
+    'Aula 5': [{ id: 'rm2', t: 20, l: 10, edges: [] }],
+    'Aula 4': [{ id: 'rm3', t: 32, l: 10, edges: [] }],
+    'Aula 3': [{ id: 'rm4', t: 45, l: 10, edges: [] }],
+    'Laboratorio 1': [{ id: 'rm5', t: 57, l: 10, edges: [] }],
+    'Laboratorio 2': [{ id: 'rm6', t: 70, l: 10, edges: [] }],
+    'Laboratorio 3': [{ id: 'rm7', t: 82, l: 10, edges: [] }],
+    'Almacen': [{ id: 'rm8', t: 90, l: 10, edges: [] }],
+    'Laboratorio 4': [{ id: 'rm9', t: 5, l: 50, edges: [] }],
+    'Servicio Comunitario': [{ id: 'rm10', t: 20, l: 50, edges: [] }],
+    'Laboratorio 5': [{ id: 'rm11', t: 32, l: 50, edges: [] }],
+    'Laboratorio 6': [{ id: 'rm12', t: 45, l: 50, edges: [] }],
+    'Lab Computación': [{ id: 'rm13', t: 73, l: 50, edges: [] }],
+    'Lab Robótica': [{ id: 'rm14', t: 90, l: 50, edges: [] }],
+    'Telecomunicaciones': [{ id: 'rm15', t: 10, l: 90, edges: [] }],
+    'Baños': [{ id: 'rm16', t: 25, l: 90, edges: [] }],
+    'Laboratorio 7': [{ id: 'rm17', t: 40, l: 90, edges: [] }],
+    'Laboratorio 8': [{ id: 'rm18', t: 57, l: 90, edges: [] }],
+    'Laboratorio 9': [{ id: 'rm19', t: 70, l: 90, edges: [] }],
+    'Oficinas': [{ id: 'rm20', t: 90, l: 90, edges: [] }],
+    'Pasillo Central': [{ id: 'rm21', t: 50, l: 25, edges: [] }],
+    'Pasillo Este': [{ id: 'rm22', t: 50, l: 75, edges: [] }],
+};
+
 function PeerNode({ peer }) {
   const [pos, setPos] = useState({ t: 50, l: 50 });
   const wpIdRef = useRef(null);
+  const syncPos = useWebRTCStore(state => state.syncPos);
+
+  // Sync position from network if it's a remote peer
+  useEffect(() => {
+    if (!peer.isSelf && peer.pos) {
+      setPos({ t: peer.pos.t, l: peer.pos.l });
+    }
+  }, [peer.pos, peer.isSelf]);
 
   useEffect(() => {
-    const points = waypoints[peer.zona] || waypoints['Zona A'];
+    // Only the owner calculates movement
+    if (!peer.isSelf) return;
+
+    let points = waypoints[peer.zona];
+    if (!points) {
+        points = roomWaypoints[peer.zona];
+    }
+    if (!points) {
+        points = waypoints['Zona A'];
+    }
+
     const startPt = points[Math.floor(Math.random() * points.length)];
     setPos({ t: startPt.t, l: startPt.l });
     wpIdRef.current = startPt.id;
+    syncPos(startPt.t, startPt.l);
 
     const interval = setInterval(() => {
       const currentPt = points.find(p => p.id === wpIdRef.current);
@@ -58,12 +103,21 @@ function PeerNode({ peer }) {
           const rT = nextPt.t + (Math.random() * 4 - 2);
           const rL = nextPt.l + (Math.random() * 2 - 1);
           setPos({ t: rT, l: rL });
+          syncPos(rT, rL);
         }
+      } else {
+        // If no edges (like inside a room), just drift slightly
+        setPos(prev => {
+            const newT = Math.max(0, Math.min(100, prev.t + (Math.random() * 4 - 2)));
+            const newL = Math.max(0, Math.min(100, prev.l + (Math.random() * 4 - 2)));
+            syncPos(newT, newL);
+            return { t: newT, l: newL };
+        });
       }
     }, 6000 + Math.random() * 2000);
 
     return () => clearInterval(interval);
-  }, [peer.zona]);
+  }, [peer.zona, peer.isSelf, syncPos]);
 
   return (
     <div 
@@ -88,6 +142,7 @@ export function MapView() {
   const myName = useWebRTCStore(state => state.myName);
   const myAvatar = useWebRTCStore(state => state.myAvatar);
   const myZone = useWebRTCStore(state => state.zone);
+  const changeZone = useWebRTCStore(state => state.changeZone);
   const [isHeatmap, setIsHeatmap] = useState(false);
   const [heatmapData, setHeatmapData] = useState({});
 
@@ -140,7 +195,8 @@ export function MapView() {
   const totals = {};
   for (const p in heatmapData) {
     for (const z in heatmapData[p]) {
-      totals[z] = (totals[z] || 0) + heatmapData[p][z];
+      const macro = getMacroZone(z);
+      totals[macro] = (totals[macro] || 0) + heatmapData[p][z];
     }
   }
   let maxScore = Math.max(...Object.values(totals), 0);
@@ -175,7 +231,7 @@ export function MapView() {
       <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md flex justify-between items-center z-20">
         <div>
           <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Mapa P2P</h2>
-          <p className="text-[12px] text-on-surface-variant">Zona Actual: <span className="text-primary font-bold">{myZone}</span></p>
+          <p className="text-[12px] text-on-surface-variant">Zona Actual: <span className="text-primary font-bold">{getMacroZone(myZone)} {myZone !== getMacroZone(myZone) ? `(${myZone})` : ''}</span></p>
         </div>
         <button 
           onClick={() => setIsHeatmap(!isHeatmap)}
@@ -226,32 +282,32 @@ export function MapView() {
           </div>
 
           {/* Habitaciones del blueprint (igual que peer.html) */}
-          <div className="blueprint-room z-10" style={{ gridArea: '1 / 1 / 3 / 2' }}>Aula 6</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '3 / 1 / 5 / 2' }}>Aula 5</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '5 / 1 / 7 / 2' }}>Aula 4</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '7 / 1 / 9 / 2' }}>Aula 3</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '9 / 1 / 11 / 2' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '11 / 1 / 13 / 2' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '13 / 1 / 15 / 2' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '15 / 1 / 17 / 2' }}>Almacen</div>
-          <div className="blueprint-pasillo z-10" style={{ gridArea: '1 / 2 / 17 / 3', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Pasillo</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '1 / 3 / 3 / 4' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '3 / 3 / 5 / 4' }}>Servicio Comunitario</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '5 / 3 / 7 / 4' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '7 / 3 / 9 / 4' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Aula 6')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '1 / 1 / 3 / 2' }}>Aula 6</div>
+          <div onClick={() => changeZone('Aula 5')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '3 / 1 / 5 / 2' }}>Aula 5</div>
+          <div onClick={() => changeZone('Aula 4')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '5 / 1 / 7 / 2' }}>Aula 4</div>
+          <div onClick={() => changeZone('Aula 3')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '7 / 1 / 9 / 2' }}>Aula 3</div>
+          <div onClick={() => changeZone('Laboratorio 1')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '9 / 1 / 11 / 2' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Laboratorio 2')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '11 / 1 / 13 / 2' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Laboratorio 3')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '13 / 1 / 15 / 2' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Almacen')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '15 / 1 / 17 / 2' }}>Almacen</div>
+          <div onClick={() => changeZone('Pasillo Central')} className="blueprint-pasillo z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '1 / 2 / 17 / 3', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Pasillo</div>
+          <div onClick={() => changeZone('Laboratorio 4')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '1 / 3 / 3 / 4' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Servicio Comunitario')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '3 / 3 / 5 / 4' }}>Servicio Comunitario</div>
+          <div onClick={() => changeZone('Laboratorio 5')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '5 / 3 / 7 / 4' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Laboratorio 6')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '7 / 3 / 9 / 4' }}>Laboratorio</div>
           <div className="flex gap-1 z-10" style={{ gridArea: '9 / 3 / 11 / 4' }}>
               <div className="blueprint-room blueprint-stairs flex-1"><span className="bg-surface-container/80 px-1 py-0.5">Escaleras</span></div>
               <div className="blueprint-room blueprint-stairs flex-1"><span className="bg-surface-container/80 px-1 py-0.5">Escaleras</span></div>
           </div>
-          <div className="blueprint-room z-10" style={{ gridArea: '11 / 3 / 14 / 4' }}>Lab Computación</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '14 / 3 / 17 / 4' }}>Lab Robótica</div>
-          <div className="blueprint-pasillo z-10" style={{ gridArea: '1 / 4 / 17 / 5', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Pasillo</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '1 / 5 / 4 / 6' }}>Telecomunicaciones</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '4 / 5 / 6 / 6' }}>Baños</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '6 / 5 / 9 / 6' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '9 / 5 / 11 / 6' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '11 / 5 / 13 / 6' }}>Laboratorio</div>
-          <div className="blueprint-room z-10" style={{ gridArea: '13 / 5 / 17 / 6' }}>Oficinas</div>
+          <div onClick={() => changeZone('Lab Computación')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '11 / 3 / 14 / 4' }}>Lab Computación</div>
+          <div onClick={() => changeZone('Lab Robótica')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '14 / 3 / 17 / 4' }}>Lab Robótica</div>
+          <div onClick={() => changeZone('Pasillo Este')} className="blueprint-pasillo z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '1 / 4 / 17 / 5', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Pasillo</div>
+          <div onClick={() => changeZone('Telecomunicaciones')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '1 / 5 / 4 / 6' }}>Telecomunicaciones</div>
+          <div onClick={() => changeZone('Baños')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '4 / 5 / 6 / 6' }}>Baños</div>
+          <div onClick={() => changeZone('Laboratorio 7')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '6 / 5 / 9 / 6' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Laboratorio 8')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '9 / 5 / 11 / 6' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Laboratorio 9')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '11 / 5 / 13 / 6' }}>Laboratorio</div>
+          <div onClick={() => changeZone('Oficinas')} className="blueprint-room z-10 cursor-pointer hover:bg-primary/20 transition-colors" style={{ gridArea: '13 / 5 / 17 / 6' }}>Oficinas</div>
           <div className="flex items-center justify-center text-outline/60 font-label-mono text-[11px] pb-2 pt-1 uppercase tracking-[0.12em] z-10 border-t border-dashed border-outline/30" style={{ gridArea: '17 / 1 / 18 / 6' }}>
               Entrada
           </div>

@@ -8,8 +8,10 @@ export function TicTacToe({ opponent, onExit }) {
   const [xIsNext, setXIsNext] = useState(true);
   const [myMark, setMyMark] = useState(null); // 'X' or 'O'
   const myId = useWebRTCStore(state => state.myId);
+  const addPoints = useWebRTCStore(state => state.addPoints);
   const boardRef = useRef(board);
   const [myTurn, setMyTurn] = useState(false);
+  const [pointsAwarded, setPointsAwarded] = useState(false);
 
   useEffect(() => {
     boardRef.current = board;
@@ -49,6 +51,13 @@ export function TicTacToe({ opponent, onExit }) {
   const winData = calculateWinner(board);
   const winner = winData?.winner;
   const winLine = winData?.line;
+
+  useEffect(() => {
+    if (winner === myMark && !pointsAwarded) {
+      addPoints(25);
+      setPointsAwarded(true);
+    }
+  }, [winner, myMark, pointsAwarded, addPoints]);
 
   const handleClick = (i) => {
     if (board[i] || winner || (xIsNext ? 'X' : 'O') !== myMark) return;

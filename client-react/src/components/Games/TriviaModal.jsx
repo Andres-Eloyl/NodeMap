@@ -7,6 +7,7 @@ export function TriviaModal() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [answered, setAnswered] = useState(false);
   const myId = useWebRTCStore(state => state.myId);
+  const addPoints = useWebRTCStore(state => state.addPoints);
 
   useEffect(() => {
     let interval = null;
@@ -41,6 +42,7 @@ export function TriviaModal() {
   const handleAnswer = (idx) => {
     if (answered) return;
     setAnswered(true);
+    addPoints(10); // Reward for participation
     import('../../services/webrtc.js').then(({ WebRTCEngine }) => {
       const myNombre = useWebRTCStore.getState().peers.find(p => p.id === myId)?.nombre || 'Yo';
       WebRTCEngine.broadcast(PROTOCOL.TRIVIA_ANSWER, { answerIndex: idx, nombre: myNombre });

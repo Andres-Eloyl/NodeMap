@@ -191,6 +191,7 @@ export function PeerView() {
   const [activeTab, setActiveTab] = useState('map');
   const isConnected = useWebRTCStore(state => state.isConnected);
   const disconnect = useWebRTCStore(state => state.disconnect);
+  const myPoints = useWebRTCStore(state => state.myPoints);
 
   if (!isConnected) {
     return <LoginScreen />;
@@ -242,6 +243,13 @@ export function PeerView() {
               </button>
           </nav>
           <div className="hidden md:flex flex-col gap-1 p-3 border-t border-outline-variant/30">
+              <div className="w-full text-yellow-500 bg-yellow-500/10 border border-yellow-500/30 px-4 py-2.5 flex items-center justify-between mb-2 shadow-[0_0_10px_rgba(234,179,8,0.2)]">
+                  <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">stars</span>
+                      <span className="font-headline-md text-[13px] font-bold">Puntos</span>
+                  </div>
+                  <span className="font-label-mono text-[13px] font-bold">{myPoints}</span>
+              </div>
               <button onClick={() => { if(confirm('¿Salir de NodeMap?')) disconnect(); }} className="w-full text-on-surface-variant/60 hover:bg-surface-variant/30 hover:text-primary transition-all duration-200 px-4 py-2.5 flex items-center gap-3">
                   <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>logout</span>
                   <span className="font-headline-md text-[13px] font-medium">Salir</span>

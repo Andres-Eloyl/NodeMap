@@ -5,6 +5,7 @@ import { Swords, Gamepad } from 'lucide-react';
 import { TicTacToe } from '../components/Games/TicTacToe';
 import { RockPaperScissors } from '../components/Games/RockPaperScissors';
 import { ReactionGame } from '../components/Games/ReactionGame';
+import { Blackjack } from '../components/Games/Blackjack';
 import SoundEngine from '../services/SoundEngine';
 import PROTOCOL from '../shared/protocol.js';
 
@@ -15,6 +16,26 @@ export function GamesView() {
   const [opponent, setOpponent] = useState(null);
   const [invites, setInvites] = useState([]);
   const [selectedGameToInvite, setSelectedGameToInvite] = useState(null);
+  
+  const [farmCooldown, setFarmCooldown] = useState(0);
+  const addPoints = useWebRTCStore(state => state.addPoints);
+
+  useEffect(() => {
+    let timer;
+    if (farmCooldown > 0) {
+      timer = setInterval(() => {
+        setFarmCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [farmCooldown]);
+
+  const handleFarm = () => {
+    if (farmCooldown <= 0) {
+      addPoints(5);
+      setFarmCooldown(25);
+    }
+  };
 
   useEffect(() => {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
@@ -65,12 +86,25 @@ export function GamesView() {
   if (activeGame === 'reaction') {
     return <ReactionGame opponent={opponent} onExit={() => setActiveGame(null)} />;
   }
+  if (activeGame === 'blackjack') {
+    return <Blackjack onExit={() => setActiveGame(null)} />;
+  }
 
   return (
     <div className="flex flex-col h-full bg-transparent border-none overflow-hidden relative">
-      <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md">
-        <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Zona Arcade</h2>
-        <p className="text-[12px] text-on-surface-variant">Reta a tus amigos a una partida rápida.</p>
+      <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md flex justify-between items-center">
+        <div>
+          <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Zona Arcade</h2>
+          <p className="text-[12px] text-on-surface-variant">Reta a tus amigos a una partida rápida.</p>
+        </div>
+        <button 
+          onClick={handleFarm}
+          disabled={farmCooldown > 0}
+          className={`flex items-center gap-1 px-3 py-1.5 rounded font-bold text-xs shadow-md transition-all ${farmCooldown > 0 ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black hover:scale-105'}`}
+        >
+          <span className="material-symbols-outlined text-[16px]">stars</span>
+          {farmCooldown > 0 ? `Espera ${farmCooldown}s` : 'Minar +5 pts'}
+        </button>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
@@ -102,6 +136,16 @@ export function GamesView() {
                 <div className="text-center">
                   <h4 className="font-bold text-on-surface text-lg">Tic Tac Toe</h4>
                   <p className="text-xs text-on-surface-variant mt-1">El clásico tres en raya.</p>
+                </div>
+              </button>
+
+              <button onClick={() => setActiveGame('blackjack')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-green-500/50 transition-all hover:-translate-y-1 group border border-green-500/20 bg-green-500/5">
+                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-green-500 text-4xl">style</span>
+                </div>
+                <div className="text-center">
+                  <h4 className="font-bold text-on-surface text-lg">Blackjack</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">Juega contra la CPU.</p>
                 </div>
               </button>
               

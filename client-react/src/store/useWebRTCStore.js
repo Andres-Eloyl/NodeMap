@@ -15,6 +15,7 @@ export const useWebRTCStore = create((set, get) => ({
   zone: null,
   toasts: [],
   broadcast: null,
+  myPoints: 0,
 
   addToast: (message, type = 'info', onClick = null) => {
     const id = Date.now() + Math.random();
@@ -41,6 +42,42 @@ export const useWebRTCStore = create((set, get) => ({
 
     WebRTCEngine.onMessage(PROTOCOL.PEER_EXIT, () => {
       set({ peers: WebRTCEngine.getPeers() });
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.ZONE_CHANGE, (data) => {
+      set((state) => {
+        const newPeers = state.peers.map(p => {
+          if (p.id === data.senderId) {
+            return { ...p, zona: data.newZone };
+          }
+          return p;
+        });
+        return { peers: newPeers };
+      });
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.POS_SYNC, (data) => {
+      set((state) => {
+        const newPeers = state.peers.map(p => {
+          if (p.id === data.senderId) {
+            return { ...p, pos: { t: data.t, l: data.l } };
+          }
+          return p;
+        });
+        return { peers: newPeers };
+      });
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.UPDATE_POINTS, (data) => {
+      set((state) => {
+        const newPeers = state.peers.map(p => {
+          if (p.id === data.senderId) {
+            return { ...p, puntos: data.puntos };
+          }
+          return p;
+        });
+        return { peers: newPeers };
+      });
     });
 
     WebRTCEngine.onMessage(PROTOCOL.CHAT, (msg) => {
@@ -106,6 +143,7 @@ export const useWebRTCStore = create((set, get) => ({
         myAvatar: avatar,
         isConnected: true,
         zone: mapZone,
+        myPoints: 0,
         peers: WebRTCEngine.getPeers() 
       });
     }, 1000);
@@ -113,7 +151,24 @@ export const useWebRTCStore = create((set, get) => ({
 
   disconnect: () => {
     WebRTCEngine.desconectar();
-    set({ isConnected: false, peers: [], myId: null, myName: null, myColor: null, myAvatar: null, zone: null, messages: [], forumMessages: [] });
+    set({ isConnected: false, peers: [], myId: null, myName: null, myColor: null, myAvatar: null, zone: null, myPoints: 0, messages: [], forumMessages: [] });
+  },
+
+  changeZone: (newZone) => {
+    set({ zone: newZone });
+    WebRTCEngine.broadcast(PROTOCOL.ZONE_CHANGE, { newZone });
+  },
+
+  syncPos: (t, l) => {
+    WebRTCEngine.broadcast(PROTOCOL.POS_SYNC, { t, l });
+  },
+
+  addPoints: (amount) => {
+    set((state) => {
+      const newPoints = state.myPoints + amount;
+      WebRTCEngine.broadcast(PROTOCOL.UPDATE_POINTS, { puntos: newPoints });
+      return { myPoints: newPoints };
+    });
   },
 
   sendMessageToForum: (text) => {
