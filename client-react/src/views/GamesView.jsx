@@ -6,6 +6,8 @@ import { TicTacToe } from '../components/Games/TicTacToe';
 import { RockPaperScissors } from '../components/Games/RockPaperScissors';
 import { ReactionGame } from '../components/Games/ReactionGame';
 import { Blackjack } from '../components/Games/Blackjack';
+import { DominoLobby } from '../components/Games/DominoLobby';
+import { DominoGame } from '../components/Games/DominoGame';
 import SoundEngine from '../services/SoundEngine';
 import PROTOCOL from '../shared/protocol.js';
 
@@ -16,6 +18,7 @@ export function GamesView() {
   const [opponent, setOpponent] = useState(null);
   const [invites, setInvites] = useState([]);
   const [selectedGameToInvite, setSelectedGameToInvite] = useState(null);
+  const [dominoState, setDominoState] = useState(null);
   
   const [farmCooldown, setFarmCooldown] = useState(0);
   const addPoints = useWebRTCStore(state => state.addPoints);
@@ -37,6 +40,11 @@ export function GamesView() {
     }
   };
 
+  const handleExitGame = () => {
+    setActiveGame(null);
+    setOpponent(null);
+  };
+
   useEffect(() => {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
       WebRTCEngine.onMessage(PROTOCOL.GAME_INVITE, (data) => {
@@ -50,8 +58,24 @@ export function GamesView() {
       WebRTCEngine.onMessage(PROTOCOL.GAME_REJECT, (data) => {
         alert(`${data.nombre} rechazó tu invitación a jugar.`);
       });
+
+      const handleDominoInvite = (data) => {
+        const accept = window.confirm(`${data.nombre} te invita a una partida de Dominó 2v2. ¿Aceptar?`);
+        if (accept) {
+          WebRTCEngine.sendMessage(data.hostId, PROTOCOL.DOMINO_ACCEPT, { senderId: myId, nombre: useWebRTCStore.getState().myName });
+          setActiveGame('domino_lobby'); 
+        }
+      };
+
+      const handleDominoStart = (data) => {
+        setDominoState(data);
+        setActiveGame('domino_game');
+      };
+
+      WebRTCEngine.onMessage(PROTOCOL.DOMINO_INVITE, handleDominoInvite);
+      WebRTCEngine.onMessage(PROTOCOL.DOMINO_START, handleDominoStart);
     });
-  }, []);
+  }, [myId]);
 
   const inviteToGame = (peerId, peerName, gameType) => {
     import('../services/webrtc.js').then(({ WebRTCEngine }) => {
@@ -77,17 +101,31 @@ export function GamesView() {
     });
   };
 
-  if (activeGame === 'tictactoe') {
-    return <TicTacToe opponent={opponent} onExit={() => setActiveGame(null)} />;
-  }
-  if (activeGame === 'rps' || activeGame === 'rockpaperscissors') {
-    return <RockPaperScissors opponent={opponent} onExit={() => setActiveGame(null)} />;
-  }
-  if (activeGame === 'reaction') {
-    return <ReactionGame opponent={opponent} onExit={() => setActiveGame(null)} />;
-  }
-  if (activeGame === 'blackjack') {
-    return <Blackjack onExit={() => setActiveGame(null)} />;
+  const renderActiveGame = () => {
+    switch (activeGame) {
+      case 'tictactoe':
+        return <TicTacToe opponent={opponent} onExit={handleExitGame} />;
+      case 'rps':
+      case 'rockpaperscissors':
+        return <RockPaperScissors opponent={opponent} onExit={handleExitGame} />;
+      case 'reaction':
+        return <ReactionGame opponent={opponent} onExit={handleExitGame} />;
+      case 'blackjack':
+        return <Blackjack onExit={handleExitGame} />;
+      case 'domino_lobby':
+        return <DominoLobby onExit={handleExitGame} onStartGame={(initialState) => {
+          setDominoState(initialState);
+          setActiveGame('domino_game');
+        }} />;
+      case 'domino_game':
+        return <DominoGame initialState={dominoState} onExit={handleExitGame} />;
+      default:
+        return null;
+    }
+  };
+
+  if (activeGame) {
+    return renderActiveGame();
   }
 
   return (
@@ -166,6 +204,16 @@ export function GamesView() {
                 <div className="text-center">
                   <h4 className="font-bold text-on-surface text-lg">Carrera de Reacción</h4>
                   <p className="text-xs text-on-surface-variant mt-1">¿Quién tiene mejores reflejos?</p>
+                </div>
+              </button>
+
+              <button onClick={() => setActiveGame('domino_lobby')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-all hover:-translate-y-1 group border border-blue-500/20 bg-blue-500/5">
+                <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-blue-500 text-4xl">grid_view</span>
+                </div>
+                <div className="text-center">
+                  <h4 className="font-bold text-on-surface text-lg">Dominó 2v2</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">Multijugador en Parejas.</p>
                 </div>
               </button>
             </div>
