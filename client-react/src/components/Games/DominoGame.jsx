@@ -30,6 +30,10 @@ export function DominoGame({ initialState, onExit }) {
 
   const myIndex = players.findIndex(p => p.id === myId);
   const isMyTurn = turnIndex === myIndex;
+  
+  const rightIndex = (myIndex + 1) % 4;
+  const topIndex = (myIndex + 2) % 4;
+  const leftIndex = (myIndex + 3) % 4;
 
   useEffect(() => {
     let unmounted = false;
@@ -226,16 +230,29 @@ export function DominoGame({ initialState, onExit }) {
       if (board.length === 0) return <div className="text-white/30 italic">La mesa está vacía. Juega cualquier ficha.</div>;
       
       return (
-          <div className="flex flex-wrap items-center justify-center gap-1 p-4 bg-green-800/30 rounded-xl min-h-[200px] border border-green-500/20 shadow-inner">
-             {board.map((move, idx) => {
-                 const isDouble = move.tile[0] === move.tile[1];
-                 return (
-                     <motion.div key={idx} initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                        <DominoPiece tile={move.tile} isHorizontal={!isDouble} />
-                     </motion.div>
-                 );
-             })}
-          </div>
+      <div className="flex flex-wrap items-center justify-center gap-1 p-4 bg-green-800/30 rounded-xl min-h-[200px] border border-green-500/20 shadow-inner">
+         {board.map((move, idx) => {
+             const isDouble = move.tile[0] === move.tile[1];
+             return (
+                 <motion.div key={idx} initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                    <DominoPiece tile={move.tile} isHorizontal={!isDouble} />
+                 </motion.div>
+             );
+         })}
+      </div>
+    );
+  };
+
+  const PlayerBadge = ({ index, positionClass }) => {
+      const p = players[index];
+      if (!p) return null;
+      const active = turnIndex === index;
+      return (
+        <div className={`absolute ${positionClass} flex flex-col items-center p-2 rounded-xl transition-all duration-500 ${active ? 'bg-yellow-500/30 border-2 border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.8)] scale-110 z-20' : 'bg-black/60 border border-white/10 z-10'}`}>
+            <span className="material-symbols-outlined text-white/50 mb-1 text-sm">person</span>
+            <span className={`font-bold whitespace-nowrap text-sm ${active ? 'text-yellow-400' : 'text-white'}`}>{p.name}</span>
+            <span className="text-[10px] text-white/70 bg-black/50 px-2 py-0.5 rounded-full mt-1">{handsCount[p.id]} fichas</span>
+        </div>
       );
   };
 
@@ -278,25 +295,15 @@ export function DominoGame({ initialState, onExit }) {
         </div>
       )}
 
-      <div className="flex-1 p-4 flex flex-col justify-between relative overflow-y-auto">
+      <div className="flex-1 p-4 flex flex-col justify-between relative overflow-hidden">
         
-        {/* Opponents Status Top/Sides */}
-        <div className="flex justify-between px-4 mb-4">
-            {[0, 1, 2, 3].map(i => {
-                if (i === myIndex) return null;
-                const p = players[i];
-                const active = turnIndex === i;
-                return (
-                    <div key={i} className={`flex flex-col items-center p-2 rounded ${active ? 'bg-yellow-500/20 border border-yellow-500' : 'bg-black/20'}`}>
-                        <span className={`font-bold ${active ? 'text-yellow-400' : 'text-white'}`}>{p.name}</span>
-                        <span className="text-xs text-white/50">{handsCount[p.id]} fichas</span>
-                    </div>
-                );
-            })}
-        </div>
+        {/* Opponents Status (Absolute positioning for cross layout) */}
+        <PlayerBadge index={topIndex} positionClass="top-2 left-1/2 -translate-x-1/2" />
+        <PlayerBadge index={leftIndex} positionClass="left-2 top-1/2 -translate-y-1/2" />
+        <PlayerBadge index={rightIndex} positionClass="right-2 top-1/2 -translate-y-1/2" />
 
         {/* Board */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4 w-full overflow-x-auto">
+        <div className="flex-1 flex flex-col items-center justify-center py-12 px-16 w-full overflow-y-auto">
             {renderBoard()}
         </div>
 
@@ -314,9 +321,11 @@ export function DominoGame({ initialState, onExit }) {
         </div>
 
         {/* My Hand */}
-        <div className="bg-black/30 p-4 rounded-xl border border-white/10 flex flex-col items-center">
-            <h4 className="text-white/60 text-sm mb-3">Tus fichas</h4>
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
+        <div className={`p-4 rounded-xl border transition-all duration-500 flex flex-col items-center mt-auto ${isMyTurn ? 'bg-yellow-500/10 border-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.4)]' : 'bg-black/40 border-white/10'}`}>
+            <h4 className={`text-sm mb-3 font-bold ${isMyTurn ? 'text-yellow-400' : 'text-white/60'}`}>
+                {isMyTurn ? '¡Es tu turno!' : 'Tus fichas'}
+            </h4>
+            <div className="flex flex-wrap justify-center gap-2 mb-2">
                 {myHand.map((tile, idx) => {
                     const valid = isMyTurn && canPlayTile(tile);
                     return (
