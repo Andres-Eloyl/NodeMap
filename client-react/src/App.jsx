@@ -1,9 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
+import { HomeView } from './views/HomeView';
 import { PeerView } from './views/PeerView';
 import { DisplayView } from './views/DisplayView';
 import { OrganizerView } from './views/OrganizerView';
 import { BotView } from './views/BotView';
 import { TestSignalingView } from './views/TestSignalingView';
+import { WorkLoginView } from './views/WorkLoginView';
+import { WorkDashboardView } from './views/WorkDashboardView';
 import { NetworkBackground } from './components/NetworkBackground';
 
 function App() {
@@ -11,7 +14,12 @@ function App() {
     <>
       <NetworkBackground />
       <Routes>
-        <Route path="/" element={<PeerView />} />
+        <Route path="/" element={<HomeView />} />
+        <Route path="/map" element={<PeerView />} />
+        <Route path="/work/login" element={<WorkLoginView />} />
+        <Route path="/work/app" element={<WorkDashboardView />} />
+        
+        {/* Legacy / Direct Routes */}
         <Route path="/display.html" element={<DisplayView />} />
         <Route path="/display" element={<DisplayView />} />
         <Route path="/organizer.html" element={<OrganizerView />} />

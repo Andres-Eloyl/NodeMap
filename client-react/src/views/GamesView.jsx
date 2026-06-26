@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWebRTCStore } from '../store/useWebRTCStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Swords, Gamepad } from 'lucide-react';
+import { Swords, Gamepad, Zap, ArrowLeft, Star, UserX } from 'lucide-react';
 import { TicTacToe } from '../components/Games/TicTacToe';
 import { RockPaperScissors } from '../components/Games/RockPaperScissors';
 import { ReactionGame } from '../components/Games/ReactionGame';
@@ -138,17 +138,19 @@ export function GamesView() {
 
   return (
     <div className="flex flex-col h-full bg-transparent border-none overflow-hidden relative">
-      <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md flex justify-between items-center">
+      <div className="p-4 border-b border-white/10 glass-panel flex justify-between items-center relative z-10">
         <div>
-          <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Zona Arcade</h2>
-          <p className="text-[12px] text-on-surface-variant">Reta a tus amigos a una partida rápida.</p>
+          <h2 className="font-logo text-[20px] font-bold text-white flex items-center gap-2">
+            <Gamepad size={20} className="text-orange-400" /> Zona Arcade
+          </h2>
+          <p className="text-[12px] text-white/60 font-mono">Reta a tus amigos a una partida rápida.</p>
         </div>
         <button 
           onClick={handleFarm}
           disabled={farmCooldown > 0}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded font-bold text-xs shadow-md transition-all ${farmCooldown > 0 ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black hover:scale-105'}`}
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition-all ${farmCooldown > 0 ? 'bg-white/5 text-white/40 cursor-not-allowed border border-white/10' : 'bg-yellow-500 hover:bg-yellow-400 text-black hover:scale-105 shadow-[0_0_15px_rgba(234,179,8,0.4)]'}`}
         >
-          <span className="material-symbols-outlined text-[16px]">stars</span>
+          <Star size={16} className={farmCooldown <= 0 ? "fill-black" : ""} />
           {farmCooldown > 0 ? `Espera ${farmCooldown}s` : 'Minar +5 pts'}
         </button>
       </div>
@@ -157,21 +159,21 @@ export function GamesView() {
         <AnimatePresence>
           {invites.length > 0 && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 space-y-2">
-              <h3 className="font-bold text-primary flex items-center gap-2"><Swords size={18}/> Invitaciones Pendientes</h3>
+              <h3 className="font-bold text-orange-400 flex items-center gap-2 font-logo"><Swords size={18}/> Invitaciones Pendientes</h3>
               {invites.map((inv, idx) => (
-                <div key={idx} className="glass-card-solid p-4 flex flex-col md:flex-row items-start md:items-center justify-between border border-primary/40 gap-3">
+                <div key={idx} className="glass-panel p-4 flex flex-col md:flex-row items-start md:items-center justify-between border-orange-500/40 gap-3 rounded-xl bg-orange-500/5">
                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400">
                           <Swords size={20} />
                       </div>
                       <div>
                           <span className="font-bold text-white text-[15px]">{inv.name}</span>
-                          <span className="text-sm text-on-surface-variant block">Te invita a jugar {inv.game === 'domino_lobby' ? 'Dominó 2v2' : (inv.game === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra Papel Tijera')}</span>
+                          <span className="text-sm text-white/60 block">Te invita a jugar {inv.game === 'domino_lobby' ? 'Dominó 2v2' : (inv.game === 'tictactoe' ? 'Tic Tac Toe' : 'Piedra Papel Tijera')}</span>
                       </div>
                   </div>
                   <div className="flex gap-2 w-full md:w-auto">
-                    <button onClick={() => rejectInvite(inv)} className="flex-1 md:flex-none btn-ghost px-4 py-2 border border-white/10 hover:bg-red-500/20 hover:text-red-300 transition-colors">Rechazar</button>
-                    <button onClick={() => acceptInvite(inv)} className="flex-1 md:flex-none btn-primary px-6 py-2 shadow-lg hover:shadow-primary/30">Aceptar</button>
+                    <button onClick={() => rejectInvite(inv)} className="flex-1 md:flex-none px-4 py-2 border border-white/10 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-colors text-white/70 rounded-lg text-sm font-bold">Rechazar</button>
+                    <button onClick={() => acceptInvite(inv)} className="flex-1 md:flex-none bg-orange-500 text-[#05050a] px-6 py-2 shadow-lg hover:shadow-[0_0_15px_rgba(249,115,22,0.4)] rounded-lg text-sm font-bold">Aceptar</button>
                   </div>
                 </div>
               ))}
@@ -181,55 +183,45 @@ export function GamesView() {
 
         {!selectedGameToInvite ? (
           <>
-            <h3 className="font-bold text-white mb-4">Selecciona un Juego</h3>
+            <h3 className="font-bold text-white mb-4 font-logo">Selecciona un Juego</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button onClick={() => setSelectedGameToInvite('tictactoe')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-primary/50 transition-all hover:-translate-y-1 group">
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Gamepad size={32} className="text-primary" />
+              <button onClick={() => setSelectedGameToInvite('tictactoe')} className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-orange-500/50 transition-all hover:-translate-y-1 group hover:bg-white/5">
+                <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(249,115,22,0.1)]">
+                  <Gamepad size={32} className="text-orange-400" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-bold text-on-surface text-lg">Tic Tac Toe</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">El clásico tres en raya.</p>
+                  <h4 className="font-bold text-white text-lg">Tic Tac Toe</h4>
+                  <p className="text-xs text-white/50 mt-1 font-mono">El clásico tres en raya.</p>
                 </div>
               </button>
 
-              <button onClick={() => setActiveGame('blackjack')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-green-500/50 transition-all hover:-translate-y-1 group border border-green-500/20 bg-green-500/5">
-                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <button onClick={() => setActiveGame('blackjack')} className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-green-500/50 transition-all hover:-translate-y-1 group bg-green-500/5">
+                <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]">
                   <span className="material-symbols-outlined text-green-500 text-4xl">style</span>
                 </div>
                 <div className="text-center">
-                  <h4 className="font-bold text-on-surface text-lg">Blackjack</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Juega contra la CPU.</p>
+                  <h4 className="font-bold text-white text-lg">Blackjack</h4>
+                  <p className="text-xs text-white/50 mt-1 font-mono">Juega contra la CPU.</p>
                 </div>
               </button>
               
-              <button onClick={() => setSelectedGameToInvite('rps')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-secondary/50 transition-all hover:-translate-y-1 group">
-                <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Swords size={32} className="text-secondary" />
+              <button onClick={() => setSelectedGameToInvite('rps')} className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-all hover:-translate-y-1 group hover:bg-blue-500/5 border-blue-500/20">
+                <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]">
+                  <Swords size={32} className="text-blue-500" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-bold text-on-surface text-lg">Piedra Papel Tijera</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Suerte y estrategia.</p>
+                  <h4 className="font-bold text-white text-lg">Piedra Papel Tijera</h4>
+                  <p className="text-xs text-white/50 mt-1 font-mono">Suerte y estrategia.</p>
                 </div>
               </button>
 
-              <button onClick={() => setSelectedGameToInvite('reaction')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-tertiary/50 transition-all hover:-translate-y-1 group">
-                <div className="w-16 h-16 rounded-full bg-tertiary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-tertiary text-4xl">timer</span>
+              <button onClick={() => setSelectedGameToInvite('reaction')} className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-purple-500/50 transition-all hover:-translate-y-1 group hover:bg-purple-500/5 border-purple-500/20">
+                <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]">
+                  <Zap size={32} className="text-purple-500" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-bold text-on-surface text-lg">Carrera de Reacción</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">¿Quién tiene mejores reflejos?</p>
-                </div>
-              </button>
-
-              <button onClick={() => setActiveGame('domino_lobby')} className="glass-card p-6 flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-all hover:-translate-y-1 group border border-blue-500/20 bg-blue-500/5">
-                <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="material-symbols-outlined text-blue-500 text-4xl">grid_view</span>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-bold text-on-surface text-lg">Dominó 2v2</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Multijugador en Parejas.</p>
+                  <h4 className="font-bold text-white text-lg">Carrera de Reacción</h4>
+                  <p className="text-xs text-white/50 mt-1 font-mono">¿Quién tiene mejores reflejos?</p>
                 </div>
               </button>
             </div>
@@ -237,35 +229,35 @@ export function GamesView() {
         ) : (
           <div className="animate-fade-in">
             <div className="flex items-center gap-4 mb-6">
-              <button onClick={() => setSelectedGameToInvite(null)} className="btn-ghost p-2 flex items-center justify-center rounded-full hover:bg-surface-variant/50">
-                <span className="material-symbols-outlined text-xl">arrow_back</span>
+              <button onClick={() => setSelectedGameToInvite(null)} className="p-2 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors">
+                <ArrowLeft size={24} />
               </button>
-              <h3 className="font-bold text-white text-lg">
+              <h3 className="font-bold text-white text-lg font-logo">
                 Invitar a jugar {selectedGameToInvite === 'tictactoe' ? 'Tic Tac Toe' : selectedGameToInvite === 'rps' ? 'Piedra Papel Tijera' : 'Carrera de Reacción'}
               </h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {peers.map(peer => (
-                <div key={peer.id} className="glass-card p-4 flex items-center justify-between border border-outline-variant/30 hover:border-primary/50 transition-all hover:bg-surface-variant/10 cursor-pointer" onClick={() => inviteToGame(peer.id, peer.nombre, selectedGameToInvite)}>
+                <div key={peer.id} className="glass-panel rounded-xl p-4 flex items-center justify-between border-white/10 hover:border-orange-500/50 transition-all hover:bg-white/5 cursor-pointer" onClick={() => inviteToGame(peer.id, peer.nombre, selectedGameToInvite)}>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-surface-variant/50 shadow-inner" style={{ color: peer.color || '#fff' }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] bg-white/5" style={{ color: peer.color || '#fff' }}>
                       {peer.avatar || peer.nombre.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-bold text-[15px] text-on-surface">{peer.nombre}</span>
-                      <span className="text-[11px] text-on-surface-variant/60 uppercase tracking-widest mt-0.5">{peer.zona}</span>
+                      <span className="font-bold text-[15px] text-white">{peer.nombre}</span>
+                      <span className="text-[11px] text-white/40 uppercase tracking-widest mt-0.5 font-mono">{peer.zona}</span>
                     </div>
                   </div>
-                  <button className="btn-primary px-4 py-2 text-xs rounded-lg shadow-md">
+                  <button className="bg-orange-500/20 text-orange-400 px-4 py-2 text-xs rounded-lg border border-orange-500/30 hover:bg-orange-500 hover:text-[#05050a] transition-colors font-bold">
                     Invitar
                   </button>
                 </div>
               ))}
               {peers.length === 0 && (
-                <div className="col-span-full py-8 text-center bg-surface/20 rounded-xl border border-outline-variant/10">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2">person_off</span>
-                  <p className="text-sm text-on-surface-variant">No hay usuarios disponibles en la red para invitar.</p>
+                <div className="col-span-full py-8 text-center glass-panel rounded-xl opacity-60">
+                  <UserX size={48} className="mx-auto mb-2 text-white/40" />
+                  <p className="text-sm text-white/60">No hay usuarios disponibles en la red para invitar.</p>
                 </div>
               )}
             </div>

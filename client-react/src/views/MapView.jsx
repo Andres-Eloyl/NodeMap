@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Flame, Trophy, Target } from 'lucide-react';
 import { useWebRTCStore } from '../store/useWebRTCStore';
 import PROTOCOL from '../shared/protocol.js';
 import { getMacroZone } from '../shared/zones.js';
@@ -228,38 +229,38 @@ export function MapView() {
 
   return (
     <div className="flex flex-col h-full bg-transparent overflow-hidden relative">
-      <div className="p-4 border-b border-primary/20 bg-surface/50 backdrop-blur-md flex justify-between items-center z-20">
+      <div className="p-4 border-b border-white/10 glass-panel flex justify-between items-center z-20">
         <div>
-          <h2 className="font-headline-lg text-[20px] font-bold text-on-surface">Mapa P2P</h2>
-          <p className="text-[12px] text-on-surface-variant">Zona Actual: <span className="text-primary font-bold">{getMacroZone(myZone)} {myZone !== getMacroZone(myZone) ? `(${myZone})` : ''}</span></p>
+          <h2 className="font-logo text-[20px] font-bold text-white">Mapa P2P</h2>
+          <p className="text-[12px] text-white/60 font-mono">Zona Actual: <span className="text-orange-400 font-bold">{getMacroZone(myZone)} {myZone !== getMacroZone(myZone) ? `(${myZone})` : ''}</span></p>
         </div>
         <button 
           onClick={() => setIsHeatmap(!isHeatmap)}
-          className={`px-3 py-1.5 border flex items-center gap-2 text-sm transition-colors ${isHeatmap ? 'bg-primary/20 border-primary text-primary' : 'border-outline-variant/30 text-on-surface-variant/70 bg-black/20'}`}
+          className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm transition-colors ${isHeatmap ? 'bg-orange-500/20 border border-orange-500/50 text-orange-400' : 'border border-white/10 text-white/70 bg-white/5 hover:bg-white/10'}`}
         >
-          <span className="material-symbols-outlined text-[18px]">local_fire_department</span>
-          <span className="hidden md:inline">Heatmap</span>
+          <Flame className="w-4 h-4" />
+          <span className="hidden md:inline font-mono text-xs">Heatmap</span>
         </button>
       </div>
 
       <div className="flex-1 relative overflow-auto p-2 md:p-4 bg-transparent">
         
         {isHeatmap && (
-          <div className="absolute top-4 right-4 md:right-8 w-[220px] md:w-[260px] glass-card-solid p-3 shadow-2xl z-30 animate-fade-in pointer-events-none">
-            <h3 className="font-headline-sm text-primary mb-2 flex items-center gap-2 border-b border-outline-variant/30 pb-2 text-[13px]">
-              <span className="material-symbols-outlined text-[16px]">leaderboard</span> Top Zonas
+          <div className="absolute top-4 right-4 md:right-8 w-[220px] md:w-[260px] glass-card p-4 rounded-xl shadow-2xl z-30 animate-fade-in pointer-events-none">
+            <h3 className="font-bold text-orange-400 mb-3 flex items-center gap-2 border-b border-white/10 pb-2 text-[13px] font-logo">
+              <Trophy className="w-4 h-4" /> Top Zonas
             </h3>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {sortedZones.length === 0 ? (
-                <div className="text-center text-on-surface-variant/40 text-[11px] font-label-mono mt-2">Sin datos aún</div>
+                <div className="text-center text-white/40 text-[11px] font-mono mt-2">Sin datos aún</div>
               ) : (
                 sortedZones.map((z, idx) => (
-                  <div key={z.name} className="flex items-center justify-between p-2 bg-surface/40 border border-outline-variant/20">
+                  <div key={z.name} className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[12px]" style={{ color: idx === 0 ? '#fbbf24' : idx === 1 ? '#9ca3af' : '#b45309' }}>#{idx + 1}</span>
-                      <span className="font-headline-md text-[13px] text-on-surface">{z.name}</span>
+                      <span className="font-mono text-[12px] text-white/80">{z.name}</span>
                     </div>
-                    <span className="font-label-mono text-[11px] text-white/60 bg-black/30 px-1.5 py-0.5">{Math.floor(z.score)}s</span>
+                    <span className="font-mono text-[11px] text-white/50 bg-black/40 px-1.5 py-0.5 rounded">{Math.floor(z.score)}s</span>
                   </div>
                 ))
               )}
@@ -314,8 +315,8 @@ export function MapView() {
 
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
             {allNodes.map(p => <PeerNode key={p.id} peer={p} />)}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 border-2 border-primary bg-primary/20 flex items-center justify-center map-zone-glow z-0 backdrop-blur-sm pointer-events-auto" style={{ left: '50%', top: '53%', transform: 'translate(-50%, -50%)' }}>
-              <span className="material-symbols-outlined text-primary">my_location</span>
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 border-2 border-orange-400 bg-orange-400/20 rounded-full flex items-center justify-center map-zone-glow z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_3px_rgba(251,146,60,0.3)]" style={{ left: '50%', top: '53%', transform: 'translate(-50%, -50%)' }}>
+              <Target className="text-orange-400 w-6 h-6" />
             </div>
           </div>
 

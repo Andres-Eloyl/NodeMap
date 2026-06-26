@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { WebRTCEngine } from '../services/webrtc.js';
 import PROTOCOL from '../shared/protocol.js';
 import SoundEngine from '../services/SoundEngine.js';
+import { useWorkStore } from './useWorkStore.js';
 
 export const useWebRTCStore = create((set, get) => ({
   myId: null,
@@ -9,6 +10,9 @@ export const useWebRTCStore = create((set, get) => ({
   myColor: null,
   myAvatar: null,
   peers: [],
+  getFilteredPeers: () => {
+    return WebRTCEngine.getPeers().filter(p => p.nombre !== 'Dashboard' && p.nombre !== 'ORGANIZADOR');
+  },
   messages: [],
   forumMessages: [],
   isConnected: false,
@@ -40,7 +44,7 @@ export const useWebRTCStore = create((set, get) => ({
     WebRTCEngine.conectar(nombre, mapZone, color, avatar);
     
     WebRTCEngine.onMessage(PROTOCOL.PEER_JOIN, (data) => {
-      set({ peers: WebRTCEngine.getPeers() });
+      set({ peers: get().getFilteredPeers() });
       if (data.zona === mapZone && data.nombre) {
         get().addToast(`${data.nombre} acaba de unirse a tu zona`, 'info', () => get().setActiveTab('users'));
         SoundEngine.playJoin();
@@ -48,11 +52,11 @@ export const useWebRTCStore = create((set, get) => ({
     });
     
     WebRTCEngine.onMessage(PROTOCOL.PEER_LEAVE, () => {
-      set({ peers: WebRTCEngine.getPeers() });
+      set({ peers: get().getFilteredPeers() });
     });
 
     WebRTCEngine.onMessage(PROTOCOL.PEER_EXIT, () => {
-      set({ peers: WebRTCEngine.getPeers() });
+      set({ peers: get().getFilteredPeers() });
     });
 
     WebRTCEngine.onMessage(PROTOCOL.ZONE_CHANGE, (data) => {
@@ -155,6 +159,34 @@ export const useWebRTCStore = create((set, get) => ({
         SoundEngine.playAlert();
       }
     });
+
+    // NodeMap Work Listeners
+    WebRTCEngine.onMessage(PROTOCOL.WORK_CHANNEL_MSG, (data) => {
+      useWorkStore.getState().addChannelMessage(data);
+      if (data.senderId !== get().myId) SoundEngine.playZoneChat();
+    });
+    
+    WebRTCEngine.onMessage(PROTOCOL.WORK_PRIVATE_MSG, (data) => {
+      useWorkStore.getState().addPrivateMessage(data);
+      if (data.senderId !== get().myId) SoundEngine.playPrivateChat();
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_REPORT, (data) => {
+      useWorkStore.getState().upsertReport(data);
+      if (data.senderId !== get().myId) SoundEngine.playAlert();
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_REPORT_UPDATE, (data) => {
+      useWorkStore.getState().upsertReport(data);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_STATUS, (data) => {
+      useWorkStore.getState().updateStatus(data);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_POSITION, (data) => {
+      useWorkStore.getState().updateStatus(data);
+    });
     
     setTimeout(() => {
       set({ 
@@ -165,7 +197,7 @@ export const useWebRTCStore = create((set, get) => ({
         isConnected: true,
         zone: mapZone,
         myPoints: 0,
-        peers: WebRTCEngine.getPeers() 
+        peers: get().getFilteredPeers() 
       });
     }, 1000);
   },

@@ -36,6 +36,14 @@ const PROTOCOL = {
   ZONE_CHANGE: "zone-change",
   POS_SYNC: "pos-sync",
   UPDATE_POINTS: "update-points",
+  
+  // NodeMap Work
+  WORK_CHANNEL_MSG: "work-channel-msg",
+  WORK_PRIVATE_MSG: "work-private-msg",
+  WORK_REPORT: "work-report",
+  WORK_REPORT_UPDATE: "work-report-update",
+  WORK_STATUS: "work-status",
+  WORK_POSITION: "work-position",
 };
 
 export default PROTOCOL;

@@ -4,6 +4,7 @@ import { WebRTCEngine } from '../services/webrtc';
 import PROTOCOL from '../shared/protocol.js';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Network, Activity, BarChart2, MessageSquare, MonitorPlay, History, Trophy, Terminal, X, Server, Wifi, WifiHigh, WifiLow, WifiZero, TrendingUp, Shuffle } from 'lucide-react';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -355,14 +356,14 @@ export function DisplayView() {
   }, [replaySpeed]);
 
 
-  let kpiLatencyIcon = "wifi_off";
+  let KpiLatencyIcon = WifiZero;
   let kpiLatencyColor = "text-gray-400/80";
   let kpiLatencyGlow = "bg-gray-500/10";
   
   if (kpiLatency > 0) {
-      if (kpiLatency < 50) { kpiLatencyIcon = "wifi"; kpiLatencyColor = "text-green-400/80"; kpiLatencyGlow = "bg-green-500/10"; }
-      else if (kpiLatency <= 150) { kpiLatencyIcon = "network_wifi_2_bar"; kpiLatencyColor = "text-yellow-400/80"; kpiLatencyGlow = "bg-yellow-500/10"; }
-      else { kpiLatencyIcon = "network_wifi_1_bar"; kpiLatencyColor = "text-red-400/80"; kpiLatencyGlow = "bg-red-500/10"; }
+      if (kpiLatency < 50) { KpiLatencyIcon = WifiHigh; kpiLatencyColor = "text-green-400/80"; kpiLatencyGlow = "bg-green-500/10"; }
+      else if (kpiLatency <= 150) { KpiLatencyIcon = WifiLow; kpiLatencyColor = "text-yellow-400/80"; kpiLatencyGlow = "bg-yellow-500/10"; }
+      else { KpiLatencyIcon = Wifi; kpiLatencyColor = "text-red-400/80"; kpiLatencyGlow = "bg-red-500/10"; }
   }
 
   const sortedGames = Object.values(activeGames).sort((a,b) => b.time - a.time).slice(0, 5);
@@ -374,95 +375,95 @@ export function DisplayView() {
       <div className="relative z-10 flex-grow flex flex-col max-w-[1400px] w-full mx-auto">
         <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(255,179,173,0.3)]">
-                    <span className="material-symbols-outlined text-primary text-3xl">hub</span>
+                <div className="w-12 h-12 bg-orange-500/20 flex items-center justify-center border border-orange-500/30 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.3)]">
+                    <Activity size={24} className="text-orange-400" />
                 </div>
                 <div>
-                    <h1 className="font-logo text-3xl font-bold tracking-tight text-white uppercase">NodeMap <span className="text-primary">Pulse</span></h1>
-                    <p className="text-white/60 text-sm font-medium tracking-widest uppercase">Estadísticas P2P en Vivo</p>
+                    <h1 className="font-logo text-3xl font-bold tracking-tight text-white uppercase">NodeMap <span className="text-orange-400">Pulse</span></h1>
+                    <p className="text-white/60 text-sm font-medium tracking-widest uppercase font-mono">Estadísticas P2P en Vivo</p>
                 </div>
             </div>
 
-            <div className="flex items-center gap-3 bg-black/20 p-2 border border-white/5">
+            <div className="flex items-center gap-3 bg-white/5 p-2 border border-white/10 rounded-xl glass-panel">
                 <select value={replaySpeed} onChange={e => setReplaySpeed(e.target.value)} className="bg-transparent border-none text-white/80 text-xs font-mono outline-none cursor-pointer">
-                    <option value="10">10x Speed</option>
-                    <option value="50">50x Speed</option>
-                    <option value="100">100x Speed</option>
-                    <option value="500">500x Speed</option>
+                    <option value="10" className="bg-[#05050a]">10x Speed</option>
+                    <option value="50" className="bg-[#05050a]">50x Speed</option>
+                    <option value="100" className="bg-[#05050a]">100x Speed</option>
+                    <option value="500" className="bg-[#05050a]">500x Speed</option>
                 </select>
-                <button onClick={startReplay} disabled={isReplaying} className="bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary px-4 py-1.5 font-bold text-sm tracking-wide transition-all flex items-center gap-2 shadow-[0_0_10px_rgba(255,179,173,0.2)] disabled:opacity-50">
-                    <span className="material-symbols-outlined text-xl">history</span>
+                <button onClick={startReplay} disabled={isReplaying} className="bg-orange-500/20 hover:bg-orange-500 hover:text-[#05050a] border border-orange-500/50 text-orange-400 px-4 py-1.5 font-bold text-sm tracking-wide transition-all flex items-center gap-2 shadow-[0_0_10px_rgba(249,115,22,0.2)] disabled:opacity-50 rounded-lg">
+                    <History size={16} />
                     <span>{isReplaying ? "Cargando..." : "Replay del Día"}</span>
                 </button>
             </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="glass-card p-6 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div className="glass-panel p-6 relative overflow-hidden group rounded-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div className="relative z-10 flex items-start justify-between">
                     <div>
-                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Nodos Activos</p>
+                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1 font-mono">Nodos Activos</p>
                         <h2 className="font-logo text-5xl font-bold text-white">{kpiNodes}</h2>
                     </div>
-                    <span className="material-symbols-outlined text-primary/80 text-4xl">share_windows</span>
+                    <Network size={32} className="text-orange-400/80" />
                 </div>
             </div>
             
-            <div className="glass-card p-6 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+            <div className="glass-panel p-6 relative overflow-hidden group rounded-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div className="relative z-10 flex items-start justify-between">
                     <div>
-                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Peak Simultáneo</p>
+                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1 font-mono">Peak Simultáneo</p>
                         <h2 className="font-logo text-5xl font-bold text-white">{kpiPeak}</h2>
                     </div>
-                    <span className="material-symbols-outlined text-secondary/80 text-4xl">trending_up</span>
+                    <TrendingUp size={32} className="text-blue-400/80" />
                 </div>
             </div>
             
-            <div className="glass-card p-6 relative overflow-hidden group">
+            <div className="glass-panel p-6 relative overflow-hidden group rounded-2xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
                 <div className="relative z-10 flex items-start justify-between">
                     <div>
-                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Tráfico Total (Msjs)</p>
+                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1 font-mono">Tráfico Total (Msjs)</p>
                         <h2 className="font-logo text-5xl font-bold text-white">{kpiMessages}</h2>
                     </div>
-                    <span className="material-symbols-outlined text-purple-400/80 text-4xl">swap_calls</span>
+                    <Shuffle size={32} className="text-purple-400/80" />
                 </div>
             </div>
             
-            <div className="glass-card p-6 relative overflow-hidden group">
+            <div className="glass-panel p-6 relative overflow-hidden group rounded-2xl">
                 <div className={`absolute top-0 right-0 w-32 h-32 blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150 ${kpiLatencyGlow}`}></div>
                 <div className="relative z-10 flex items-start justify-between">
                     <div>
-                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Calidad de Red</p>
+                        <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1 font-mono">Calidad de Red</p>
                         <h2 className="font-logo text-5xl font-bold text-white flex items-center gap-1">{kpiLatency}<span className="text-xl text-white/50">ms</span></h2>
                     </div>
-                    <span className={cn("material-symbols-outlined text-4xl transition-colors", kpiLatencyColor)}>{kpiLatencyIcon}</span>
+                    <KpiLatencyIcon size={32} className={cn("transition-colors", kpiLatencyColor)} />
                 </div>
             </div>
         </div>
 
         <div className="flex-grow flex flex-col md:flex-row gap-6 min-h-[400px]">
-            <div className="glass-card p-6 relative flex flex-col flex-grow md:w-2/3">
+            <div className="glass-panel rounded-2xl p-6 relative flex flex-col flex-grow md:w-2/3">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-lg tracking-wide flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">bar_chart</span>
+                        <BarChart2 size={20} className="text-orange-400" />
                         Flujo de Mensajes por Segundo
                     </h3>
-                    <span className="text-xs font-mono text-white/50 bg-black/30 px-2 py-1">Últimos 60s</span>
+                    <span className="text-xs font-mono text-white/50 bg-black/30 px-2 py-1 rounded">Últimos 60s</span>
                 </div>
                 <div ref={chartContainerRef} className="flex-grow w-full relative min-h-[200px]"></div>
             </div>
 
-            <div className="glass-card p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
+            <div className="glass-panel rounded-2xl p-6 relative flex flex-col md:w-1/3 bg-[#0a0a0f]/90 border-green-500/20">
                 <div className="flex justify-between items-center mb-4 border-b border-green-500/20 pb-3">
                     <h3 className="font-mono text-green-400 font-bold text-sm tracking-widest flex items-center gap-2">
-                        <span className="material-symbols-outlined text-green-400 text-lg">terminal</span>
+                        <Terminal size={18} className="text-green-400" />
                         E2EE PACKET SNIFFER
                     </h3>
                     <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-green-500 animate-ping"></div>
+                        <div className="w-2 h-2 bg-green-500 animate-ping rounded-full"></div>
                     </div>
                 </div>
                 <div ref={terminalRef} className="flex-grow w-full h-0 overflow-y-auto font-mono text-[10px] sm:text-xs text-green-500/70 flex flex-col gap-2 scroll-smooth pr-2 pb-2 custom-scrollbar">
@@ -470,7 +471,7 @@ export function DisplayView() {
                         log.type === 'info' ? (
                             <div key={log.id} className="text-green-500/40 italic">{log.text}</div>
                         ) : (
-                            <div key={log.id} className="break-all bg-green-500/5 p-2 border border-green-500/10">
+                            <div key={log.id} className="break-all bg-green-500/5 p-2 border border-green-500/10 rounded">
                                 <div className="text-white/60 mb-1 flex justify-between">
                                     <span>[{log.time}] INBOUND_PACKET</span>
                                     <span className="text-yellow-400">{log.size} B</span>
@@ -485,30 +486,30 @@ export function DisplayView() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 mb-4">
-            <div className="glass-card p-6 relative flex flex-col">
+            <div className="glass-panel rounded-2xl p-6 relative flex flex-col">
                 <h3 className="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-primary">forum</span>
+                    <MessageSquare size={20} className="text-orange-400" />
                     Foros Multicast
                 </h3>
                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-white/80 font-bold">Zona A</span>
-                        <span className="font-mono text-2xl text-primary font-bold transition-transform">{forums['Zona A']}</span>
+                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
+                        <span className="text-white/80 font-bold font-mono">Zona A</span>
+                        <span className="font-mono text-xl text-orange-400 font-bold transition-transform">{forums['Zona A']}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-white/80 font-bold">Zona B</span>
-                        <span className="font-mono text-2xl text-secondary font-bold transition-transform">{forums['Zona B']}</span>
+                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
+                        <span className="text-white/80 font-bold font-mono">Zona B</span>
+                        <span className="font-mono text-xl text-blue-400 font-bold transition-transform">{forums['Zona B']}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-white/80 font-bold">Zona C</span>
-                        <span className="font-mono text-2xl text-tertiary font-bold transition-transform">{forums['Zona C']}</span>
+                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
+                        <span className="text-white/80 font-bold font-mono">Zona C</span>
+                        <span className="font-mono text-xl text-red-400 font-bold transition-transform">{forums['Zona C']}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="glass-card p-6 relative flex flex-col">
+            <div className="glass-panel rounded-2xl p-6 relative flex flex-col">
                 <h3 className="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-secondary">sports_esports</span>
+                    <MonitorPlay size={20} className="text-blue-400" />
                     Juegos en Vivo
                 </h3>
                 <div className="flex flex-col gap-3 overflow-y-auto max-h-[200px] custom-scrollbar pr-2">
@@ -516,18 +517,18 @@ export function DisplayView() {
                         <p className="text-white/50 text-sm font-mono italic">Buscando partidas P2P...</p>
                     ) : (
                         sortedGames.map((g, idx) => (
-                            <div key={idx} className="glass-card-solid p-3 border border-secondary/20 flex justify-between items-center transition-all animate-fade-in">
-                                <span className="text-[12px] font-bold text-white">{g.player1} <span className="text-secondary text-[10px]">VS</span> {g.player2}</span>
-                                <span className="badge-chip px-2 py-1 text-[9px]">{g.type === 'reaction' ? 'Reacción' : g.type}</span>
+                            <div key={idx} className="bg-white/5 rounded-lg p-3 border border-blue-400/20 flex justify-between items-center transition-all animate-fade-in">
+                                <span className="text-[12px] font-bold text-white">{g.player1} <span className="text-blue-400 text-[10px] mx-1">VS</span> {g.player2}</span>
+                                <span className="bg-blue-400/20 text-blue-400 border border-blue-400/30 px-2 py-1 text-[9px] rounded uppercase font-bold tracking-widest">{g.type === 'reaction' ? 'Reacción' : g.type}</span>
                             </div>
                         ))
                     )}
                 </div>
             </div>
 
-            <div className="glass-card p-6 relative flex flex-col border border-tertiary/20 shadow-[0_0_20px_rgba(105,216,212,0.1)]">
+            <div className="glass-panel rounded-2xl p-6 relative flex flex-col border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
                 <h3 className="font-bold text-lg tracking-wide flex items-center gap-2 mb-4">
-                    <span className="material-symbols-outlined text-tertiary">emoji_events</span>
+                    <Trophy size={20} className="text-purple-400" />
                     Top Trivia
                 </h3>
                 <div className="flex flex-col gap-3 overflow-y-auto max-h-[200px] custom-scrollbar pr-2">
@@ -535,12 +536,12 @@ export function DisplayView() {
                         <p className="text-white/50 text-sm font-mono italic">A la espera de Trivia...</p>
                     ) : (
                         sortedTrivia.map((entry, idx) => (
-                            <div key={idx} className={cn("glass-card-solid p-2 flex items-center justify-between border transition-all animate-fade-in", idx===0 ? "border-tertiary" : "border-white/10")}>
+                            <div key={idx} className={cn("bg-white/5 rounded-lg p-2 flex items-center justify-between border transition-all animate-fade-in", idx===0 ? "border-purple-400" : "border-white/10")}>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[14px] font-bold text-tertiary">#{idx+1}</span>
+                                    <span className="text-[14px] font-bold text-purple-400">#{idx+1}</span>
                                     <span className="text-[13px] font-bold text-white">{entry[0]}</span>
                                 </div>
-                                <span className="font-mono text-tertiary text-[12px]">{entry[1]} pts</span>
+                                <span className="font-mono text-purple-400 text-[12px]">{entry[1]} pts</span>
                             </div>
                         ))
                     )}
@@ -550,18 +551,18 @@ export function DisplayView() {
       </div>
 
       {isReplaying && (
-        <div className="fixed inset-0 z-50 bg-[#13121d]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8">
+        <div className="fixed inset-0 z-50 bg-[#05050a]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8">
             <div className="flex justify-between items-center w-full max-w-5xl mb-6">
                 <div>
-                    <h2 className="font-logo text-3xl md:text-5xl text-primary font-bold tracking-tight">Time-Lapse: <span className="text-white">Red P2P</span></h2>
+                    <h2 className="font-logo text-3xl md:text-5xl text-orange-400 font-bold tracking-tight">Time-Lapse: <span className="text-white">Red P2P</span></h2>
                     <p className="text-white/60 font-mono mt-2">{replayStatus}</p>
                 </div>
-                <button onClick={() => setIsReplaying(false)} className="w-12 h-12 bg-red-500/20 text-red-400 hover:bg-red-500/40 flex items-center justify-center border border-red-500/30 transition-all">
-                    <span className="material-symbols-outlined text-3xl">close</span>
+                <button onClick={() => setIsReplaying(false)} className="w-12 h-12 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center border border-red-500/30 transition-all">
+                    <X size={24} />
                 </button>
             </div>
             
-            <div className="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0e0d18] border border-primary/30 overflow-hidden shadow-[0_0_50px_rgba(255,84,81,0.15)]">
+            <div className="relative w-full max-w-5xl h-[60vh] md:h-[70vh] bg-[#0a0a0f] border border-orange-500/30 overflow-hidden shadow-[0_0_50px_rgba(249,115,22,0.15)] rounded-2xl glass-panel">
                 <div className="absolute inset-0 z-0 grid grid-cols-[1fr_0.5fr_2fr_0.5fr_1fr] gap-1 p-2 pointer-events-none blueprint-grid font-mono">
                     <div className="zone-left h-full w-full border-r border-primary/20 relative" style={{gridColumn: '1 / 3'}}>
                         <div className="absolute top-2 left-2 text-[10px] text-primary/50 tracking-widest uppercase font-bold z-0">Zona A</div>
@@ -607,8 +608,8 @@ export function DisplayView() {
                 </div>
                 
                 <div className="absolute inset-0 z-10 pointer-events-none">
-                    <div className="absolute w-16 h-16 border-2 border-primary bg-primary/20 flex items-center justify-center z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(255,84,81,0.3)]" style={{left: '50%', top: '50%', transform: 'translate(-50%, -50%)'}}>
-                        <span className="material-symbols-outlined text-primary text-2xl">router</span>
+                    <div className="absolute w-16 h-16 border-2 border-orange-400 bg-orange-500/20 rounded-full flex items-center justify-center z-0 backdrop-blur-sm pointer-events-auto shadow-[0_0_15px_rgba(249,115,22,0.3)]" style={{left: '50%', top: '50%', transform: 'translate(-50%, -50%)'}}>
+                        <Server className="text-orange-400 w-8 h-8" />
                     </div>
 
                     {replayNodes.map(node => (

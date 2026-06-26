@@ -16,6 +16,16 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../client/index.ht
 app.use(express.static(path.join(__dirname, "../client")));
 app.use("/shared", express.static(path.join(__dirname, "../shared")));
 
+// NodeMap Work Endpoints
+const workAuth = require('./work-auth');
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+app.use('/api/work', workAuth);
+
 signaling(io);
 
 app.get("/health", (req, res) => {

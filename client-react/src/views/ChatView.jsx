@@ -41,8 +41,8 @@ function MessageList({ messages, myId, peers, isPrivateView }) {
               <span className="text-[10px] text-white/40">{new Date(msg.timestamp).toLocaleTimeString()}</span>
             </div>
             <div 
-              className={`max-w-[80%] px-4 py-2.5 text-[14px] shadow-sm ${
-                isMe ? 'bg-primary text-[#68000a]' : 'glass-card-solid text-on-surface border-l-2'
+              className={`max-w-[80%] px-4 py-2.5 text-[14px] shadow-sm rounded-lg ${
+                isMe ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-tr-sm' : 'glass-panel text-white border-l-2 rounded-tl-sm'
               }`}
               style={(!isMe) ? { borderLeftColor: color } : {}}
             >
@@ -123,35 +123,34 @@ export function ChatView() {
     <div className="flex flex-col h-full bg-transparent overflow-hidden relative">
       
       {/* HEADER TABS */}
-      <div className="flex bg-surface-container-highest/80 backdrop-blur-md border-b border-primary/20">
-        <button onClick={() => {setActiveTab('zona'); setPrivatePeerId(null);}} className={`flex-1 py-3 text-[13px] font-bold transition-colors flex items-center justify-center gap-2 ${activeTab === 'zona' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-on-surface-variant/70 hover:bg-surface-container'}`}>
+      <div className="flex bg-black/60 backdrop-blur-md border-b border-white/10 relative z-10">
+        <button onClick={() => {setActiveTab('zona'); setPrivatePeerId(null);}} className={`flex-1 py-3 text-[13px] font-bold transition-colors flex items-center justify-center gap-2 ${activeTab === 'zona' ? 'text-orange-400 border-b-2 border-orange-400 bg-orange-500/5' : 'text-white/50 hover:bg-white/5'}`}>
           <Users size={16}/> Zona
         </button>
-        <button onClick={() => {setActiveTab('global'); setPrivatePeerId(null);}} className={`flex-1 py-3 text-[13px] font-bold transition-colors flex items-center justify-center gap-2 ${activeTab === 'global' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-on-surface-variant/70 hover:bg-surface-container'}`}>
+        <button onClick={() => {setActiveTab('global'); setPrivatePeerId(null);}} className={`flex-1 py-3 text-[13px] font-bold transition-colors flex items-center justify-center gap-2 ${activeTab === 'global' ? 'text-orange-400 border-b-2 border-orange-400 bg-orange-500/5' : 'text-white/50 hover:bg-white/5'}`}>
           <Globe size={16}/> Global
         </button>
-        <button onClick={() => setActiveTab('privados')} className={`flex-1 py-3 text-[13px] font-bold uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'privados' ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-on-surface-variant hover:bg-surface-variant/30'}`}>
-          <Lock className="w-4 h-4 inline-block mr-2 -mt-0.5" />
-          Privados
+        <button onClick={() => setActiveTab('privados')} className={`flex-1 py-3 text-[13px] font-bold uppercase tracking-widest border-b-2 transition-colors flex items-center justify-center gap-2 ${activeTab === 'privados' ? 'border-orange-400 text-orange-400 bg-orange-500/5' : 'border-transparent text-white/50 hover:bg-white/5'}`}>
+          <Lock className="w-4 h-4" /> Privados
         </button>
       </div>
 
       {activeTab === 'privados' && !privatePeerId ? (
-        <div className="flex-1 overflow-y-auto p-4">
-          <h3 className="font-bold text-white mb-4">Selecciona un Peer</h3>
+        <div className="flex-1 overflow-y-auto p-4 z-10 relative">
+          <h3 className="font-bold text-white mb-4 font-logo">Selecciona un Peer</h3>
           <div className="flex flex-col gap-2">
-            {privateContacts.length === 0 && <p className="text-on-surface-variant text-sm">No hay peers conectados.</p>}
+            {privateContacts.length === 0 && <p className="text-white/50 text-sm">No hay peers conectados.</p>}
             {privateContacts.map(p => {
               const pMsgs = messages.filter(m => m.isPrivate && (m.senderId === p.id || m.targetId === p.id));
               const lastMsg = pMsgs.length > 0 ? pMsgs[pMsgs.length - 1] : null;
               return (
-              <button key={p.id} onClick={() => setPrivatePeerId(p.id)} className="glass-card p-4 flex items-center gap-3 hover:bg-surface-container text-left transition-colors relative">
-                <div className="w-10 h-10 flex items-center justify-center bg-primary/20 rounded-full" style={{ color: p.color || '#fff' }}>{p.avatar || p.nombre.charAt(0).toUpperCase()}</div>
+              <button key={p.id} onClick={() => setPrivatePeerId(p.id)} className="glass-panel p-4 flex items-center gap-3 hover:bg-white/5 text-left transition-colors relative rounded-xl">
+                <div className="w-10 h-10 flex items-center justify-center bg-orange-500/20 rounded-full border border-orange-500/30 shadow-[0_0_10px_rgba(251,146,60,0.2)]" style={{ color: p.color || '#fff' }}>{p.avatar || p.nombre.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 overflow-hidden">
                   <div className="font-bold text-white text-[14px]">{p.nombre}</div>
-                  <div className="text-[12px] text-on-surface-variant truncate">{lastMsg ? lastMsg.text : p.zona}</div>
+                  <div className="text-[12px] text-white/50 truncate">{lastMsg ? lastMsg.text : p.zona}</div>
                 </div>
-                {lastMsg && <div className="text-[10px] text-on-surface-variant/60 absolute top-4 right-4">{new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>}
+                {lastMsg && <div className="text-[10px] text-white/40 absolute top-4 right-4">{new Date(lastMsg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>}
               </button>
             )})}
           </div>
@@ -174,18 +173,18 @@ export function ChatView() {
 
           <MessageList messages={currentMessages} myId={myId} peers={peers} isPrivateView={activeTab === 'privados'} />
 
-          <div className="p-4 border-t border-primary/20 bg-surface-container-highest/80 backdrop-blur-md">
+          <div className="p-4 border-t border-white/10 bg-black/60 backdrop-blur-md relative z-10">
             <form onSubmit={handleSubmit} className="flex gap-2 items-center max-w-4xl mx-auto w-full">
               <input
                 type="text"
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Escribe un mensaje..."
-                className={`flex-1 px-5 h-12 outline-none ${activeTab === 'privados' ? 'glass-card text-white rounded-full' : 'input-field'}`}
+                className="flex-1 px-5 h-12 outline-none glass-panel text-white rounded-full bg-white/5 focus:bg-white/10 focus:border-orange-500/50 transition-colors"
                 autoComplete="off"
               />
-              <button type="submit" className={`flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${activeTab === 'privados' ? 'bg-primary text-[#68000a] w-12 h-12 rounded-full shadow-lg' : 'btn-primary px-6 h-12'}`}>
-                <Send size={activeTab === 'privados' ? 20 : 18} className={activeTab === 'privados' ? 'ml-1' : ''} />
+              <button type="submit" className="flex items-center justify-center transition-transform hover:scale-105 active:scale-95 bg-orange-500 text-[#05050a] w-12 h-12 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                <Send size={20} className="ml-1" />
               </button>
             </form>
           </div>
