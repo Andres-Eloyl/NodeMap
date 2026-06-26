@@ -152,9 +152,7 @@ function setupDataChannel(peerId, nombre, dc) {
 function conectar(nombre, zona, color, avatar) {
   myNombre = nombre;
 
-  const serverUrl = (typeof CONFIG !== "undefined" && CONFIG.PORT)
-    ? `http://${window.location.hostname}:${CONFIG.PORT}`
-    : window.location.origin;
+  const serverUrl = '/';
 
   socket = io(serverUrl, { query: { nombre, zona, color, avatar, puntos: 0 } });
 

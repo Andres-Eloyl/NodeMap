@@ -323,5 +323,8 @@ body {
     border-radius: 0;
     white-space: nowrap;
 }
-. b g - g r i d - n o d e s   {   b a c k g r o u n d - i m a g e :   l i n e a r - g r a d i e n t ( t o   r i g h t ,   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 5 )   1 p x ,   t r a n s p a r e n t   1 p x ) ,   l i n e a r - g r a d i e n t ( t o   b o t t o m ,   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 5 )   1 p x ,   t r a n s p a r e n t   1 p x ) ;   b a c k g r o u n d - s i z e :   4 0 p x   4 0 p x ;   }  
- 
+
+.bg-grid-nodes {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}

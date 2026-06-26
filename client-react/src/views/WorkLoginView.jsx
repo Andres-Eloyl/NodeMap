@@ -26,9 +26,7 @@ export function WorkLoginView() {
       // Usamos fetch localmente ya que configuramos la ruta /api/work/login en el server de señalización.
       // Vite hace proxy o simplemente llamamos al puerto 3000 de forma manual.
       // Para mayor seguridad local, vamos a usar puerto 3000 asumiendo que es donde corre server.js
-      const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
-      
-      const res = await fetch(`${baseUrl}/api/work/login`, {
+      const res = await fetch(`/api/work/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ correo, password })
