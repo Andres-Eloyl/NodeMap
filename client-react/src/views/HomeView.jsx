@@ -20,8 +20,7 @@ function useReveal() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add("opacity-100", "translate-y-0");
-            e.target.classList.remove("opacity-0", "translate-y-8");
+            e.target.classList.add("is-visible");
             io.unobserve(e.target);
           }
         });
@@ -55,18 +54,14 @@ export function HomeView() {
   const parallaxY = (mouse.y - 0.5) * 30;
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-foreground">
       {/* Ambient backdrop with mouse parallax */}
       <div
-        className="pointer-events-none fixed inset-0 opacity-20 transition-transform duration-300 ease-out"
-        style={{ 
-          backgroundImage: 'radial-gradient(circle at center, #ffffff 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-          transform: `translate3d(${parallaxX * 0.4}px, ${parallaxY * 0.4}px, 0)` 
-        }}
+        className="pointer-events-none fixed inset-0 bg-grid-nodes opacity-60 transition-transform duration-300 ease-out"
+        style={{ transform: `translate3d(${parallaxX * 0.4}px, ${parallaxY * 0.4}px, 0)` }}
       />
       <div
-        className="pointer-events-none fixed inset-0 animate-pulse transition-transform duration-500 ease-out"
+        className="pointer-events-none fixed inset-0 animate-node-pulse transition-transform duration-500 ease-out"
         style={{
           background:
             "radial-gradient(ellipse 60% 50% at 20% 20%, oklch(0.4 0.2 250 / 0.25), transparent 60%), radial-gradient(ellipse 50% 50% at 85% 80%, oklch(0.5 0.18 210 / 0.18), transparent 60%)",
@@ -81,11 +76,11 @@ export function HomeView() {
         return (
           <div
             key={i}
-            className="pointer-events-none fixed h-1 w-1 rounded-full animate-bounce"
+            className="pointer-events-none fixed h-1 w-1 rounded-full"
             style={{
               top: `${15 + i * 13}%`,
               left: `${10 + ((i * 17) % 80)}%`,
-              animationDuration: `${8 + i}s`,
+              animation: `drift ${8 + i}s ease-in-out infinite`,
               backgroundColor: color.bg,
               boxShadow: `0 0 12px ${color.shadow}`,
             }}
@@ -96,7 +91,7 @@ export function HomeView() {
       {/* HERO */}
       <section className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6 py-16">
         <header
-          className="mb-14 text-center animate-fade-in"
+          className="mb-14 text-center animate-fade-in-up"
           style={{
             transform: `translateY(${scrollY * 0.25}px)`,
             opacity: Math.max(0, 1 - scrollY / 500),
@@ -105,32 +100,31 @@ export function HomeView() {
           {/* Spinning orbit halo behind title */}
           <div className="relative inline-block">
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full opacity-40"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 animate-spin-slow rounded-full opacity-40"
               style={{
-                animationDuration: '20s',
                 background:
                   "conic-gradient(from 0deg, transparent 0%, oklch(0.74 0.13 45 / 0.25) 25%, transparent 50%, oklch(0.62 0.24 255 / 0.25) 75%, transparent 100%)",
                 filter: "blur(40px)",
               }}
             />
             <h1 className="relative font-logo text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl">
-              <span className="text-white">Node</span>
+              <span className="text-foreground">Node</span>
               <span
-                className="bg-gradient-to-r from-orange-400 to-blue-500 bg-clip-text text-transparent"
+                className="bg-gradient-to-r from-coral-accent to-blue-accent bg-clip-text text-transparent"
                 style={{ filter: "drop-shadow(0 0 24px oklch(0.74 0.13 45 / 0.35))" }}
               >
                 Map
               </span>
             </h1>
           </div>
-          <p className="mt-5 font-mono text-xs tracking-[0.35em] text-white/50 sm:text-sm">
+          <p className="mt-5 font-mono text-xs tracking-[0.35em] text-muted-foreground sm:text-sm">
             ELIGE TU MODALIDAD DE ACCESO
           </p>
-          <div className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-orange-400/60 to-transparent" />
+          <div className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-coral-accent/60 to-transparent" />
         </header>
 
         <div
-          className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 animate-fade-in"
+          className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 animate-fade-in-up"
           style={{ animationDelay: "150ms" }}
         >
           <ModeCard
@@ -158,11 +152,11 @@ export function HomeView() {
         {/* Scroll indicator */}
         <a
           href="#features"
-          className="group mt-16 flex flex-col items-center gap-2 font-mono text-[10px] tracking-[0.3em] text-white/50 transition-colors hover:text-orange-400"
+          className="group mt-16 flex flex-col items-center gap-2 font-mono text-[10px] tracking-[0.3em] text-muted-foreground/60 transition-colors hover:text-coral-accent"
           style={{ opacity: Math.max(0, 1 - scrollY / 200) }}
         >
           <span>EXPLORAR</span>
-          <ChevronDown className="h-4 w-4 animate-bounce" />
+          <ChevronDown className="h-4 w-4 animate-scroll-bounce" />
         </a>
       </section>
 
@@ -186,7 +180,7 @@ export function HomeView() {
         <RevealStrip />
       </section>
 
-      <footer className="relative z-10 border-t border-white/5 py-10 text-center font-mono text-[10px] tracking-widest text-white/40">
+      <footer className="relative z-10 border-t border-white/5 py-10 text-center font-mono text-[10px] tracking-widest text-muted-foreground/60">
         v1.0.0 · DISTRIBUTED MESH PROTOCOL
       </footer>
     </main>
@@ -223,12 +217,12 @@ const FEATURES = [
 function RevealHeader() {
   const ref = useReveal();
   return (
-    <div ref={ref} className="text-center opacity-0 translate-y-8 transition-all duration-700 ease-out">
-      <p className="font-mono text-[10px] tracking-[0.35em] text-orange-400/80">// PROTOCOLO</p>
+    <div ref={ref} className="reveal-on-scroll text-center">
+      <p className="font-mono text-[10px] tracking-[0.35em] text-coral-accent/80">// PROTOCOLO</p>
       <h2 className="mt-3 font-logo text-4xl font-bold tracking-tight sm:text-5xl">
-        Diseñado como una <span className="text-blue-400">red viva</span>
+        Diseñado como una <span className="text-blue-accent">red viva</span>
       </h2>
-      <p className="mx-auto mt-4 max-w-xl text-sm text-white/60">
+      <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
         Cada modalidad comparte el mismo núcleo: nodos autónomos que se descubren, validan y enrutan
         sin punto único de falla.
       </p>
@@ -242,7 +236,7 @@ function RevealFeature({ feature, delay }) {
   return (
     <div
       ref={ref}
-      className="group relative overflow-hidden rounded-2xl border border-white/10 p-6 transition-all duration-700 hover:-translate-y-1 hover:border-white/20 opacity-0 translate-y-8"
+      className="reveal-on-scroll group relative overflow-hidden rounded-2xl border border-white/10 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
       style={{
         transitionDelay: `${delay}ms`,
         backdropFilter: "blur(12px)",
@@ -259,8 +253,8 @@ function RevealFeature({ feature, delay }) {
       >
         <Icon className="h-5 w-5" strokeWidth={1.5} />
       </div>
-      <h3 className="font-bold text-lg font-semibold">{feature.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-white/60">{feature.desc}</p>
+      <h3 className="font-logo text-lg font-semibold">{feature.title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
     </div>
   );
 }
@@ -270,7 +264,7 @@ function RevealStrip() {
   return (
     <div
       ref={ref}
-      className="relative overflow-hidden rounded-2xl border border-white/10 p-10 text-center opacity-0 translate-y-8 transition-all duration-700 ease-out"
+      className="reveal-on-scroll relative overflow-hidden rounded-2xl border border-white/10 p-10 text-center"
       style={{
         backdropFilter: "blur(12px)",
         background:
@@ -278,20 +272,21 @@ function RevealStrip() {
       }}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-40 animate-pulse"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           background:
             "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%)",
           backgroundSize: "200% 100%",
+          animation: "shimmer 6s linear infinite",
         }}
       />
-      <p className="relative font-mono text-[10px] tracking-[0.35em] text-white/50">
+      <p className="relative font-mono text-[10px] tracking-[0.35em] text-muted-foreground">
         // LISTO PARA CONECTARTE
       </p>
       <h3 className="relative mt-3 font-logo text-3xl font-bold tracking-tight sm:text-4xl">
-        Sube al <span className="text-orange-400">mesh</span>.
+        Sube al <span className="text-coral-accent">mesh</span>.
       </h3>
-      <p className="relative mx-auto mt-3 max-w-md text-sm text-white/60">
+      <p className="relative mx-auto mt-3 max-w-md text-sm text-muted-foreground">
         Vuelve arriba y elige tu modalidad para entrar en la red.
       </p>
       <a
@@ -300,7 +295,7 @@ function RevealStrip() {
           e.preventDefault();
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
-        className="relative mt-6 inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase text-blue-400 transition-transform hover:translate-x-1"
+        className="relative mt-6 inline-flex items-center gap-2 font-mono text-xs tracking-widest uppercase text-blue-accent transition-transform hover:translate-x-1"
       >
         <span>Volver al inicio</span>
         <ArrowRight className="h-3.5 w-3.5 -rotate-90" />
@@ -323,14 +318,14 @@ const COMPARISON_ROWS = [
 function RevealComparison() {
   const ref = useReveal();
   return (
-    <div ref={ref} className="opacity-0 translate-y-8 transition-all duration-700 ease-out">
+    <div ref={ref} className="reveal-on-scroll">
       <div className="text-center">
-        <p className="font-mono text-[10px] tracking-[0.35em] text-orange-400/80">// COMPARATIVA</p>
+        <p className="font-mono text-[10px] tracking-[0.35em] text-coral-accent/80">// COMPARATIVA</p>
         <h2 className="mt-3 font-logo text-4xl font-bold tracking-tight sm:text-5xl">
-          Consumer <span className="text-white/40">vs</span>{" "}
-          <span className="text-blue-500">Work</span>
+          Consumer <span className="text-muted-foreground/40">vs</span>{" "}
+          <span className="text-blue-accent">Work</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-white/60">
+        <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
           El mismo protocolo, dos experiencias. Elige según tu contexto.
         </p>
       </div>
@@ -340,10 +335,10 @@ function RevealComparison() {
         style={{ backdropFilter: "blur(12px)", background: "rgba(255,255,255,0.02)" }}
       >
         {/* Header row */}
-        <div className="grid grid-cols-3 border-b border-white/10 text-center font-mono text-[10px] tracking-widest uppercase text-white/50">
+        <div className="grid grid-cols-3 border-b border-white/10 text-center font-mono text-[10px] tracking-widest uppercase text-muted-foreground">
           <div className="px-4 py-4 text-left">Característica</div>
-          <div className="px-4 py-4 text-orange-400">Consumer</div>
-          <div className="px-4 py-4 text-blue-500">Work</div>
+          <div className="px-4 py-4 text-coral-accent">Consumer</div>
+          <div className="px-4 py-4 text-blue-accent">Work</div>
         </div>
 
         {/* Rows */}
@@ -361,22 +356,22 @@ function RevealComparison() {
               className="grid grid-cols-3 items-center border-b border-white/5 transition-colors duration-200 hover:bg-white/[0.02]"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="px-4 py-4 text-sm text-white/60">{row.label}</div>
+              <div className="px-4 py-4 text-sm text-muted-foreground">{row.label}</div>
               <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm">
                 {isConsumerBetter ? (
-                  <Check className="h-3.5 w-3.5 text-orange-400" strokeWidth={2.5} />
+                  <Check className="h-3.5 w-3.5 text-coral-accent" strokeWidth={2.5} />
                 ) : (
-                  <Minus className="h-3.5 w-3.5 text-white/30" strokeWidth={2} />
+                  <Minus className="h-3.5 w-3.5 text-muted-foreground/40" strokeWidth={2} />
                 )}
-                <span className={isConsumerBetter ? "text-orange-400" : "text-white/80"}>{row.consumer}</span>
+                <span className={isConsumerBetter ? "text-coral-accent" : "text-foreground/80"}>{row.consumer}</span>
               </div>
               <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm">
                 {isWorkBetter ? (
-                  <Check className="h-3.5 w-3.5 text-blue-500" strokeWidth={2.5} />
+                  <Check className="h-3.5 w-3.5 text-blue-accent" strokeWidth={2.5} />
                 ) : (
-                  <Minus className="h-3.5 w-3.5 text-white/30" strokeWidth={2} />
+                  <Minus className="h-3.5 w-3.5 text-muted-foreground/40" strokeWidth={2} />
                 )}
-                <span className={isWorkBetter ? "text-blue-500" : "text-white/80"}>{row.work}</span>
+                <span className={isWorkBetter ? "text-blue-accent" : "text-foreground/80"}>{row.work}</span>
               </div>
             </div>
           );
@@ -392,7 +387,7 @@ function ModeCard({ variant, icon, titleMain, titleAccent, description, tag, cta
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   const accentColor = isWork ? "oklch(0.62 0.24 255)" : "oklch(0.74 0.13 45)";
-  const accentText = isWork ? "text-blue-500" : "text-orange-400";
+  const accentText = isWork ? "text-blue-accent" : "text-coral-accent";
 
   const handleMove = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -463,7 +458,7 @@ function ModeCard({ variant, icon, titleMain, titleAccent, description, tag, cta
         >
           {tag}
         </div>
-        <div className="font-mono text-[10px] tracking-widest text-white/40">
+        <div className="font-mono text-[10px] tracking-widest text-muted-foreground/60">
           {isWork ? "02" : "01"}
         </div>
       </div>
@@ -483,7 +478,7 @@ function ModeCard({ variant, icon, titleMain, titleAccent, description, tag, cta
         <span className={accentText}>{titleAccent}</span>
       </h2>
 
-      <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/50">
+      <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
 
