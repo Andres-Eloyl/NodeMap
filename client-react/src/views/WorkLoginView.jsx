@@ -23,9 +23,6 @@ export function WorkLoginView() {
     setError(null);
 
     try {
-      // Usamos fetch localmente ya que configuramos la ruta /api/work/login en el server de señalización.
-      // Vite hace proxy o simplemente llamamos al puerto 3000 de forma manual.
-      // Para mayor seguridad local, vamos a usar puerto 3000 asumiendo que es donde corre server.js
       const res = await fetch(`/api/work/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,9 +32,6 @@ export function WorkLoginView() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión');
 
-      // Verificación estricta requerida por la rúbrica (rol y departamento seleccionados deben coincidir 
-      // con la BD simulada, o simplemente confiamos en el endpoint. Las instrucciones decían que el selector 
-      // es obligatorio, por lo que lo validamos contra lo que devuelve el endpoint para ser robustos).
       if (data.user.rol !== rol || data.user.departamento !== departamento) {
         throw new Error('El rol o departamento no coincide con los registros corporativos.');
       }
@@ -53,7 +47,6 @@ export function WorkLoginView() {
 
   return (
     <div className="min-h-screen w-full flex bg-[#05050a] text-white">
-      {/* Panel Izquierdo: Identidad */}
       <div className="hidden md:flex flex-col flex-1 p-12 justify-center relative overflow-hidden bg-gradient-to-br from-blue-900/20 to-black">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full"></div>
         <div className="relative z-10 max-w-lg">
@@ -76,7 +69,6 @@ export function WorkLoginView() {
         </div>
       </div>
 
-      {/* Panel Derecho: Formulario */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black/50 border-l border-white/5 relative z-10">
         <div className="w-full max-w-md glass-card p-8 md:p-10">
           <div className="text-center mb-8">

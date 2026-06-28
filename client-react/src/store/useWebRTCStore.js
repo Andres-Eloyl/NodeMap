@@ -160,15 +160,27 @@ export const useWebRTCStore = create((set, get) => ({
       }
     });
 
-    // NodeMap Work Listeners
     WebRTCEngine.onMessage(PROTOCOL.WORK_CHANNEL_MSG, (data) => {
       useWorkStore.getState().addChannelMessage(data);
-      if (data.senderId !== get().myId) SoundEngine.playZoneChat();
+      if (data.senderId !== get().myId) {
+        if (data.texto && data.texto.startsWith('[ALERTA DE GERENCIA]')) {
+           window.alert(`⚠️ ALERTA DE GERENCIA ⚠️\n\nDe: ${data.nombre}\n${data.texto.replace('[ALERTA DE GERENCIA]: ', '')}`);
+           for(let i=0; i<3; i++) setTimeout(SoundEngine.playZoneChat, i*300);
+        } else {
+           SoundEngine.playZoneChat();
+        }
+
+        if (data.canal === 'global-empresa') useWorkStore.getState().incrementUnread('global');
+        else useWorkStore.getState().incrementUnread('channel');
+      }
     });
     
     WebRTCEngine.onMessage(PROTOCOL.WORK_PRIVATE_MSG, (data) => {
       useWorkStore.getState().addPrivateMessage(data);
-      if (data.senderId !== get().myId) SoundEngine.playPrivateChat();
+      if (data.senderId !== get().myId) {
+        SoundEngine.playPrivateChat();
+        useWorkStore.getState().incrementUnread('private');
+      }
     });
 
     WebRTCEngine.onMessage(PROTOCOL.WORK_REPORT, (data) => {

@@ -39,6 +39,25 @@ export function HomeView() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = "NodeMap — Elige tu modalidad";
+    
+    const updateMeta = (name, property, content) => {
+      let el = document.querySelector(`meta[${name ? `name="${name}"` : `property="${property}"`}]`);
+      if (!el) {
+        el = document.createElement('meta');
+        if (name) el.name = name;
+        if (property) el.setAttribute("property", property);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    updateMeta("description", null, "NodeMap: red P2P para uso público y entornos corporativos. Elige entre Consumer o Work para acceder.");
+    updateMeta(null, "og:title", "NodeMap — Elige tu modalidad");
+    updateMeta(null, "og:description", "Red P2P pública o entorno empresarial seguro. Elige tu acceso.");
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
     const onMove = (e) =>
       setMouse({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
@@ -107,7 +126,7 @@ export function HomeView() {
                 filter: "blur(40px)",
               }}
             />
-            <h1 className="relative font-logo text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl">
+            <h1 className="relative font-display text-6xl font-bold tracking-tight sm:text-7xl md:text-8xl">
               <span className="text-foreground">Node</span>
               <span
                 className="bg-gradient-to-r from-coral-accent to-blue-accent bg-clip-text text-transparent"
@@ -219,7 +238,7 @@ function RevealHeader() {
   return (
     <div ref={ref} className="reveal-on-scroll text-center">
       <p className="font-mono text-[10px] tracking-[0.35em] text-coral-accent/80">// PROTOCOLO</p>
-      <h2 className="mt-3 font-logo text-4xl font-bold tracking-tight sm:text-5xl">
+      <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
         Diseñado como una <span className="text-blue-accent">red viva</span>
       </h2>
       <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
@@ -253,7 +272,7 @@ function RevealFeature({ feature, delay }) {
       >
         <Icon className="h-5 w-5" strokeWidth={1.5} />
       </div>
-      <h3 className="font-logo text-lg font-semibold">{feature.title}</h3>
+      <h3 className="font-display text-lg font-semibold">{feature.title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
     </div>
   );
@@ -283,7 +302,7 @@ function RevealStrip() {
       <p className="relative font-mono text-[10px] tracking-[0.35em] text-muted-foreground">
         // LISTO PARA CONECTARTE
       </p>
-      <h3 className="relative mt-3 font-logo text-3xl font-bold tracking-tight sm:text-4xl">
+      <h3 className="relative mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
         Sube al <span className="text-coral-accent">mesh</span>.
       </h3>
       <p className="relative mx-auto mt-3 max-w-md text-sm text-muted-foreground">
@@ -321,7 +340,7 @@ function RevealComparison() {
     <div ref={ref} className="reveal-on-scroll">
       <div className="text-center">
         <p className="font-mono text-[10px] tracking-[0.35em] text-coral-accent/80">// COMPARATIVA</p>
-        <h2 className="mt-3 font-logo text-4xl font-bold tracking-tight sm:text-5xl">
+        <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
           Consumer <span className="text-muted-foreground/40">vs</span>{" "}
           <span className="text-blue-accent">Work</span>
         </h2>
@@ -473,7 +492,7 @@ function ModeCard({ variant, icon, titleMain, titleAccent, description, tag, cta
         {icon}
       </div>
 
-      <h2 className="font-logo text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
         <span className="text-white/60">{titleMain}</span>{" "}
         <span className={accentText}>{titleAccent}</span>
       </h2>

@@ -60,6 +60,8 @@
   --font-label-mono: "Google Sans", "Product Sans", "Open Sans", sans-serif;
   --font-logo: "Montserrat", sans-serif;
   --font-profile: "Google Sans", "Product Sans", "Open Sans", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   --color-coral-accent: #fb923c;
   --color-blue-accent: #3b82f6;

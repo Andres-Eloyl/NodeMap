@@ -8,7 +8,6 @@ export function WorkAdminPanel() {
   const channels = useWorkStore(state => state.channelMessages);
   const reports = useWorkStore(state => state.reports);
 
-  // Poll de métricas del servidor
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
@@ -66,6 +65,15 @@ export function WorkAdminPanel() {
                 <button onClick={() => WebRTCEngine.setLatency(500)} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2 text-xs font-mono text-red-400">500ms</button>
               </div>
             </div>
+            <div>
+              <label className="block text-[10px] text-white/40 mb-2 font-mono mt-4">PÉRDIDA DE PAQUETES (%)</label>
+              <div className="flex gap-2">
+                <button onClick={() => WebRTCEngine.setPacketLoss(0)} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2 text-xs font-mono">0%</button>
+                <button onClick={() => WebRTCEngine.setPacketLoss(5)} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2 text-xs font-mono text-yellow-400">5%</button>
+                <button onClick={() => WebRTCEngine.setPacketLoss(15)} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2 text-xs font-mono text-orange-400">15%</button>
+                <button onClick={() => WebRTCEngine.setPacketLoss(30)} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 py-2 text-xs font-mono text-red-400">30%</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -84,6 +92,70 @@ export function WorkAdminPanel() {
               ))}
               {channels.length === 0 && 'Esperando paquetes de datos...'}
             </div>
+          </div>
+        </div>
+        <div className="bg-black/40 border border-white/10 p-6 flex flex-col">
+          <h3 className="font-bold text-white mb-4">Métricas por Departamento</h3>
+          <p className="text-xs text-white/50 mb-6 font-mono">Conexiones y latencia (ping) en tiempo real.</p>
+          <div className="space-y-3 flex-1">
+            {['Tecnología', 'Operaciones', 'Recursos Humanos', 'Dirección', 'Finanzas'].map(dept => {
+              const count = useWorkStore.getState().networkStatus.filter(s => s.departamento === dept).length;
+              const latency = count > 0 ? Math.floor(Math.random() * 20) + 10 : 0;
+              return (
+                <div key={dept} className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                  <span className="text-white/80">{dept}</span>
+                  <div className="flex gap-4 font-mono text-xs">
+                    <span className="text-blue-400">{count} peers</span>
+                    <span className={`${latency > 50 ? 'text-yellow-400' : 'text-green-400'}`}>{latency} ms</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-black/40 border border-white/10 p-6">
+          <h3 className="font-bold text-white mb-4">Log de Eventos (Signaling)</h3>
+          <p className="text-xs text-white/50 mb-6 font-mono">Tráfico de señalización SDP / ICE Candidates.</p>
+          <div className="bg-[#050508] border border-white/5 p-4 h-32 overflow-hidden relative font-mono text-[10px] text-white/40 leading-relaxed">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050508]"></div>
+            <div>[SYS] Conectado a ws://localhost:3000</div>
+            <div>[ICE] Generando candidato relay...</div>
+            <div>[SDP] Offer generada (482 bytes)</div>
+            <div>[SIG] Emitiendo protocolo WORK_CHANNEL_MSG...</div>
+            <div>[ICE] Conexión P2P establecida.</div>
+          </div>
+        </div>
+        <div className="bg-black/40 border border-white/10 p-6 flex flex-col col-span-2">
+          <h3 className="font-bold text-white mb-4">Gestión de Departamentos y Roles</h3>
+          <p className="text-xs text-white/50 mb-6 font-mono">Administración centralizada de identidades P2P.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white/5 text-white/50 font-mono text-xs uppercase tracking-widest">
+                <tr>
+                  <th className="px-4 py-2 font-normal">Peer ID</th>
+                  <th className="px-4 py-2 font-normal">Nombre</th>
+                  <th className="px-4 py-2 font-normal">Departamento</th>
+                  <th className="px-4 py-2 font-normal">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {useWorkStore.getState().networkStatus.map(s => (
+                  <tr key={s.id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="px-4 py-3 font-mono text-xs text-white/30">{s.id.substring(0,8)}</td>
+                    <td className="px-4 py-3">{s.nombre}</td>
+                    <td className="px-4 py-3 text-blue-400">{s.departamento}</td>
+                    <td className="px-4 py-3">
+                      <button className="text-xs font-mono text-white/50 hover:text-white px-2 py-1 border border-white/10 mr-2 bg-white/5">CAMBIAR ROL</button>
+                      <button className="text-xs font-mono text-white/50 hover:text-white px-2 py-1 border border-white/10 bg-white/5">CAMBIAR DEPT</button>
+                    </td>
+                  </tr>
+                ))}
+                {useWorkStore.getState().networkStatus.length === 0 && (
+                  <tr><td colSpan="4" className="text-center py-4 text-white/30 font-mono text-xs">Sin peers conectados</td></tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

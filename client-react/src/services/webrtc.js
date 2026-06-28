@@ -318,6 +318,9 @@ function sendMessage(peerId, tipo, datos) {
   const peer = peers.get(peerId);
   if (!peer || !peer.dc || peer.dc.readyState !== "open") return;
   try {
+    if (window.simulatedPacketLoss && Math.random() < window.simulatedPacketLoss) {
+      return; // Simulate packet loss
+    }
     let finalDatos = { ...datos };
     if (tipo === PROTOCOL.CHAT || tipo === PROTOCOL.ORGANIZER_BROADCAST) {
         if (finalDatos.text) {
@@ -394,6 +397,14 @@ function requestReplay() {
   }
 }
 
+function setLatency(ms) {
+  window.simulatedLatency = ms;
+}
+
+function setPacketLoss(lossPercentage) {
+  window.simulatedPacketLoss = lossPercentage / 100;
+}
+
 export const WebRTCEngine = {
   conectar,
   desconectar,
@@ -406,4 +417,6 @@ export const WebRTCEngine = {
   getLatency,
   getMyId,
   requestReplay,
+  setLatency,
+  setPacketLoss,
 };

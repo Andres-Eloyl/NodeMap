@@ -1,9 +1,13 @@
 import { useWorkStore } from '../../store/useWorkStore';
 
 export function WorkMap() {
+  const user = useWorkStore(state => state.user);
   const statusList = useWorkStore(state => state.networkStatus);
 
-  // Departamentos y sus colores
+  const visibleStatus = user.rol === 'Administrador'
+    ? statusList
+    : statusList.filter(s => s.departamento === user.departamento);
+
   const deptColors = {
     'Tecnología': '#3b82f6', // blue-500
     'Operaciones': '#10b981', // emerald-500
@@ -17,25 +21,14 @@ export function WorkMap() {
       <h2 className="text-xl font-bold mb-6">Mapa de Instalaciones</h2>
       
       <div className="flex-1 relative border border-white/10 bg-black/50 overflow-hidden flex items-center justify-center">
-        {/* Placeholder SVG map */}
-        <svg viewBox="0 0 800 600" className="w-full h-full opacity-50 absolute inset-0">
-          <rect x="50" y="50" width="300" height="200" fill="none" stroke="#ffffff33" strokeWidth="2"/>
-          <text x="200" y="150" fill="#ffffff55" textAnchor="middle" className="font-mono text-sm">Tecnología (Sala A)</text>
+        <img 
+          src="/work-instalaciones.svg" 
+          alt="Plano Corporativo" 
+          className="w-full h-full opacity-60 absolute inset-0 object-cover" 
+        />
 
-          <rect x="400" y="50" width="350" height="200" fill="none" stroke="#ffffff33" strokeWidth="2"/>
-          <text x="575" y="150" fill="#ffffff55" textAnchor="middle" className="font-mono text-sm">Operaciones (Sala B)</text>
-
-          <rect x="50" y="300" width="300" height="250" fill="none" stroke="#ffffff33" strokeWidth="2"/>
-          <text x="200" y="425" fill="#ffffff55" textAnchor="middle" className="font-mono text-sm">RRHH / Finanzas</text>
-          
-          <rect x="400" y="300" width="350" height="250" fill="none" stroke="#ffffff33" strokeWidth="2"/>
-          <text x="575" y="425" fill="#ffffff55" textAnchor="middle" className="font-mono text-sm">Dirección</text>
-        </svg>
-
-        {/* Empleados renderizados de forma simulada */}
         <div className="absolute inset-0">
-            {statusList.map((emp, i) => {
-              // Posición simulada basada en el index para no hacer lógica compleja de collision
+            {visibleStatus.map((emp, i) => {
               const x = 100 + (i * 40) % 600;
               const y = 100 + (i * 30) % 400;
               return (

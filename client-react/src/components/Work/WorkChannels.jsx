@@ -9,7 +9,6 @@ export function WorkChannels({ currentChannel }) {
   const [text, setText] = useState('');
   const bottomRef = useRef(null);
 
-  // Filtrar solo mensajes del canal activo
   const activeMessages = messages.filter(m => m.canal === currentChannel);
 
   useEffect(() => {

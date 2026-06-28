@@ -1,16 +1,30 @@
 import { create } from 'zustand';
 
 export const useWorkStore = create((set, get) => ({
-  user: null,
+  user: JSON.parse(sessionStorage.getItem('work_user')) || null,
   channelMessages: [],
   privateMessages: [],
   reports: [],
   networkStatus: [],
+  activeWorkTab: 'channel',
+  unreadCounts: { channel: 0, global: 0, private: 0 },
 
-  setUser: (user) => set({ user }),
+  setActiveWorkTab: (tab) => set(state => {
+    const newUnread = { ...state.unreadCounts, [tab]: 0 };
+    return { activeWorkTab: tab, unreadCounts: newUnread };
+  }),
+
+  incrementUnread: (tab) => set((state) => {
+    if (state.activeWorkTab === tab) return state;
+    return { unreadCounts: { ...state.unreadCounts, [tab]: state.unreadCounts[tab] + 1 } };
+  }),
+
+  setUser: (user) => {
+    sessionStorage.setItem('work_user', JSON.stringify(user));
+    set({ user });
+  },
 
   addChannelMessage: (msg) => set((state) => {
-    // Prevent duplicates
     if (state.channelMessages.find(m => m.id === msg.id)) return state;
     return { channelMessages: [...state.channelMessages, msg].sort((a,b) => a.timestamp - b.timestamp) };
   }),
@@ -24,7 +38,6 @@ export const useWorkStore = create((set, get) => ({
     const exists = state.reports.findIndex(r => r.id === report.id || r.id === report.reporte_id);
     if (exists >= 0) {
       const newReports = [...state.reports];
-      // Si es un UPDATE, solo actualizamos los campos que vengan
       newReports[exists] = { ...newReports[exists], ...report };
       return { reports: newReports.sort((a,b) => b.timestamp - a.timestamp) };
     }
@@ -42,5 +55,11 @@ export const useWorkStore = create((set, get) => ({
     return { networkStatus: newStatus };
   }),
   
-  logout: () => set({ user: null, channelMessages: [], privateMessages: [], reports: [], networkStatus: [] })
+  logout: () => {
+    sessionStorage.removeItem('work_user');
+    set({ 
+      user: null, channelMessages: [], privateMessages: [], reports: [], networkStatus: [],
+      unreadCounts: { channel: 0, global: 0, private: 0 }, activeWorkTab: 'channel'
+    });
+  }
 }));

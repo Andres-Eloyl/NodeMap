@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <rect width="800" height="600" fill="url(#grid)" />
+
+  <!-- Pasillos -->
+  <path d="M 375 30 L 375 570" stroke="rgba(255,255,255,0.05)" stroke-width="30" stroke-linecap="round"/>
+  <path d="M 30 275 L 770 275" stroke="rgba(255,255,255,0.05)" stroke-width="30" stroke-linecap="round"/>
+  <text x="400" y="280" fill="rgba(255,255,255,0.3)" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle" letter-spacing="4">PASILLO CENTRAL</text>
+
+  <!-- Tecnología (Top Left) -->
+  <g id="dept-tecnologia">
+    <rect x="50" y="50" width="300" height="200" fill="rgba(59, 130, 246, 0.1)" stroke="#3b82f6" stroke-width="2" rx="4"/>
+    <text x="200" y="85" fill="#3b82f6" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">Tecnología</text>
+    
+    <rect x="70" y="110" width="120" height="120" fill="rgba(59, 130, 246, 0.15)" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4" rx="2" />
+    <text x="130" y="175" fill="rgba(255,255,255,0.5)" font-family="monospace" font-size="12" text-anchor="middle">Sala A</text>
+    
+    <rect x="210" y="110" width="120" height="120" fill="rgba(59, 130, 246, 0.15)" stroke="#3b82f6" stroke-width="1" stroke-dasharray="4" rx="2" />
+    <text x="270" y="175" fill="rgba(255,255,255,0.5)" font-family="monospace" font-size="12" text-anchor="middle">Sala B</text>
+  </g>
+
+  <!-- Operaciones (Top Right) -->
+  <g id="dept-operaciones">
+    <rect x="410" y="50" width="340" height="200" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" stroke-width="2" rx="4"/>
+    <text x="580" y="145" fill="#10b981" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">Operaciones</text>
+    <text x="580" y="165" fill="rgba(255,255,255,0.5)" font-family="monospace" font-size="12" text-anchor="middle">Planta Principal</text>
+  </g>
+
+  <!-- Recursos Humanos (Bottom Left) -->
+  <g id="dept-rrhh">
+    <rect x="50" y="310" width="140" height="240" fill="rgba(236, 72, 153, 0.1)" stroke="#ec4899" stroke-width="2" rx="4"/>
+    <text x="120" y="435" fill="#ec4899" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">RRHH</text>
+  </g>
+
+  <!-- Finanzas (Bottom Mid) -->
+  <g id="dept-finanzas">
+    <rect x="210" y="310" width="140" height="240" fill="rgba(245, 158, 11, 0.1)" stroke="#f59e0b" stroke-width="2" rx="4"/>
+    <text x="280" y="435" fill="#f59e0b" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">Finanzas</text>
+  </g>
+
+  <!-- Dirección (Bottom Right) -->
+  <g id="dept-direccion">
+    <rect x="410" y="310" width="340" height="240" fill="rgba(139, 92, 246, 0.1)" stroke="#8b5cf6" stroke-width="2" rx="4"/>
+    <text x="580" y="390" fill="#8b5cf6" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">Dirección</text>
+    
+    <rect x="440" y="420" width="280" height="100" fill="rgba(139, 92, 246, 0.15)" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4" rx="2" />
+    <text x="580" y="475" fill="rgba(255,255,255,0.5)" font-family="monospace" font-size="12" text-anchor="middle">Sala de Juntas</text>
+  </g>
+</svg>
