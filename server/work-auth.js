@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const db = require('./database');
 
 // Base de datos en memoria para la feria
 const usersDB = new Map([
@@ -27,6 +28,57 @@ router.post('/login', express.json(), (req, res) => {
   }
 
   return res.status(401).json({ error: 'Credenciales inválidas.' });
+});
+
+// Kanban Endpoints
+router.get('/tareas', (req, res) => {
+  const { canal } = req.query;
+  if (!canal) return res.status(400).json({ error: 'Falta canal' });
+  try {
+    const tareas = db.tareas.listarPorCanal(canal);
+    res.json(tareas);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/tareas', express.json(), (req, res) => {
+  try {
+    db.tareas.crear(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/tareas/:id', express.json(), (req, res) => {
+  try {
+    db.tareas.actualizarEstado(req.params.id, req.body.estado);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Calendar Endpoints
+router.get('/calendario', (req, res) => {
+  const { departamento } = req.query;
+  if (!departamento) return res.status(400).json({ error: 'Falta departamento' });
+  try {
+    const eventos = db.calendario.listarPorDepartamento(departamento);
+    res.json(eventos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/calendario', express.json(), (req, res) => {
+  try {
+    db.calendario.crear(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

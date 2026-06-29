@@ -28,6 +28,9 @@ const PROTOCOL = {
   REACTION_TAP: "reaction-tap",
   TRIVIA_START: "trivia-start",
   TRIVIA_ANSWER: "trivia-answer",
+  WORK_TASK_CREATE: "work-task-create",
+  WORK_TASK_MOVE: "work-task-move",
+  WORK_EVENT_CREATE: "work-event-create",
 };
 
 if (typeof module !== 'undefined' && module.exports) {

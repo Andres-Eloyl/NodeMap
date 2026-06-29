@@ -38,24 +38,6 @@ const TABS = [
   { key: "games", label: "Juegos", icon: Gamepad2 },
 ];
 
-/* ------------------------------- Backdrop ------------------------------- */
-
-function Backdrop() {
-  return (
-    <>
-      <div className="pointer-events-none fixed inset-0 bg-grid-nodes opacity-40 z-0" />
-      <div
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 20% 15%, rgba(249,115,22,0.18), transparent 60%), radial-gradient(ellipse 50% 50% at 85% 80%, rgba(249,115,22,0.10), transparent 60%), radial-gradient(ellipse 40% 30% at 50% 100%, rgba(249,115,22,0.08), transparent 70%)",
-        }}
-      />
-      <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-transparent via-transparent to-[#05050a] z-0" />
-    </>
-  );
-}
-
 /* ------------------------------- LOGIN ---------------------------------- */
 
 function LoginScreen() {
@@ -144,8 +126,7 @@ function LoginScreen() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
 
-          <div className="mt-6 flex items-center justify-between font-mono text-[10px] tracking-widest text-white/40">
-            <span>v1.0.0 · P2P MESH</span>
+          <div className="mt-6 flex items-center justify-end font-mono text-[10px] tracking-widest text-white/40">
             <Link to="/" className="hover:text-orange-400 transition-colors">
               ← VOLVER
             </Link>
@@ -409,16 +390,14 @@ export function PeerView() {
 
   if (!isConnected) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden bg-[#05050a]">
-        <Backdrop />
+      <div className="relative min-h-screen overflow-x-hidden bg-transparent">
         <LoginScreen />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#05050a] flex flex-col text-white">
-      <Backdrop />
+    <div className="relative min-h-screen overflow-hidden bg-transparent flex flex-col text-white">
       <GlobalToasts />
       <BroadcastModal />
       <TriviaModal />

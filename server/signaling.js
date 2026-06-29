@@ -14,10 +14,19 @@ function generarId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
+const db = require("./database");
+
 function addToLog(evento) {
   metricas.log.push({ evento, timestamp: Date.now() });
   if (metricas.log.length > CONFIG.MAX_LOG_EVENTOS) {
     metricas.log.shift();
+  }
+  
+  // Persist to SQLite
+  try {
+    db.eventos.registrar('LOG', { mensaje: evento });
+  } catch (e) {
+    console.error("Error guardando evento en DB:", e);
   }
 }
 

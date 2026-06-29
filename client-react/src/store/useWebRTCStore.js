@@ -199,6 +199,18 @@ export const useWebRTCStore = create((set, get) => ({
     WebRTCEngine.onMessage(PROTOCOL.WORK_POSITION, (data) => {
       useWorkStore.getState().updateStatus(data);
     });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_TASK_CREATE, (data) => {
+      useWorkStore.getState().addTarea(data);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_TASK_MOVE, (data) => {
+      useWorkStore.getState().updateTareaEstado(data.id, data.estado);
+    });
+
+    WebRTCEngine.onMessage(PROTOCOL.WORK_EVENT_CREATE, (data) => {
+      useWorkStore.getState().addCalendarioEvento(data);
+    });
     
     setTimeout(() => {
       set({ 

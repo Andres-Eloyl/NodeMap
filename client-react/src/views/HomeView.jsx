@@ -2,15 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { Globe2, Building2, ArrowRight, ChevronDown, Network, Shield, Zap, Lock, Check, Minus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const PARTICLE_COLORS = [
-  { bg: "oklch(0.74 0.13 45 / 0.6)", shadow: "oklch(0.74 0.13 45 / 0.5)" },
-  { bg: "oklch(0.88 0.12 210 / 0.6)", shadow: "oklch(0.88 0.12 210 / 0.5)" },
-  { bg: "oklch(0.75 0.14 150 / 0.5)", shadow: "oklch(0.75 0.14 150 / 0.4)" },
-  { bg: "oklch(0.74 0.13 45 / 0.6)", shadow: "oklch(0.74 0.13 45 / 0.5)" },
-  { bg: "oklch(0.88 0.12 210 / 0.6)", shadow: "oklch(0.88 0.12 210 / 0.5)" },
-  { bg: "oklch(0.75 0.14 150 / 0.5)", shadow: "oklch(0.75 0.14 150 / 0.4)" },
-];
-
 function useReveal() {
   const ref = useRef(null);
   useEffect(() => {
@@ -35,7 +26,6 @@ function useReveal() {
 
 export function HomeView() {
   const [scrollY, setScrollY] = useState(0);
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,54 +49,14 @@ export function HomeView() {
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
-    const onMove = (e) =>
-      setMouse({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("mousemove", onMove);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("mousemove", onMove);
     };
   }, []);
 
-  const parallaxX = (mouse.x - 0.5) * 30;
-  const parallaxY = (mouse.y - 0.5) * 30;
-
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#05050a] text-foreground">
-      {/* Ambient backdrop with mouse parallax */}
-      <div
-        className="pointer-events-none fixed inset-0 bg-grid-nodes opacity-60 transition-transform duration-300 ease-out"
-        style={{ transform: `translate3d(${parallaxX * 0.4}px, ${parallaxY * 0.4}px, 0)` }}
-      />
-      <div
-        className="pointer-events-none fixed inset-0 animate-node-pulse transition-transform duration-500 ease-out"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 20% 20%, oklch(0.4 0.2 250 / 0.25), transparent 60%), radial-gradient(ellipse 50% 50% at 85% 80%, oklch(0.5 0.18 210 / 0.18), transparent 60%)",
-          transform: `translate3d(${parallaxX}px, ${parallaxY}px, 0)`,
-        }}
-      />
-      <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-transparent via-transparent to-[#05050a]" />
-
-      {/* Floating particles */}
-      {[...Array(6)].map((_, i) => {
-        const color = PARTICLE_COLORS[i];
-        return (
-          <div
-            key={i}
-            className="pointer-events-none fixed h-1 w-1 rounded-full"
-            style={{
-              top: `${15 + i * 13}%`,
-              left: `${10 + ((i * 17) % 80)}%`,
-              animation: `drift ${8 + i}s ease-in-out infinite`,
-              backgroundColor: color.bg,
-              boxShadow: `0 0 12px ${color.shadow}`,
-            }}
-          />
-        );
-      })}
-
+    <main className="relative min-h-screen overflow-x-hidden bg-transparent text-foreground">
       {/* HERO */}
       <section className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6 py-16">
         <header
@@ -199,9 +149,7 @@ export function HomeView() {
         <RevealStrip />
       </section>
 
-      <footer className="relative z-10 border-t border-white/5 py-10 text-center font-mono text-[10px] tracking-widest text-muted-foreground/60">
-        v1.0.0 · DISTRIBUTED MESH PROTOCOL
-      </footer>
+      {/* Background elements */}
     </main>
   );
 }

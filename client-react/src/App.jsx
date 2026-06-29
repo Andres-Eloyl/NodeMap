@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import { HomeView } from './views/HomeView';
 import { PeerView } from './views/PeerView';
 import { DisplayView } from './views/DisplayView';
@@ -8,8 +9,15 @@ import { TestSignalingView } from './views/TestSignalingView';
 import { WorkLoginView } from './views/WorkLoginView';
 import { WorkDashboardView } from './views/WorkDashboardView';
 import { NetworkBackground } from './components/NetworkBackground';
+import { initLocalDB } from './utils/localDB';
+import { solicitarPermiso } from './utils/notificaciones';
 
 function App() {
+  useEffect(() => {
+    initLocalDB().catch(console.error);
+    solicitarPermiso().catch(console.error);
+  }, []);
+
   return (
     <>
       <NetworkBackground />

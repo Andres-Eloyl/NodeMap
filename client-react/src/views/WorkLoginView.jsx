@@ -10,6 +10,8 @@ export function WorkLoginView() {
   const [password, setPassword] = useState('');
   const [rol, setRol] = useState('');
   const [departamento, setDepartamento] = useState('');
+  const [isTokenMode, setIsTokenMode] = useState(false);
+  const [token, setToken] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -45,8 +47,32 @@ export function WorkLoginView() {
     }
   };
 
+  const validTokens = useWorkStore(state => state.validTokens);
+  const handleTokenLogin = (e) => {
+    e.preventDefault();
+    if (!token) return setError('El token es obligatorio.');
+
+    setLoading(true);
+    setError(null);
+
+    setTimeout(() => {
+      if (validTokens.includes(token)) {
+        setUser({
+          nombre: 'Colaborador (Token)',
+          rol: 'Colaborador',
+          departamento: 'Invitado',
+          correo: 'token@nodemap.local'
+        });
+        navigate('/work/app');
+      } else {
+        setError('Token corporativo inválido o expirado.');
+        setLoading(false);
+      }
+    }, 800);
+  };
+
   return (
-    <div className="min-h-screen w-full flex bg-[#05050a] text-white">
+    <div className="min-h-screen w-full flex bg-transparent text-white">
       <div className="hidden md:flex flex-col flex-1 p-12 justify-center relative overflow-hidden bg-gradient-to-br from-blue-900/20 to-black">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full"></div>
         <div className="relative z-10 max-w-lg">
@@ -83,65 +109,99 @@ export function WorkLoginView() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Correo Corporativo</label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-3 text-white/30 text-lg">mail</span>
-                <input type="email" required value={correo} onChange={e => setCorreo(e.target.value)}
-                  className="w-full bg-[#0a0a0f] border border-white/10 rounded-none pl-10 pr-4 py-3 text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all" 
-                  placeholder="usuario@empresa.com" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Contraseña</label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-3 text-white/30 text-lg">lock</span>
-                <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-[#0a0a0f] border border-white/10 rounded-none pl-10 pr-4 py-3 text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all" 
-                  placeholder="Mínimo 6 caracteres" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+          {isTokenMode ? (
+            <form onSubmit={handleTokenLogin} className="space-y-5">
               <div>
-                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Rol</label>
-                <select required value={rol} onChange={e => setRol(e.target.value)} className="w-full bg-[#0a0a0f] border border-white/10 rounded-none px-3 py-3 text-sm focus:border-blue-500/50 outline-none">
-                  <option value="" disabled>Seleccione...</option>
-                  <option value="Colaborador">Colaborador</option>
-                  <option value="Gerente">Gerente</option>
-                  <option value="Administrador">Administrador</option>
-                </select>
+                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Código de Acceso (Token)</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-3 text-white/30 text-lg">key</span>
+                  <input type="text" required value={token} onChange={e => setToken(e.target.value)}
+                    className="w-full bg-[#0a0a0f] border border-white/10 rounded-none pl-10 pr-4 py-3 text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all uppercase" 
+                    placeholder="Ej. ADMIN-TOKEN" />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Departamento</label>
-                <select required value={departamento} onChange={e => setDepartamento(e.target.value)} className="w-full bg-[#0a0a0f] border border-white/10 rounded-none px-3 py-3 text-sm focus:border-blue-500/50 outline-none">
-                  <option value="" disabled>Seleccione...</option>
-                  <option value="Tecnología">Tecnología</option>
-                  <option value="Operaciones">Operaciones</option>
-                  <option value="Recursos Humanos">RRHH</option>
-                  <option value="Dirección">Dirección</option>
-                  <option value="Finanzas">Finanzas</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 mt-4 mb-2">
-              <input type="checkbox" id="keepSession" className="accent-blue-500 w-4 h-4 bg-[#0a0a0f] border-white/10" />
-              <label htmlFor="keepSession" className="text-xs text-white/60 cursor-pointer">Mantener sesión activa</label>
-            </div>
-
-            <button disabled={loading} type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 mt-2 transition-colors disabled:opacity-50">
-              {loading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN'}
-            </button>
-            
-            <div className="text-center mt-6">
-              <button type="button" className="text-[11px] text-white/40 hover:text-white/80 transition-colors uppercase tracking-widest font-mono">
-                Acceder mediante Token Corporativo
+              
+              <button disabled={loading} type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 mt-2 transition-colors disabled:opacity-50">
+                {loading ? 'VERIFICANDO...' : 'VALIDAR TOKEN'}
               </button>
-            </div>
-          </form>
+
+              <div className="text-center mt-6 flex flex-col items-center gap-4">
+                <button type="button" onClick={() => { setIsTokenMode(false); setError(null); }} className="text-[11px] text-white/40 hover:text-white/80 transition-colors uppercase tracking-widest font-mono">
+                  Usar credenciales estándar
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Correo Corporativo</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-3 text-white/30 text-lg">mail</span>
+                  <input type="email" required value={correo} onChange={e => setCorreo(e.target.value)}
+                    className="w-full bg-[#0a0a0f] border border-white/10 rounded-none pl-10 pr-4 py-3 text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all" 
+                    placeholder="usuario@empresa.com" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Contraseña</label>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-3 text-white/30 text-lg">lock</span>
+                  <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-[#0a0a0f] border border-white/10 rounded-none pl-10 pr-4 py-3 text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all" 
+                    placeholder="Mínimo 6 caracteres" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Rol</label>
+                  <select required value={rol} onChange={e => setRol(e.target.value)} className="w-full bg-[#0a0a0f] border border-white/10 rounded-none px-3 py-3 text-sm focus:border-blue-500/50 outline-none">
+                    <option value="" disabled>Seleccione...</option>
+                    <option value="Colaborador">Colaborador</option>
+                    <option value="Gerente">Gerente</option>
+                    <option value="Administrador">Administrador</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-white/50 mb-2 font-bold">Departamento</label>
+                  <select required value={departamento} onChange={e => setDepartamento(e.target.value)} className="w-full bg-[#0a0a0f] border border-white/10 rounded-none px-3 py-3 text-sm focus:border-blue-500/50 outline-none">
+                    <option value="" disabled>Seleccione...</option>
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Operaciones">Operaciones</option>
+                    <option value="Recursos Humanos">RRHH</option>
+                    <option value="Dirección">Dirección</option>
+                    <option value="Finanzas">Finanzas</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-4 mb-2">
+                <input type="checkbox" id="keepSession" className="accent-blue-500 w-4 h-4 bg-[#0a0a0f] border-white/10" />
+                <label htmlFor="keepSession" className="text-xs text-white/60 cursor-pointer">Mantener sesión activa</label>
+              </div>
+
+              <button disabled={loading} type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 mt-2 transition-colors disabled:opacity-50">
+                {loading ? 'AUTENTICANDO...' : 'INICIAR SESIÓN'}
+              </button>
+              
+              <div className="text-center mt-6 flex flex-col items-center gap-4">
+                <button type="button" onClick={() => { setIsTokenMode(true); setError(null); }} className="text-[11px] text-white/40 hover:text-white/80 transition-colors uppercase tracking-widest font-mono">
+                  Acceder mediante Token Corporativo
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="text-center mt-6 flex flex-col items-center gap-4">
+            <button 
+              type="button" 
+              onClick={() => navigate('/')} 
+              className="text-white/50 hover:text-blue-400 font-mono text-xs uppercase tracking-widest transition-colors mt-2"
+            >
+              ← Volver al Menú Principal
+            </button>
+          </div>
         </div>
       </div>
     </div>

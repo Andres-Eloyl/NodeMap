@@ -8,6 +8,8 @@ import { WorkAdminPanel } from '../components/Work/WorkAdminPanel';
 import { WorkTopology } from '../components/Work/WorkTopology';
 import { WorkPrivateMessages } from '../components/Work/WorkPrivateMessages';
 import { WorkTeamList } from '../components/Work/WorkTeamList';
+import { WorkKanbanBoard } from '../components/Work/WorkKanbanBoard';
+import { WorkCalendar } from '../components/Work/WorkCalendar';
 import { WebRTCEngine } from '../services/webrtc';
 import PROTOCOL from '../shared/protocol';
 
@@ -22,7 +24,8 @@ import {
   Siren,
   Cpu,
   Network,
-  ChevronDown
+  ChevronDown,
+  CalendarDays
 } from "lucide-react";
 
 function NavGroup({ title, children }) {
@@ -117,7 +120,7 @@ export function WorkDashboardView() {
   const unreadCounts = useWorkStore(state => state.unreadCounts);
   
   const [myStatus, setMyStatus] = useState('Activo');
-  const [myLocation, setMyLocation] = useState('Room A');
+  const [myLocation, setMyLocation] = useState('Oficinas Generales');
 
   const updateStatus = (estado) => {
     setMyStatus(estado);
@@ -190,7 +193,9 @@ export function WorkDashboardView() {
   channelsList.push({ key: 'private', label: 'Mensajes Privados', icon: MessageSquare, badge: unreadCounts.private });
 
   const toolsList = [
-    { key: 'reports', label: 'Gestión de Reportes', icon: FileWarning }
+    { key: 'reports', label: 'Gestión de Reportes', icon: FileWarning },
+    { key: 'kanban', label: 'Tabla de Tareas', icon: Hash },
+    { key: 'calendar', label: 'Calendario', icon: CalendarDays }
   ];
 
   const managementList = isManager ? [
@@ -224,28 +229,15 @@ export function WorkDashboardView() {
     if (activeTab === 'map') return 'Mapa de Instalaciones';
     if (activeTab === 'admin') return 'Panel Técnico';
     if (activeTab === 'topology') return 'Topología de Red P2P';
+    if (activeTab === 'kanban') return 'Tabla de Tareas';
+    if (activeTab === 'calendar') return 'Calendario Departamental';
     return activeTab;
   };
 
   const initials = user.nombre.substring(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen w-full bg-[#05050a] text-zinc-200 font-sans antialiased selection:bg-sky-500/30">
-      {/* Ambient background */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 -left-32 h-[480px] w-[480px] rounded-full bg-sky-500/10 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[520px] w-[520px] rounded-full bg-emerald-500/5 blur-[140px]" />
-        <div className="absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-blue-700/10 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-      </div>
-
+    <div className="min-h-screen w-full bg-transparent text-zinc-200 font-sans antialiased selection:bg-sky-500/30">
       <div className="flex min-h-screen">
         {/* SIDEBAR */}
         <aside className="hidden md:flex w-[260px] shrink-0 flex-col border-r border-white/5 bg-white/[0.02] backdrop-blur-xl">
@@ -302,7 +294,7 @@ export function WorkDashboardView() {
               />
               <SleekSelect 
                 label="Ubicación" 
-                options={["Room A", "Room B", "Remoto"]} 
+                options={["Recepción", "Sala de Juntas", "Oficinas Generales", "Data Center", "Cafetería", "Remoto"]} 
                 value={myLocation}
                 onChange={updateLocation}
               />
@@ -355,15 +347,6 @@ export function WorkDashboardView() {
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-semibold text-white tracking-wide">{getTopTitle()}</h2>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">P2P Connected</span>
-              </div>
-            </div>
           </header>
 
           <div className="flex-1 min-h-0 relative overflow-hidden">
@@ -377,6 +360,8 @@ export function WorkDashboardView() {
              {activeTab === 'map' && <WorkMap />}
              {activeTab === 'admin' && <WorkAdminPanel />}
              {activeTab === 'topology' && <WorkTopology />}
+             {activeTab === 'kanban' && <WorkKanbanBoard />}
+             {activeTab === 'calendar' && <WorkCalendar />}
           </div>
         </main>
       </div>

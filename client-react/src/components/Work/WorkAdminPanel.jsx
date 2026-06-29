@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useWorkStore } from '../../store/useWorkStore';
 import { WebRTCEngine } from '../../services/webrtc';
 import PROTOCOL from '../../shared/protocol';
-import { Network, Inbox, ClipboardList, Activity, Terminal as TerminalIcon, Users } from 'lucide-react';
+import { Network, Inbox, ClipboardList, Activity, Terminal as TerminalIcon, Users, FileDown, Database } from 'lucide-react';
+import { generarReportePDF } from '../../utils/generarPDF';
+import { descargarHistorialJSON } from '../../utils/sesionLog';
 
 function StatCard({
   label,
@@ -62,6 +64,8 @@ function Segmented({ label, unit, value, options, onChange }) {
 
 export function WorkAdminPanel() {
   const [metrics, setMetrics] = useState(null);
+  const addToken = useWorkStore(state => state.addToken);
+  const [generatedToken, setGeneratedToken] = useState(null);
   const channels = useWorkStore(state => state.channelMessages);
   const reports = useWorkStore(state => state.reports);
   const networkStatus = useWorkStore(state => state.networkStatus);
@@ -69,6 +73,16 @@ export function WorkAdminPanel() {
   
   const [latency, setLatency] = useState(0);
   const [loss, setLoss] = useState(0);
+
+  const handleGenerateToken = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let newTok = 'NDMP-';
+    for (let i = 0; i < 6; i++) {
+      newTok += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    addToken(newTok);
+    setGeneratedToken(newTok);
+  };
 
   useEffect(() => {
     WebRTCEngine.setLatency(latency);
@@ -101,6 +115,30 @@ export function WorkAdminPanel() {
   return (
     <div className="p-5 md:p-8 space-y-6 h-full overflow-y-auto bg-transparent relative z-10">
       
+      {/* Header & Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Panel de Administración</h2>
+          <p className="text-xs text-zinc-400 font-mono mt-1">Gestión global y monitoreo de la red P2P</p>
+        </div>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => descargarHistorialJSON({ networkStatus, reports })}
+            className="flex items-center gap-2 bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 border border-white/10 px-4 py-2.5 rounded-lg text-sm transition-all font-medium"
+          >
+            <Database className="h-4 w-4" />
+            Descargar Historial (JSON)
+          </button>
+          <button 
+            onClick={() => generarReportePDF({ metrics, networkStatus, reports, channels })}
+            className="flex items-center gap-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 px-4 py-2.5 rounded-lg text-sm transition-all font-medium"
+          >
+            <FileDown className="h-4 w-4" />
+            Exportar Reporte (PDF)
+          </button>
+        </div>
+      </div>
+
       {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard label="Peers Conectados" value={metrics?.peers_activos || networkStatus.length} delta="en la malla actual" icon={Network} accent="sky" />
@@ -181,6 +219,34 @@ export function WorkAdminPanel() {
               <span className="inline-block h-3 w-1.5 bg-emerald-400 animate-pulse" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Access Management */}
+      <div className="rounded-xl border border-white/5 bg-white/[0.02] backdrop-blur-xl overflow-hidden p-5 flex flex-col gap-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-white mb-2">
+          <span className="material-symbols-outlined text-amber-400 text-lg">key</span> Gestión de Accesos Temporales
+        </div>
+        <p className="text-[11px] text-zinc-400 font-mono">Genera tokens de acceso seguro para autenticación sin contraseña.</p>
+        <div className="flex flex-wrap items-center gap-4 mt-2">
+          <button 
+            onClick={handleGenerateToken}
+            className="text-xs px-4 py-2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 transition-all font-mono uppercase"
+          >
+            Generar Nuevo Token
+          </button>
+          {generatedToken && (
+            <div className="flex items-center gap-2 bg-black/40 border border-white/10 px-3 py-1.5 rounded font-mono text-sm text-emerald-400">
+              {generatedToken}
+              <button 
+                onClick={() => navigator.clipboard.writeText(generatedToken)}
+                className="text-white/40 hover:text-white/80 ml-2 flex items-center justify-center"
+                title="Copiar al portapapeles"
+              >
+                <span className="material-symbols-outlined text-[16px]">content_copy</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
