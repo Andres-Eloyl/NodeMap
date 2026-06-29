@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useWorkStore } from '../../store/useWorkStore';
+import { Network } from 'lucide-react';
 
 export function WorkTopology() {
   const svgRef = useRef();
@@ -8,11 +9,11 @@ export function WorkTopology() {
   const [viewMode, setViewMode] = useState('mesh'); // mesh, department, tree
 
   const deptColors = {
-    'Tecnología': '#3b82f6',
-    'Operaciones': '#10b981',
-    'Recursos Humanos': '#ec4899',
-    'Dirección': '#8b5cf6',
-    'Finanzas': '#f59e0b',
+    'Tecnología': '#38bdf8', // sky-400
+    'Operaciones': '#34d399', // emerald-400
+    'Recursos Humanos': '#fbbf24', // amber-400
+    'Dirección': '#a78bfa', // violet-400
+    'Finanzas': '#fb7185', // rose-400
   };
 
   useEffect(() => {
@@ -85,11 +86,13 @@ export function WorkTopology() {
     const node = svg.append("g")
       .attr("stroke", "#fff")
       .attr("stroke-width", 1.5)
+      .attr("stroke-opacity", 0.1)
       .selectAll("circle")
       .data(nodes)
       .join("circle")
       .attr("r", d => d.r)
       .attr("fill", d => d.id === 'root' ? "#ffffff" : (deptColors[d.departamento] || "#888"))
+      .style("filter", "drop-shadow(0px 0px 4px rgba(255,255,255,0.2))")
       .call(drag(simulation));
 
     const label = svg.append("g")
@@ -100,7 +103,7 @@ export function WorkTopology() {
       .attr("font-size", d => d.isHub ? 12 : 9)
       .attr("dx", d => d.r + 5)
       .attr("dy", 4)
-      .attr("fill", d => d.isHub ? "#ffffff" : "#ffffff88")
+      .attr("fill", d => d.isHub ? "#ffffff" : "#ffffffaa")
       .attr("font-family", "monospace");
 
     simulation.on("tick", () => {
@@ -146,49 +149,53 @@ export function WorkTopology() {
   const resilience = viewMode === 'mesh' ? 'Alta (Descentralizada)' : 'Media (Estructurada)';
 
   return (
-    <div className="flex h-full bg-[#0a0a0f] border border-white/5 relative z-10 overflow-hidden">
-      <div className="w-64 bg-black/40 border-r border-white/5 p-6 flex flex-col">
-        <h2 className="text-xl font-bold text-blue-400 mb-6">Topología P2P</h2>
+    <div className="flex flex-col md:flex-row h-full bg-transparent relative z-10 overflow-hidden">
+      
+      <div className="w-full md:w-72 bg-white/[0.02] backdrop-blur-xl border-r border-white/5 p-6 flex flex-col z-20 shadow-2xl">
+        <div className="flex items-center gap-2 mb-8 text-white font-medium">
+          <Network className="h-5 w-5 text-sky-400" />
+          <h2 className="text-lg text-white">Topología P2P</h2>
+        </div>
         
-        <div className="mb-6 space-y-2">
-          <label className="block text-[10px] uppercase text-white/50 tracking-widest font-mono">Modo de Visualización</label>
+        <div className="mb-8 space-y-3">
+          <label className="block text-[10px] uppercase text-zinc-500 tracking-widest font-mono">Modo de Visualización</label>
           <div className="flex flex-col gap-2">
-            <button onClick={() => setViewMode('mesh')} className={`text-left px-3 py-2 text-xs font-mono border ${viewMode === 'mesh' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/10 text-white/60 hover:bg-white/5'}`}>Mesh Completo</button>
-            <button onClick={() => setViewMode('department')} className={`text-left px-3 py-2 text-xs font-mono border ${viewMode === 'department' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/10 text-white/60 hover:bg-white/5'}`}>Por Departamento</button>
-            <button onClick={() => setViewMode('tree')} className={`text-left px-3 py-2 text-xs font-mono border ${viewMode === 'tree' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/10 text-white/60 hover:bg-white/5'}`}>Árbol Jerárquico</button>
+            <button onClick={() => setViewMode('mesh')} className={`text-left px-3 py-2 text-xs font-mono rounded-md transition-all ${viewMode === 'mesh' ? 'bg-sky-500/15 text-white border border-sky-400/30 shadow-[inset_0_0_15px_rgba(56,189,248,0.15)]' : 'border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.03]'}`}>Mesh Completo</button>
+            <button onClick={() => setViewMode('department')} className={`text-left px-3 py-2 text-xs font-mono rounded-md transition-all ${viewMode === 'department' ? 'bg-sky-500/15 text-white border border-sky-400/30 shadow-[inset_0_0_15px_rgba(56,189,248,0.15)]' : 'border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.03]'}`}>Por Departamento</button>
+            <button onClick={() => setViewMode('tree')} className={`text-left px-3 py-2 text-xs font-mono rounded-md transition-all ${viewMode === 'tree' ? 'bg-sky-500/15 text-white border border-sky-400/30 shadow-[inset_0_0_15px_rgba(56,189,248,0.15)]' : 'border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.03]'}`}>Árbol Jerárquico</button>
           </div>
         </div>
 
         <div className="flex-1">
-          <label className="block text-[10px] uppercase text-white/50 tracking-widest font-mono mb-4">Métricas de Red</label>
+          <label className="block text-[10px] uppercase text-zinc-500 tracking-widest font-mono mb-4">Métricas de Red</label>
           <div className="space-y-4 font-mono text-xs">
-            <div>
-              <div className="text-white/40 mb-1">Nodos Activos</div>
-              <div className="text-lg text-white">{totalNodes}</div>
+            <div className="flex justify-between items-center bg-white/[0.01] border border-white/5 p-2 rounded">
+              <div className="text-zinc-500">Nodos Activos</div>
+              <div className="text-sm text-white font-bold">{totalNodes}</div>
             </div>
-            <div>
-              <div className="text-white/40 mb-1">DataChannels</div>
-              <div className="text-lg text-blue-400">{totalConnections}</div>
+            <div className="flex justify-between items-center bg-white/[0.01] border border-white/5 p-2 rounded">
+              <div className="text-zinc-500">DataChannels</div>
+              <div className="text-sm text-sky-400 font-bold">{totalConnections}</div>
             </div>
-            <div>
-              <div className="text-white/40 mb-1">Grado Promedio</div>
-              <div className="text-lg text-purple-400">{avgDegree} edges/nodo</div>
+            <div className="flex justify-between items-center bg-white/[0.01] border border-white/5 p-2 rounded">
+              <div className="text-zinc-500">Grado Promedio</div>
+              <div className="text-sm text-purple-400 font-bold">{avgDegree}</div>
             </div>
-            <div>
-              <div className="text-white/40 mb-1">Diámetro de Red</div>
-              <div className="text-lg text-yellow-400">{diameter} saltos</div>
+            <div className="flex justify-between items-center bg-white/[0.01] border border-white/5 p-2 rounded">
+              <div className="text-zinc-500">Diámetro de Red</div>
+              <div className="text-sm text-amber-400 font-bold">{diameter}</div>
             </div>
-            <div>
-              <div className="text-white/40 mb-1">Nivel Resiliencia</div>
-              <div className="text-green-400">{resilience}</div>
+            <div className="flex flex-col bg-white/[0.01] border border-white/5 p-2 rounded gap-1">
+              <div className="text-zinc-500">Nivel Resiliencia</div>
+              <div className="text-emerald-400 truncate">{resilience}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 relative bg-black/50 overflow-hidden">
+      <div className="flex-1 relative bg-transparent overflow-hidden">
         {statusList.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-white/30 font-mono text-sm z-20 pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 font-mono text-sm z-20 pointer-events-none">
             Esperando telemetría de peers...
           </div>
         )}
